@@ -3,7 +3,7 @@ import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 import { env } from "./env";
-import { saveCookies } from "./utils/cookies";
+import { loadCookies, saveCookies } from "./utils/cookies";
 
 puppeteer.use(StealthPlugin());
 
@@ -17,8 +17,14 @@ async function runParser() {
   console.log("🚀 Запуск парсера hh.ru...");
   console.log(`📧 Email: ${email}`);
 
+  const savedCookies = await loadCookies();
+
   const loginUrl =
     "https://hh.ru/account/login?role=employer&backurl=%2F&hhtmFrom=main&hasSwitcher=true&skipSwitcher=true";
+
+  const startUrl = savedCookies
+    ? "https://hh.ru/employer/vacancies?hhtmFrom=vacancy"
+    : loginUrl;
 
   const crawler = new PuppeteerCrawler({
     headless: false, // Показываем браузер для отладки
@@ -35,69 +41,31 @@ async function runParser() {
         slowMo: 50,
       },
     },
+    preNavigationHooks: [
+      async ({ page, log }) => {
+        if (savedCookies) {
+          log.info("🍪 Восстанавливаем сохраненные куки...");
+          await page.setCookie(...(savedCookies as any[]));
+        }
+      },
+    ],
     async requestHandler({ page, request, log }) {
       log.info(`📄 Обработка страницы: ${request.url}`);
 
       try {
         log.info("⏳ Ожидание загрузки страницы...");
-        await page.waitForNetworkIdle({ timeout: 10000 });
+        await page.waitForNetworkIdle({ timeout: 30000 });
 
-        log.info("🔍 Поиск поля email...");
-        await page.waitForSelector('input[type="text"][name="username"]', {
-          visible: false,
-          timeout: 15000,
-        });
+        const loginInput = await page.$('input[type="text"][name="username"]');
 
-        log.info("✍️  Заполнение email...");
-        await page.click('input[type="text"][name="username"]', {
-          clickCount: 3,
-        });
-        await page.keyboard.press("Backspace");
-        await new Promise((r) => setTimeout(r, Math.random() * 500 + 200));
-        await page.type('input[type="text"][name="username"]', email, {
-          delay: 100,
-        });
-
-        log.info("🔑 Нажатие на кнопку 'Войти с паролем'...");
-        await page.waitForSelector(
-          'button[data-qa="expand-login-by_password"]',
-          {
-            visible: false,
-            timeout: 10000,
-          },
-        );
-        await new Promise((r) => setTimeout(r, Math.random() * 1000 + 500));
-        await page.click('button[data-qa="expand-login-by_password"]');
-
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        await page.waitForSelector('input[type="password"][name="password"]', {
-          visible: false,
-        });
-        log.info("🔒 Заполнение пароля...");
-        await page.type('input[type="password"][name="password"]', password, {
-          delay: 100,
-        });
-
-        await new Promise((r) => setTimeout(r, Math.random() * 1000 + 500));
-        log.info("📤 Отправка формы...");
-
-        await Promise.all([
-          page.waitForNavigation({ waitUntil: "networkidle2", timeout: 30000 }),
-          page.click('button[type="submit"]'),
-        ]);
-
-        log.info("✅ Авторизация выполнена!");
-        log.info(`🌐 Текущий URL: ${page.url()}`);
-
-        const cookies = await page.cookies();
-        log.info(`🍪 Получено ${cookies.length} cookies`);
-
-        await saveCookies(cookies);
+        if (loginInput) {
+          await performLogin(page, log, email, password);
+        } else {
+          log.info("✅ Форма входа не найдена. Похоже, мы уже авторизованы.");
+        }
 
         const vacancies = await parseVacancies(page);
 
-        // Парсим отклики для каждой вакансии
         for (const vacancy of vacancies) {
           if (vacancy.responsesUrl) {
             const fullUrl = new URL(vacancy.responsesUrl, "https://hh.ru").href;
@@ -121,9 +89,10 @@ async function runParser() {
       }
     },
     maxRequestsPerCrawl: 1,
+    requestHandlerTimeoutSecs: 300, // 5 минут на обработку (чтобы успеть ввести капчу)
   });
 
-  await crawler.run([loginUrl]);
+  await crawler.run([startUrl]);
   await crawler.teardown();
 }
 
@@ -221,6 +190,72 @@ async function parseResponses(page: any, url: string) {
   console.log(`✅ Найдено откликов: ${responses.length}`);
   console.log(JSON.stringify(responses, null, 2));
   return responses;
+}
+
+async function performLogin(
+  page: any,
+  log: any,
+  email: string,
+  password: string,
+) {
+  log.info("🔍 Поиск поля email...");
+  await page.waitForSelector('input[type="text"][name="username"]', {
+    visible: false,
+    timeout: 15000,
+  });
+
+  log.info("✍️  Заполнение email...");
+  await page.click('input[type="text"][name="username"]', {
+    clickCount: 3,
+  });
+  await page.keyboard.press("Backspace");
+  await new Promise((r) => setTimeout(r, Math.random() * 500 + 200));
+  await page.type('input[type="text"][name="username"]', email, {
+    delay: 100,
+  });
+
+  log.info("🔑 Нажатие на кнопку 'Войти с паролем'...");
+  await page.waitForSelector('button[data-qa="expand-login-by_password"]', {
+    visible: false,
+    timeout: 10000,
+  });
+  await new Promise((r) => setTimeout(r, Math.random() * 1000 + 500));
+  await page.click('button[data-qa="expand-login-by_password"]');
+
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  await page.waitForSelector('input[type="password"][name="password"]', {
+    visible: false,
+  });
+  log.info("🔒 Заполнение пароля...");
+  await page.type('input[type="password"][name="password"]', password, {
+    delay: 100,
+  });
+
+  await new Promise((r) => setTimeout(r, Math.random() * 1000 + 500));
+  log.info("📤 Отправка формы...");
+
+  await page.click('button[type="submit"]');
+
+  log.info("⏳ Ждем 2 минуты для ввода капчи (если есть)...");
+  try {
+    await page.waitForNavigation({
+      waitUntil: "networkidle2",
+      timeout: 120000,
+    });
+  } catch (e) {
+    log.info(
+      "⚠️ Тайм-аут ожидания навигации. Проверяем, прошли ли мы дальше...",
+    );
+  }
+
+  log.info("✅ Авторизация выполнена!");
+  log.info(`🌐 Текущий URL: ${page.url()}`);
+
+  const cookies = await page.cookies();
+  log.info(`🍪 Получено ${cookies.length} cookies`);
+
+  await saveCookies(cookies);
 }
 
 runParser().catch(console.error);
