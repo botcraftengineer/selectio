@@ -1,6 +1,7 @@
 import { PuppeteerCrawler } from "crawlee";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import { stripHtml } from "string-strip-html";
 
 import { env } from "./env";
 import { loadCookies, saveCookies } from "./utils/cookies";
@@ -156,8 +157,50 @@ async function parseVacancies(page: any) {
   );
 
   console.log(`✅ Найдено активных вакансий: ${vacancies.length}`);
+
+  // Fetch detailed descriptions for each vacancy
+  for (const vacancy of vacancies) {
+    let vacancyUrl = vacancy.url;
+
+    // If URL is not found, construct it from vacancy ID
+    if (!vacancyUrl && vacancy.id) {
+      vacancyUrl = `https://hh.ru/vacancy/${vacancy.id}`;
+    }
+
+    if (vacancyUrl) {
+      const fullUrl = vacancyUrl.startsWith("http")
+        ? vacancyUrl
+        : new URL(vacancyUrl, "https://hh.ru").href;
+      const description = await parseVacancyDetails(page, fullUrl);
+      vacancy.description = description;
+      vacancy.url = fullUrl; // Update URL in the object
+    }
+  }
+
   console.log(JSON.stringify(vacancies, null, 2));
   return vacancies;
+}
+
+async function parseVacancyDetails(page: any, url: string): Promise<string> {
+  console.log(`📄 Переход на детальную страницу вакансии: ${url}`);
+  await page.goto(url, { waitUntil: "networkidle2" });
+
+  try {
+    await page.waitForSelector('div[data-qa="main-content"]', {
+      timeout: 10000,
+    });
+
+    const htmlContent = await page.$eval(
+      'div[data-qa="main-content"]',
+      (el: HTMLElement) => el.innerHTML,
+    );
+
+    const { result } = stripHtml(htmlContent);
+    return result.trim();
+  } catch (e) {
+    console.log("⚠️ Не удалось получить описание вакансии.");
+    return "";
+  }
 }
 
 async function parseResponses(page: any, url: string) {
