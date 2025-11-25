@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@acme/ui";
+} from "@selectio/ui";
 import {
   type Icon,
   IconDots,

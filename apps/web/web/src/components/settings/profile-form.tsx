@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, Input, Label, Textarea, toast } from "@acme/ui";
-import { type ProfileFormValues, profileFormSchema } from "@acme/validators";
+import { Button, Input, Label, Textarea, toast } from "@selectio/ui";
+import { type ProfileFormValues, profileFormSchema } from "@selectio/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "lucide-react";

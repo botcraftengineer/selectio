@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Separator, SidebarTrigger } from "@acme/ui";
+import { Button, Separator, SidebarTrigger } from "@selectio/ui";
 
 export function SiteHeader() {
   return (

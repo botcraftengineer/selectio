@@ -2,7 +2,6 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "tasks": {
-
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".cache/tsbuildinfo.json", "dist/**"]
@@ -13,12 +12,16 @@
       "persistent": false
     },
     "format": {
-      "outputs": [".cache/.prettiercache"],
+      "outputs": [],
       "outputLogs": "new-only"
     },
     "lint": {
       "dependsOn": ["^build"],
-      "outputs": [".cache/.eslintcache"]
+      "outputs": []
+    },
+    "check": {
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "typecheck": {
       "dependsOn": ["^build"],

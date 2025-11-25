@@ -8,7 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@acme/ui";
+} from "@selectio/ui";
 import {
   IconCamera,
   IconChartBar,

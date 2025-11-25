@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@acme/ui";
+} from "@selectio/ui";
 import {
   IconCreditCard,
   IconDotsVertical,

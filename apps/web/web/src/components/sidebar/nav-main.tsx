@@ -7,7 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@acme/ui";
+} from "@selectio/ui";
 import { type Icon, IconCirclePlusFilled, IconMail } from "@tabler/icons-react";
 
 export function NavMain({

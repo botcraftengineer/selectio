@@ -9,23 +9,19 @@
   "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "format": "biome format .",
+    "lint": "biome lint .",
+    "check": "biome check .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/postcss": "4.1.17",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "4.1.17"
   },
   "devDependencies": {
-    "@selectio/eslint-config": "*",
-    "@selectio/prettier-config": "*",
     "@selectio/tsconfig": "*",
-    "@types/node": "^24.10.1",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
-  },
-  "prettier": "@selectio/prettier-config"
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  }
 }

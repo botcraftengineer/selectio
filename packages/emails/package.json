@@ -19,10 +19,10 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@selectio/config": "workspace:*",
-    "@selectio/tsconfig": "workspace:*",
     "@radix-ui/colors": "3.0.0",
     "@react-email/components": "1.0.1",
+    "@selectio/config": "workspace:*",
+    "@selectio/tsconfig": "workspace:*",
     "@tailwindcss/typography": "0.5.19",
     "nodemailer": "^7.0.10",
     "react": "19.2.0",
