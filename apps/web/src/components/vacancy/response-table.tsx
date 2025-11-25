@@ -2,6 +2,9 @@
 
 import {
   Button,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
   Table,
   TableBody,
   TableCell,
@@ -48,9 +51,24 @@ export function ResponseTable({ responses }: ResponseTableProps) {
               <TableCell>
                 <div className="max-w-md">
                   {response.experience ? (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {response.experience}
-                    </p>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-left text-sm text-muted-foreground hover:underline cursor-pointer line-clamp-2"
+                        >
+                          {response.experience}
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-semibold">Опыт работы</h4>
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            {response.experience}
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   ) : (
                     <span className="text-sm text-muted-foreground">
                       Не указан

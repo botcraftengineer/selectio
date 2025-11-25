@@ -7,6 +7,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
 } from "@selectio/ui";
 import { ExternalLink, User } from "lucide-react";
 import type { VacancyResponse } from "~/types/vacancy";
@@ -51,9 +54,24 @@ export function ResponseCards({ responses }: ResponseCardsProps) {
             {response.experience && (
               <div>
                 <h4 className="text-sm font-medium mb-1">Опыт работы</h4>
-                <p className="text-sm text-muted-foreground">
-                  {response.experience}
-                </p>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-left text-sm text-muted-foreground hover:underline cursor-pointer line-clamp-3"
+                    >
+                      {response.experience}
+                    </button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold">Опыт работы</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {response.experience}
+                      </p>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               </div>
             )}
             {response.contacts && typeof response.contacts === "object" ? (
