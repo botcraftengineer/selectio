@@ -30,7 +30,7 @@ export async function parseResponses(
         const nameEl = el.querySelector(
           'span[data-qa="resume-serp__resume-fullname"]'
         );
-        const name = nameEl ? nameEl.textContent.trim() : "";
+        const name = nameEl ? nameEl.textContent?.trim() : "";
 
         return {
           name,
@@ -41,21 +41,25 @@ export async function parseResponses(
   );
 
   console.log(`✅ Найдено откликов: ${responses.length}`);
-  console.log(JSON.stringify(responses, null, 2));
 
-  const firstResponse = responses[0];
-  if (firstResponse?.url) {
-    const experienceData = await parseResumeExperience(page, firstResponse.url);
-    console.log("\n📊 Данные первого кандидата (опыт работы и контакты):");
-    console.log(JSON.stringify(experienceData, null, 2));
+  // Сохраняем все отклики
+  for (const response of responses) {
+    if (response?.url) {
+      try {
+        const experienceData = await parseResumeExperience(page, response.url);
+        console.log(`\n📊 Обработка кандидата: ${response.name}`);
 
-    await saveResponseToDb({
-      vacancyId,
-      resumeUrl: firstResponse.url,
-      candidateName: firstResponse.name,
-      experience: experienceData.experience,
-      contacts: experienceData.contacts,
-    });
+        await saveResponseToDb({
+          vacancyId,
+          resumeUrl: response.url,
+          candidateName: response.name,
+          experience: experienceData.experience,
+          contacts: experienceData.contacts,
+        });
+      } catch (error) {
+        console.error(`❌ Ошибка обработки отклика ${response.name}:`, error);
+      }
+    }
   }
 
   return responses;
