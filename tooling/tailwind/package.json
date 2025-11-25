@@ -1,5 +1,5 @@
 {
-  "name": "@selection/tailwind-config",
+  "name": "@selectio/tailwind-config",
   "private": true,
   "type": "module",
   "exports": {
@@ -20,7 +20,7 @@
     "tailwindcss": "4.1.17"
   },
   "devDependencies": {
-    "@selection/tsconfig": "*",
+    "@selectio/tsconfig": "*",
     "@types/node": "24.10.1",
     "typescript": "5.9.3"
   }

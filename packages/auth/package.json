@@ -1,5 +1,5 @@
 {
-  "name": "@selection/auth",
+  "name": "@selectio/auth",
   "private": true,
   "type": "module",
   "exports": {
@@ -24,8 +24,8 @@
     "zod": "4.1.13"
   },
   "devDependencies": {
-    "@selection/tsconfig": "workspace:*",
     "@better-auth/cli": "1.4.0-beta.9",
+    "@selectio/tsconfig": "workspace:*",
     "typescript": "5.9.3"
   }
 }
