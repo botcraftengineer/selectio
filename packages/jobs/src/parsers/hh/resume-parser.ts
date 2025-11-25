@@ -13,7 +13,7 @@ export async function parseResumeExperience(
   // Переходим на страницу резюме
   await page.goto(url, {
     waitUntil: "domcontentloaded",
-    timeout: 30000,
+    timeout: 60000,
   });
 
   // Дополнительная задержка для загрузки динамического контента
