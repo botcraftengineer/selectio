@@ -1,13 +1,14 @@
+import { env } from "@selectio/config";
 import type { Config } from "drizzle-kit";
 
-if (!process.env.POSTGRES_URL) {
+if (!env.POSTGRES_URL) {
   throw new Error("Missing POSTGRES_URL");
 }
 
-const nonPoolingUrl = process.env.POSTGRES_URL.replace(":6543", ":5432");
+const nonPoolingUrl = env.POSTGRES_URL.replace(":6543", ":5432");
 
 export default {
-  schema: "./src/schema.ts",
+  schema: "./src/schema/index.ts",
   dialect: "postgresql",
   dbCredentials: { url: nonPoolingUrl },
   casing: "snake_case",
