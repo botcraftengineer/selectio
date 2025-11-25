@@ -21,6 +21,37 @@ export async function parseResponses(
     return [];
   }
 
+  // Скроллим страницу для подгрузки всех откликов
+  console.log("🔄 Скроллинг страницы для загрузки всех откликов...");
+  let previousCount = 0;
+  let currentCount = 0;
+  let noChangeCount = 0;
+
+  do {
+    previousCount = currentCount;
+
+    // Получаем текущее количество откликов
+    currentCount = await page.$$eval("[data-resume-id]", (els) => els.length);
+
+    // Скроллим вниз
+    await page.evaluate(() => {
+      window.scrollBy(0, window.innerHeight);
+    });
+
+    // Ждем подгрузки новых элементов
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Если количество не изменилось, увеличиваем счетчик
+    if (currentCount === previousCount) {
+      noChangeCount++;
+    } else {
+      noChangeCount = 0;
+      console.log(`📊 Загружено откликов: ${currentCount}`);
+    }
+
+    // Если 3 раза подряд количество не менялось, значит все загружено
+  } while (noChangeCount < 3);
+
   const responses = await page.$$eval(
     "[data-resume-id]",
     (elements: Array<Element>) => {
@@ -40,7 +71,7 @@ export async function parseResponses(
     }
   );
 
-  console.log(`✅ Найдено откликов: ${responses.length}`);
+  console.log(`✅ Всего найдено откликов: ${responses.length}`);
 
   // Сохраняем все отклики
   for (const response of responses) {
