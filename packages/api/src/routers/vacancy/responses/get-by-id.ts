@@ -8,5 +8,8 @@ export const getById = protectedProcedure
   .query(({ ctx, input }) => {
     return ctx.db.query.vacancyResponse.findFirst({
       where: eq(vacancyResponse.id, input.id),
+      with: {
+        vacancy: true,
+      },
     });
   });

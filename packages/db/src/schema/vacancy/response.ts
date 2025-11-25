@@ -20,6 +20,10 @@ export const vacancyResponse = pgTable("vacancy_responses", {
   candidateName: varchar("candidate_name", { length: 500 }),
   experience: text("experience"),
   contacts: jsonb("contacts"),
+  languages: text("languages"),
+  about: text("about"),
+  education: text("education"),
+  courses: text("courses"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .$onUpdate(() => new Date())

@@ -20,6 +20,10 @@ export interface ResponseData {
 export interface ResumeExperience {
   experience: string;
   contacts: unknown;
+  languages: string;
+  about: string;
+  education: string;
+  courses: string;
 }
 
 export interface SaveResponseData {
@@ -28,4 +32,8 @@ export interface SaveResponseData {
   candidateName: string;
   experience: string;
   contacts: unknown;
+  languages: string;
+  about: string;
+  education: string;
+  courses: string;
 }

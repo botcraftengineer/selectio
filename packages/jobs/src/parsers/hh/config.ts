@@ -14,6 +14,9 @@ export const HH_CONFIG = {
   delays: {
     afterParsing: 5000,
     beforeSubmit: 2000,
+    betweenResumes: { min: 3000, max: 8000 }, // Задержка между просмотром резюме
+    readingPage: { min: 2000, max: 5000 }, // Время "чтения" страницы
+    scrollDelay: { min: 500, max: 1500 }, // Задержка при скролле
   },
   puppeteer: {
     headless: false,
@@ -21,8 +24,11 @@ export const HH_CONFIG = {
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-blink-features=AutomationControlled",
+      "--disable-web-security",
+      "--disable-features=IsolateOrigins,site-per-process",
+      "--window-size=1920,1080",
     ] as string[],
     ignoreDefaultArgs: ["--enable-automation"] as string[],
-    slowMo: 50,
+    slowMo: 100, // Увеличена задержка между действиями
   },
 };

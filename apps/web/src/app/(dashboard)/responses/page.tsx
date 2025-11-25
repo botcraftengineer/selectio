@@ -122,7 +122,12 @@ export default async function ResponsesPage() {
                             <TableCell>
                               <div className="flex flex-col gap-1">
                                 <div className="font-medium flex items-center gap-2">
-                                  {response.candidateName || "Без имени"}
+                                  <Link
+                                    href={`/responses/${response.id}`}
+                                    className="hover:underline"
+                                  >
+                                    {response.candidateName || "Без имени"}
+                                  </Link>
                                   {isNew && (
                                     <Badge
                                       variant="default"
