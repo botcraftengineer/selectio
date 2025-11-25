@@ -1,5 +1,8 @@
 import type { Page } from "puppeteer";
-import { saveResponseToDb } from "../../services/response-service";
+import {
+  checkResponseExists,
+  saveResponseToDb,
+} from "../../services/response-service";
 import type { ResponseData } from "../types";
 import { HH_CONFIG } from "./config";
 import { humanDelay, humanScroll, randomDelay } from "./human-behavior";
@@ -105,10 +108,26 @@ export async function parseResponses(
   console.log(`✅ Всего найдено откликов: ${allResponses.length}`);
 
   // Сохраняем все отклики
+  let processedCount = 0;
+  let skippedCount = 0;
+
   for (let i = 0; i < allResponses.length; i++) {
     const response = allResponses[i];
     if (response?.url) {
       try {
+        // Проверяем, существует ли уже отклик в базе
+        const exists = await checkResponseExists(response.url);
+        if (exists) {
+          skippedCount++;
+          console.log(
+            `⏭️ Пропуск кандидата ${i + 1}/${allResponses.length}: ${
+              response.name
+            } (уже в базе)`
+          );
+          continue;
+        }
+
+        processedCount++;
         console.log(
           `\n📊 Обработка кандидата ${i + 1}/${allResponses.length}: ${
             response.name
@@ -116,7 +135,7 @@ export async function parseResponses(
         );
 
         // Случайная задержка между просмотром резюме (имитация человека)
-        if (i > 0) {
+        if (processedCount > 1) {
           const delay = randomDelay(3000, 8000);
           console.log(
             `⏳ Пауза ${Math.round(delay / 1000)}с перед следующим резюме...`
@@ -177,6 +196,10 @@ export async function parseResponses(
       }
     }
   }
+
+  console.log(
+    `\n📊 Итоговая статистика: Обработано новых: ${processedCount}, Пропущено (уже в базе): ${skippedCount}, Всего: ${allResponses.length}`
+  );
 
   return allResponses;
 }

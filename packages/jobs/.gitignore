@@ -8,3 +8,4 @@ dist/
 *.log
 storage/
 chrome/
+.trigger

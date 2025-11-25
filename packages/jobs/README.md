@@ -17,7 +17,7 @@
 1. Установите переменные окружения в корневом файле `.env`:
 
 ```bash
-HH_EMAIL="kodermax@gmail.com"
+HH_EMAIL="example@gmail.com"
 HH_PASSWORD="ваш_пароль"
 ```
 
