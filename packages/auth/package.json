@@ -24,7 +24,7 @@
     "zod": "4.1.13"
   },
   "devDependencies": {
-    "@acme/tsconfig": "workspace:*",
+    "@selection/tsconfig": "workspace:*",
     "@better-auth/cli": "1.4.0-beta.9",
     "typescript": "5.9.3"
   }
