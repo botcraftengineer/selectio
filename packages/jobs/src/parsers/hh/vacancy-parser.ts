@@ -92,13 +92,13 @@ async function parseVacancyDetails(page: Page, url: string): Promise<string> {
   await page.goto(url, { waitUntil: "networkidle2" });
 
   try {
-    await page.waitForSelector("div[class=vacancy-section]", {
+    await page.waitForSelector(".vacancy-section", {
       timeout: HH_CONFIG.timeouts.selector,
     });
 
     const htmlContent = await page.$eval(
-      "div[class=vacancy-section]",
-      (el: HTMLElement) => el.innerHTML
+      ".vacancy-section",
+      (el) => el.innerHTML
     );
 
     const { result } = stripHtml(htmlContent);
