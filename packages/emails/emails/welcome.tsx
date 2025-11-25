@@ -15,7 +15,7 @@ import {
 
 import { emailTailwindConfig } from "../tailwind";
 
-const baseUrl = "https://bun-turbo-starter.vercel.app";
+const baseUrl = "https://selectio-web.vercel.app";
 
 export default function WelcomeEmail({
   username = "username",
@@ -32,7 +32,7 @@ export default function WelcomeEmail({
             <Heading className="mx-0 my-[30px] p-0 text-center text-[24px] font-normal text-black">
               Добро пожаловать в{" "}
               <Link
-                href="https://bun-turbo-starter.vercel.app"
+                href="https://selectio-web.vercel.app"
                 className="text-black"
               >
                 <strong>Selectio</strong>
@@ -45,10 +45,10 @@ export default function WelcomeEmail({
               Мы рады приветствовать вас в Selectio! Ваш аккаунт был успешно
               создан на{" "}
               <Link
-                href="https://bun-turbo-starter.vercel.app"
+                href="https://selectio-web.vercel.app"
                 className="text-black"
               >
-                <strong>bun-turbo-starter.vercel.app</strong>
+                <strong>selectio-web.vercel.app</strong>
               </Link>
               .
             </Text>

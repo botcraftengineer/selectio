@@ -4,6 +4,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
   Table,
   TableBody,
   TableCell,
@@ -144,7 +147,32 @@ export default async function ResponsesPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              {response.experience || "Не указан"}
+                              {response.experience ? (
+                                <HoverCard>
+                                  <HoverCardTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="text-left hover:underline cursor-pointer"
+                                    >
+                                      {response.experience.length > 50
+                                        ? `${response.experience.slice(0, 50)}...`
+                                        : response.experience}
+                                    </button>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent className="w-80">
+                                    <div className="space-y-2">
+                                      <h4 className="text-sm font-semibold">
+                                        Опыт работы
+                                      </h4>
+                                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                        {response.experience}
+                                      </p>
+                                    </div>
+                                  </HoverCardContent>
+                                </HoverCard>
+                              ) : (
+                                "Не указан"
+                              )}
                             </TableCell>
                             <TableCell>
                               {new Date(response.createdAt).toLocaleDateString(

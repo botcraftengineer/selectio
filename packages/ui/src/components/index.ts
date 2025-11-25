@@ -15,6 +15,7 @@ export * from "./drawer";
 export * from "./dropdown-menu";
 export * from "./field";
 export * from "./form";
+export * from "./hover-card";
 export * from "./input";
 export * from "./input-otp";
 export * from "./label";
