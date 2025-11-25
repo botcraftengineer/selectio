@@ -75,7 +75,11 @@ export async function saveBasicVacancy(vacancyData: VacancyData) {
       console.log(`✅ Базовая информация сохранена: ${vacancyData.title}`);
     }
   } catch (error) {
-    console.error(`❌ Ошибка сохранения базовой информации:`, error);
+    console.error(
+      `❌ Ошибка сохранения базовой информации для ${vacancyData.title}:`,
+      error
+    );
+    throw error; // Пробрасываем ошибку для обработки на верхнем уровне
   }
 }
 
@@ -93,7 +97,11 @@ export async function updateVacancyDescription(
       .where(eq(vacancy.id, vacancyId));
     console.log(`✅ Описание вакансии обновлено: ${vacancyId}`);
   } catch (error) {
-    console.error(`❌ Ошибка обновления описания вакансии:`, error);
+    console.error(
+      `❌ Ошибка обновления описания вакансии ${vacancyId}:`,
+      error
+    );
+    throw error; // Пробрасываем ошибку для обработки на верхнем уровне
   }
 }
 

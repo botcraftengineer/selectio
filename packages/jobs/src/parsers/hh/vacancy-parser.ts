@@ -122,15 +122,25 @@ async function collectVacancies(page: Page): Promise<VacancyData[]> {
  * ЭТАП 2: Сохраняет базовую информацию всех вакансий
  */
 async function saveBasicVacancies(vacancies: VacancyData[]): Promise<void> {
+  let savedCount = 0;
+  let errorCount = 0;
+
   for (let i = 0; i < vacancies.length; i++) {
     const vacancy = vacancies[i];
     if (!vacancy) continue;
 
-    await saveBasicVacancy(vacancy);
+    try {
+      await saveBasicVacancy(vacancy);
+      savedCount++;
+    } catch (error) {
+      errorCount++;
+      console.error(`❌ Ошибка сохранения вакансии ${vacancy.title}:`, error);
+      // Продолжаем работу со следующей вакансией
+    }
   }
 
   console.log(
-    `✅ Базовая информация сохранена для ${vacancies.length} вакансий`
+    `✅ Базовая информация: успешно ${savedCount}, ошибок ${errorCount}`
   );
 }
 
@@ -143,6 +153,7 @@ async function parseVacancyDescriptions(
 ): Promise<void> {
   let parsedCount = 0;
   let skippedCount = 0;
+  let errorCount = 0;
 
   for (let i = 0; i < vacancies.length; i++) {
     const vacancy = vacancies[i];
@@ -160,13 +171,12 @@ async function parseVacancyDescriptions(
         continue;
       }
 
-      parsedCount++;
       console.log(
         `\n📊 Парсинг описания ${i + 1}/${vacancies.length}: ${vacancy.title}`
       );
 
       // Задержка между просмотром вакансий
-      if (parsedCount > 1) {
+      if (parsedCount > 0) {
         const delay = randomDelay(2000, 5000);
         console.log(
           `⏳ Пауза ${Math.round(delay / 1000)}с перед следующей вакансией...`
@@ -179,8 +189,15 @@ async function parseVacancyDescriptions(
       if (description) {
         await updateVacancyDescription(vacancy.id, description);
         vacancy.description = description;
+        parsedCount++;
+        console.log(
+          `✅ Описание ${i + 1}/${vacancies.length} обработано успешно`
+        );
+      } else {
+        console.log(`⚠️ Пустое описание для ${vacancy.title}`);
       }
     } catch (error) {
+      errorCount++;
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       console.error(
@@ -188,13 +205,14 @@ async function parseVacancyDescriptions(
         errorMessage
       );
 
-      // Пауза после ошибки
+      // Пауза после ошибки перед следующей попыткой
+      console.log(`⏭️ Переход к следующей вакансии...`);
       await humanDelay(2000, 4000);
     }
   }
 
   console.log(
-    `✅ Спарсено описаний: ${parsedCount}, Пропущено (описание есть): ${skippedCount}`
+    `✅ Итого описания: успешно ${parsedCount}, пропущено ${skippedCount}, ошибок ${errorCount}`
   );
 }
 

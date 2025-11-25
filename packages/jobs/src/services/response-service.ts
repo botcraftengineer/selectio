@@ -51,8 +51,11 @@ export async function saveBasicResponse(
     console.log(`⏭️ Пропуск: ${candidateName} (уже в базе)`);
     return false;
   } catch (error) {
-    console.error(`❌ Ошибка сохранения базовой информации:`, error);
-    return false;
+    console.error(
+      `❌ Ошибка сохранения базовой информации для ${candidateName}:`,
+      error
+    );
+    throw error; // Пробрасываем ошибку для обработки на верхнем уровне
   }
 }
 
@@ -94,7 +97,11 @@ export async function updateResponseDetails(response: SaveResponseData) {
 
     console.log(`✅ Детальная информация обновлена: ${response.candidateName}`);
   } catch (error) {
-    console.error(`❌ Ошибка обновления детальной информации:`, error);
+    console.error(
+      `❌ Ошибка обновления детальной информации для ${response.candidateName}:`,
+      error
+    );
+    throw error; // Пробрасываем ошибку для обработки на верхнем уровне
   }
 }
 

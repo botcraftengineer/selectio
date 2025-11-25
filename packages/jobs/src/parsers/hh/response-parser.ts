@@ -147,6 +147,7 @@ async function collectAndSaveResponses(
     // Обрабатываем и сохраняем отклики с текущей страницы
     let pageSaved = 0;
     let pageSkipped = 0;
+    let pageErrors = 0;
 
     for (const response of pageResponses) {
       if (response.url && response.resumeId) {
@@ -157,18 +158,27 @@ async function collectAndSaveResponses(
 
         allResponses.push(responseWithId);
 
-        // Сразу сохраняем в базу
-        const saved = await saveBasicResponse(
-          vacancyIdForSave,
-          response.resumeId,
-          response.url,
-          response.name
-        );
+        try {
+          // Сразу сохраняем в базу
+          const saved = await saveBasicResponse(
+            vacancyIdForSave,
+            response.resumeId,
+            response.url,
+            response.name
+          );
 
-        if (saved) {
-          pageSaved++;
-        } else {
-          pageSkipped++;
+          if (saved) {
+            pageSaved++;
+          } else {
+            pageSkipped++;
+          }
+        } catch (error) {
+          pageErrors++;
+          console.error(
+            `❌ Ошибка сохранения отклика ${response.name}:`,
+            error
+          );
+          // Продолжаем работу со следующим откликом
         }
       } else {
         console.log(`⚠️ Не удалось получить resumeId для: ${response.name}`);
@@ -179,7 +189,7 @@ async function collectAndSaveResponses(
     totalSkipped += pageSkipped;
 
     console.log(
-      `💾 Страница ${currentPage}: сохранено ${pageSaved}, пропущено ${pageSkipped}`
+      `💾 Страница ${currentPage}: сохранено ${pageSaved}, пропущено ${pageSkipped}${pageErrors > 0 ? `, ошибок ${pageErrors}` : ""}`
     );
 
     currentPage++;
@@ -205,17 +215,23 @@ async function filterResponsesNeedingDetails(
     const response = responses[i];
     if (!response) continue;
 
-    const hasDetails = await hasDetailedInfo(response.resumeId);
+    try {
+      const hasDetails = await hasDetailedInfo(response.resumeId);
 
-    if (!hasDetails) {
+      if (!hasDetails) {
+        responsesNeedingDetails.push(response);
+        console.log(
+          `📝 Требуется парсинг ${i + 1}/${responses.length}: ${response.name}`
+        );
+      } else {
+        console.log(
+          `✅ Детали есть ${i + 1}/${responses.length}: ${response.name}`
+        );
+      }
+    } catch (error) {
+      console.error(`❌ Ошибка проверки деталей для ${response.name}:`, error);
+      // В случае ошибки проверки, добавляем в список для парсинга
       responsesNeedingDetails.push(response);
-      console.log(
-        `📝 Требуется парсинг ${i + 1}/${responses.length}: ${response.name}`
-      );
-    } else {
-      console.log(
-        `✅ Детали есть ${i + 1}/${responses.length}: ${response.name}`
-      );
     }
   }
 
@@ -230,6 +246,9 @@ async function parseResponseDetails(
   responses: ResponseWithId[],
   vacancyId: string
 ): Promise<void> {
+  let successCount = 0;
+  let errorCount = 0;
+
   for (let i = 0; i < responses.length; i++) {
     const response = responses[i];
     if (!response) continue;
@@ -264,7 +283,11 @@ async function parseResponseDetails(
         education: experienceData.education,
         courses: experienceData.courses,
       });
+
+      successCount++;
+      console.log(`✅ Резюме ${i + 1}/${responses.length} обработано успешно`);
     } catch (error) {
+      errorCount++;
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       console.error(
@@ -272,8 +295,13 @@ async function parseResponseDetails(
         errorMessage
       );
 
-      // Пауза после ошибки
+      // Пауза после ошибки перед следующей попыткой
+      console.log(`⏭️ Переход к следующему резюме...`);
       await humanDelay(3000, 5000);
     }
   }
+
+  console.log(
+    `\n📊 Итого парсинг резюме: успешно ${successCount}, ошибок ${errorCount}`
+  );
 }

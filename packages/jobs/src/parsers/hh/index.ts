@@ -107,9 +107,17 @@ export async function runHHParser() {
 
         const vacancies = await parseVacancies(page);
 
+        // Последовательная обработка откликов для каждой вакансии
         for (let i = 0; i < vacancies.length; i++) {
           const vacancy = vacancies[i];
-          if (vacancy?.responsesUrl) {
+          if (!vacancy?.responsesUrl) {
+            log.info(
+              `⏭️ Пропуск вакансии ${i + 1}/${vacancies.length}: нет откликов`
+            );
+            continue;
+          }
+
+          try {
             const fullUrl = new URL(
               vacancy.responsesUrl,
               HH_CONFIG.urls.baseUrl
@@ -124,7 +132,25 @@ export async function runHHParser() {
               await new Promise((resolve) => setTimeout(resolve, delay));
             }
 
+            log.info(
+              `\n📋 Обработка вакансии ${i + 1}/${vacancies.length}: ${vacancy.title}`
+            );
             await parseResponses(page, fullUrl, vacancy.id);
+            log.info(
+              `✅ Вакансия ${i + 1}/${vacancies.length} обработана успешно`
+            );
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            log.error(
+              `❌ Ошибка обработки вакансии ${vacancy.title}: ${errorMessage}`
+            );
+
+            // Продолжаем работу со следующей вакансией
+            log.info(`⏭️ Переход к следующей вакансии...`);
+
+            // Дополнительная пауза после ошибки
+            await new Promise((resolve) => setTimeout(resolve, 5000));
           }
         }
 
