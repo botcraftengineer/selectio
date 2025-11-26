@@ -27,6 +27,8 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.29",
     "@langfuse/otel": "^4.4.2",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.1",
+    "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "@selectio/db": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
