@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  Button,
+  Checkbox,
   Pagination,
   Table,
   TableBody,
@@ -9,9 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@selectio/ui";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { createTriggerPublicToken } from "~/actions/trigger";
+import { useTRPC } from "~/trpc/react";
 import type { VacancyResponse } from "~/types/vacancy";
 import { ResponseRow } from "./response-row";
 
@@ -19,7 +29,7 @@ interface ResponseTableProps {
   responses: VacancyResponse[];
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 25;
 
 type SortField = "score" | "status" | null;
 type SortDirection = "asc" | "desc";
@@ -39,6 +49,11 @@ export function ResponseTable({ responses }: ResponseTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let isMounted = true;
@@ -92,11 +107,100 @@ export function ResponseTable({ responses }: ResponseTableProps) {
     return sortedResponses.slice(startIndex, endIndex);
   }, [sortedResponses, currentPage]);
 
+  const newResponses = useMemo(
+    () => paginatedResponses.filter((r) => r.status === "NEW"),
+    [paginatedResponses]
+  );
+
+  const allNewSelected =
+    newResponses.length > 0 && newResponses.every((r) => selectedIds.has(r.id));
+
+  const handleSelectAll = () => {
+    if (allNewSelected) {
+      const newSelected = new Set(selectedIds);
+      for (const r of newResponses) {
+        newSelected.delete(r.id);
+      }
+      setSelectedIds(newSelected);
+    } else {
+      const newSelected = new Set(selectedIds);
+      for (const r of newResponses) {
+        newSelected.add(r.id);
+      }
+      setSelectedIds(newSelected);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkScreen = async () => {
+    if (selectedIds.size === 0 || !accessToken) return;
+
+    setIsProcessing(true);
+
+    try {
+      const promises = Array.from(selectedIds).map(async (responseId) => {
+        const response = await fetch("/api/trigger/screen-response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ responseId }),
+        });
+        return response.json();
+      });
+
+      await Promise.all(promises);
+
+      await queryClient.invalidateQueries(
+        trpc.vacancy.responses.list.pathFilter()
+      );
+
+      setSelectedIds(new Set());
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="rounded-lg border">
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-4 border-b bg-muted/50 px-4 py-3">
+          <p className="text-sm font-medium">Выбрано: {selectedIds.size}</p>
+          <Button
+            onClick={handleBulkScreen}
+            disabled={!accessToken || isProcessing}
+            size="sm"
+          >
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            Оценить выбранные
+          </Button>
+        </div>
+      )}
+
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">
+              <Checkbox
+                checked={allNewSelected}
+                onCheckedChange={handleSelectAll}
+                disabled={newResponses.length === 0}
+              />
+            </TableHead>
             <TableHead>Кандидат</TableHead>
             <TableHead>
               <button
@@ -143,7 +247,7 @@ export function ResponseTable({ responses }: ResponseTableProps) {
         <TableBody>
           {responses.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-[200px]">
+              <TableCell colSpan={8} className="h-[200px]">
                 <div className="flex items-center justify-center">
                   <p className="text-muted-foreground">Нет откликов</p>
                 </div>
@@ -155,6 +259,8 @@ export function ResponseTable({ responses }: ResponseTableProps) {
                 key={response.id}
                 response={response}
                 accessToken={accessToken}
+                isSelected={selectedIds.has(response.id)}
+                onSelect={handleSelectOne}
               />
             ))
           )}

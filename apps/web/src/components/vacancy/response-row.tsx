@@ -4,7 +4,7 @@ import {
   HR_SELECTION_STATUS_LABELS,
   RESPONSE_STATUS_LABELS,
 } from "@selectio/db/schema";
-import { Badge, Button, TableCell, TableRow } from "@selectio/ui";
+import { Badge, Button, Checkbox, TableCell, TableRow } from "@selectio/ui";
 import { ExternalLink, User } from "lucide-react";
 import type { VacancyResponse } from "~/types/vacancy";
 import { ContactInfo } from "./contact-info";
@@ -13,11 +13,30 @@ import { ScreenResponseButton } from "./screen-response-button";
 interface ResponseRowProps {
   response: VacancyResponse;
   accessToken: string | undefined;
+  isSelected?: boolean;
+  onSelect?: (id: string) => void;
 }
 
-export function ResponseRow({ response, accessToken }: ResponseRowProps) {
+export function ResponseRow({
+  response,
+  accessToken,
+  isSelected = false,
+  onSelect,
+}: ResponseRowProps) {
+  const canSelect = response.status === "NEW";
+
   return (
     <TableRow>
+      <TableCell>
+        {canSelect && onSelect ? (
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onSelect(response.id)}
+          />
+        ) : (
+          <div className="w-4" />
+        )}
+      </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
