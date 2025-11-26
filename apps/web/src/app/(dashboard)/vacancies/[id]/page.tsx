@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "~/components/layout";
 import {
   EmptyResponses,
+  GenerateRequirementsButton,
   ResponseCards,
   ResponseTable,
   VacancyHeader,
@@ -86,7 +87,13 @@ export default async function VacancyDetailPage({
 
                     {vacancy.description && (
                       <div className="space-y-2">
-                        <h2 className="text-xl font-semibold">Описание</h2>
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-xl font-semibold">Описание</h2>
+                          <GenerateRequirementsButton
+                            vacancyId={vacancy.id}
+                            description={vacancy.description}
+                          />
+                        </div>
                         <div className="prose prose-sm max-w-none">
                           <p className="whitespace-pre-wrap text-sm">
                             {vacancy.description}
