@@ -19,7 +19,6 @@ export function ScreenResponseButton({
   accessToken,
   candidateName,
 }: ScreenResponseButtonProps) {
-  const router = useRouter();
   const [runId, setRunId] = useState<string | undefined>();
   const [isTriggering, setIsTriggering] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -32,9 +31,8 @@ export function ScreenResponseButton({
   useEffect(() => {
     if (run?.status === "COMPLETED" && run.output) {
       setShowModal(true);
-      router.refresh();
     }
-  }, [run?.status, run?.output, router]);
+  }, [run?.status, run?.output]);
 
   const handleClick = async () => {
     setIsTriggering(true);

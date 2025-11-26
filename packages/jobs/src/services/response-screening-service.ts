@@ -36,7 +36,14 @@ export async function screenResponse(responseId: string) {
     model: deepseek("deepseek-chat"),
     prompt,
     temperature: 0.3,
-    experimental_telemetry: { isEnabled: true },
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: "screen-response",
+      metadata: {
+        responseId,
+        vacancyId: response.vacancyId,
+      },
+    },
   });
 
   console.log(`📥 Получен ответ от AI`);
