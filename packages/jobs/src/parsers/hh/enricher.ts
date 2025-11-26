@@ -1,5 +1,5 @@
-import { PuppeteerCrawler } from "crawlee";
-import type { CookieParam } from "puppeteer";
+import { Log } from "crawlee";
+import type { Browser, Page } from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { env } from "../../env";
@@ -12,6 +12,94 @@ import { HH_CONFIG } from "./config";
 import { parseResumeExperience } from "./resume-parser";
 
 puppeteer.use(StealthPlugin());
+
+async function setupBrowser(): Promise<Browser> {
+  return await puppeteer.launch({
+    headless: HH_CONFIG.puppeteer.headless,
+    args: HH_CONFIG.puppeteer.args,
+    ignoreDefaultArgs: HH_CONFIG.puppeteer.ignoreDefaultArgs,
+    slowMo: HH_CONFIG.puppeteer.slowMo,
+  });
+}
+
+async function setupPage(
+  browser: Browser,
+  savedCookies: any[] | null
+): Promise<Page> {
+  const page = await browser.newPage();
+
+  // Скрываем признаки автоматизации
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, "webdriver", {
+      get: () => false,
+    });
+    Object.defineProperty(navigator, "plugins", {
+      get: () => [1, 2, 3, 4, 5],
+    });
+    Object.defineProperty(navigator, "languages", {
+      get: () => ["ru-RU", "ru", "en-US", "en"],
+    });
+    (window as any).chrome = {
+      runtime: {},
+    };
+    const originalQuery = window.navigator.permissions.query;
+    window.navigator.permissions.query = (parameters: PermissionDescriptor) =>
+      parameters.name === "notifications"
+        ? Promise.resolve({
+            state: Notification.permission,
+          } as PermissionStatus)
+        : originalQuery(parameters);
+  });
+
+  // Restore cookies
+  if (savedCookies && savedCookies.length > 0) {
+    console.log("🍪 Восстанавливаем сохраненные куки...");
+    await page.setCookie(...savedCookies);
+  }
+
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  );
+
+  await page.setViewport({
+    width: 1920,
+    height: 1080,
+    deviceScaleFactor: 1,
+  });
+
+  return page;
+}
+
+async function checkAndPerformLogin(
+  page: Page,
+  email: string,
+  password: string
+) {
+  console.log("🔐 Проверка авторизации...");
+
+  await page.goto(HH_CONFIG.urls.login, {
+    waitUntil: "domcontentloaded",
+    timeout: HH_CONFIG.timeouts.navigation,
+  });
+
+  await page.waitForNetworkIdle({
+    timeout: HH_CONFIG.timeouts.networkIdle,
+  });
+
+  const loginInput = await page.$('input[type="text"][name="username"]');
+  if (loginInput) {
+    // Create a simple logger wrapper that implements the Log interface
+    const log = new Log();
+
+    await performLogin(page, log, email, password);
+  } else {
+    console.log("✅ Успешно авторизованы");
+  }
+
+  // Сохраняем куки после успешной проверки/логина
+  const cookies = await page.cookies();
+  await saveCookies(cookies);
+}
 
 export async function runEnricher() {
   const email = env.HH_EMAIL;
@@ -31,123 +119,39 @@ export async function runEnricher() {
   }
 
   const savedCookies = await loadCookies();
+  const browser = await setupBrowser();
 
-  // Формируем список запросов для краулера
-  // Добавляем стартовый URL для логина/проверки сессии
-  const startUrl = HH_CONFIG.urls.login;
+  try {
+    const page = await setupPage(browser, savedCookies);
 
-  // Flag to track if cookies have been restored
-  let cookiesRestored = false;
+    // Проверяем авторизацию
+    await checkAndPerformLogin(page, email, password);
 
-  const crawler = new PuppeteerCrawler({
-    headless: HH_CONFIG.puppeteer.headless,
-    launchContext: {
-      launcher: puppeteer,
-      launchOptions: {
-        headless: HH_CONFIG.puppeteer.headless,
-        args: HH_CONFIG.puppeteer.args,
-        ignoreDefaultArgs: HH_CONFIG.puppeteer.ignoreDefaultArgs,
-        slowMo: HH_CONFIG.puppeteer.slowMo,
-      },
-    },
-    preNavigationHooks: [
-      async ({ page, log }) => {
-        // Скрываем признаки автоматизации
-        await page.evaluateOnNewDocument(() => {
-          Object.defineProperty(navigator, "webdriver", {
-            get: () => false,
-          });
-          Object.defineProperty(navigator, "plugins", {
-            get: () => [1, 2, 3, 4, 5],
-          });
-          Object.defineProperty(navigator, "languages", {
-            get: () => ["ru-RU", "ru", "en-US", "en"],
-          });
-          (window as any).chrome = {
-            runtime: {},
-          };
-          const originalQuery = window.navigator.permissions.query;
-          window.navigator.permissions.query = (
-            parameters: PermissionDescriptor
-          ) =>
-            parameters.name === "notifications"
-              ? Promise.resolve({
-                  state: Notification.permission,
-                } as PermissionStatus)
-              : originalQuery(parameters);
-        });
+    console.log(`🚀 Начинаем обработку ${responsesToEnrich.length} резюме...`);
 
-        // Restore cookies only once at the very beginning
-        if (savedCookies && !cookiesRestored) {
-          log.info("🍪 Восстанавливаем сохраненные куки...");
-          await page.browserContext().setCookie(...(savedCookies as any[]));
-          cookiesRestored = true;
-        }
-
-        await page.setUserAgent({
-          userAgent:
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        });
-
-        await page.setViewport({
-          width: 1920,
-          height: 1080,
-          deviceScaleFactor: 1,
-        });
-      },
-    ],
-    async requestHandler({ page, request, log, crawler }) {
-      // Если это стартовый URL, проверяем логин
-      if (request.url === startUrl) {
-        log.info("🔐 Проверка авторизации...");
-        await page.waitForNetworkIdle({
-          timeout: HH_CONFIG.timeouts.networkIdle,
-        });
-
-        const loginInput = await page.$('input[type="text"][name="username"]');
-        if (loginInput) {
-          await performLogin(page, log, email, password);
-        } else {
-          log.info("✅ Успешно авторизованы");
-        }
-
-        // Сохраняем куки после успешной проверки/логина
-        const cookies = await page.browserContext().cookies();
-        await saveCookies(cookies);
-
-        // Добавляем задачи на парсинг резюме после успешного логина
-        const requests = responsesToEnrich.map((r) => ({
-          url: r.resumeUrl,
-          uniqueKey: r.resumeId,
-          userData: {
-            resumeId: r.resumeId,
-            vacancyId: r.vacancyId,
-            candidateName: r.candidateName,
-          },
-        }));
-
-        log.info(`🚀 Добавляем ${requests.length} задач в очередь...`);
-        await crawler.addRequests(requests);
-        return;
-      }
-
-      // Добавляем случайную задержку между 3-5 секунд для имитации человеческого поведения
-      const delay = Math.floor(Math.random() * 2000) + 3000;
-      log.info(`⏳ Ожидание ${delay}ms перед обработкой...`);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-
-      // Обработка резюме
-      const { resumeId, vacancyId, candidateName } = request.userData;
-      log.info(`📊 Парсинг резюме: ${candidateName} (${request.url})`);
+    // Последовательно обрабатываем каждое резюме
+    for (let i = 0; i < responsesToEnrich.length; i++) {
+      const response = responsesToEnrich[i];
+      if (!response) continue;
+      const { resumeId, vacancyId, candidateName, resumeUrl } = response;
 
       try {
-        const experienceData = await parseResumeExperience(page, request.url);
+        // Добавляем случайную задержку между 3-5 секунд для имитации человеческого поведения
+        const delay = Math.floor(Math.random() * 2000) + 3000;
+        console.log(`⏳ Ожидание ${delay}ms перед обработкой...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        console.log(
+          `📊 [${i + 1}/${responsesToEnrich.length}] Парсинг резюме: ${candidateName}`
+        );
+
+        const experienceData = await parseResumeExperience(page, resumeUrl);
 
         await updateResponseDetails({
           vacancyId,
           resumeId,
-          resumeUrl: request.url,
-          candidateName,
+          resumeUrl,
+          candidateName: candidateName ?? "",
           experience: experienceData.experience,
           contacts: experienceData.contacts,
           languages: experienceData.languages,
@@ -156,17 +160,18 @@ export async function runEnricher() {
           courses: experienceData.courses,
         });
 
-        log.info(`✅ Данные обновлены для: ${candidateName}`);
+        console.log(`✅ Данные обновлены для: ${candidateName}`);
       } catch (error) {
-        log.error(`❌ Ошибка парсинга для ${candidateName}: ${error}`);
-        // Можно добавить логику повторных попыток или пометки ошибки в БД
+        console.error(`❌ Ошибка парсинга для ${candidateName}: ${error}`);
+        // Продолжаем обработку следующих резюме
       }
-    },
-    // Ограничиваем количество одновременных вкладок, чтобы не спамить
-    maxConcurrency: 1,
-    requestHandlerTimeoutSecs: HH_CONFIG.timeouts.requestHandler,
-  });
+    }
 
-  // Запускаем с начальным URL
-  await crawler.run([startUrl]);
+    console.log("🎉 Обработка завершена!");
+  } catch (error) {
+    console.error("❌ Критическая ошибка:", error);
+    throw error;
+  } finally {
+    await browser.close();
+  }
 }
