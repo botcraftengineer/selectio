@@ -14,7 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@selectio/ui";
-import { ExternalLink, User } from "lucide-react";
+import { useRealtimeTaskTrigger } from "@trigger.dev/react-hooks";
+import { ExternalLink, Sparkles, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createTriggerPublicToken } from "~/actions/trigger";
 import type { VacancyResponse } from "~/types/vacancy";
 import { ContactInfo } from "./contact-info";
 
@@ -23,6 +26,24 @@ interface ResponseTableProps {
 }
 
 export function ResponseTable({ responses }: ResponseTableProps) {
+  const [accessToken, setAccessToken] = useState<string | undefined>();
+
+  useEffect(() => {
+    createTriggerPublicToken("screen-response").then((result) => {
+      if (result.success) {
+        setAccessToken(result.token);
+      }
+    });
+  }, []);
+
+  const { submit, isLoading } = useRealtimeTaskTrigger("screen-response", {
+    accessToken,
+  });
+
+  const handleScreenResponse = (responseId: string) => {
+    submit({ responseId });
+  };
+
   return (
     <div className="rounded-lg border">
       <Table>
@@ -80,15 +101,26 @@ export function ResponseTable({ responses }: ResponseTableProps) {
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <a
-                  href={response.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="ghost" size="sm">
-                    <ExternalLink className="h-4 w-4" />
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleScreenResponse(response.id)}
+                    disabled={isLoading}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    {isLoading ? "Оценка..." : "Оценить"}
                   </Button>
-                </a>
+                  <a
+                    href={response.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="ghost" size="sm">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </a>
+                </div>
               </TableCell>
             </TableRow>
           ))}
