@@ -37,17 +37,23 @@ export function ScreenResponseButton({
       console.log("Opening modal with result:", run.output);
       setShowModal(true);
       setIsSubmitting(false);
-      void queryClient.invalidateQueries(
-        trpc.vacancy.responses.list.pathFilter()
-      );
     } else if (run?.status === "FAILED" || run?.status === "CANCELED") {
       setIsSubmitting(false);
     }
-  }, [run?.status, run?.output, queryClient, trpc.vacancy.responses.list]);
+  }, [run?.status, run?.output]);
 
   const handleClick = () => {
     setIsSubmitting(true);
     submit({ responseId });
+  };
+
+  const handleModalClose = (open: boolean) => {
+    setShowModal(open);
+    if (!open) {
+      void queryClient.invalidateQueries(
+        trpc.vacancy.responses.list.pathFilter()
+      );
+    }
   };
 
   return (
@@ -68,7 +74,7 @@ export function ScreenResponseButton({
 
       <ScreeningResultModal
         open={showModal}
-        onOpenChange={setShowModal}
+        onOpenChange={handleModalClose}
         result={run?.output?.result || null}
         candidateName={candidateName}
       />
