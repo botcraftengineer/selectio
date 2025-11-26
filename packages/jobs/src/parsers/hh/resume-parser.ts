@@ -9,17 +9,6 @@ export async function parseResumeExperience(
 ): Promise<ResumeExperience> {
   console.log(`📄 Переход на страницу резюме: ${url}`);
 
-  // Set up 403 error logging
-  const log403Handler = async (response: any) => {
-    if (response.status() === 403) {
-      console.log(`🚫 403 FORBIDDEN: ${response.url()}`);
-      console.log(`   Method: ${response.request().method()}`);
-      console.log(`   Headers:`, response.request().headers());
-    }
-  };
-
-  page.on("response", log403Handler);
-
   // Переходим на страницу резюме, если мы еще не там
   if (page.url() !== url) {
     await page.goto(url, {
@@ -119,7 +108,7 @@ export async function parseResumeExperience(
   }
 
   const resumeIdMatch = url.match(/\/resume\/([a-f0-9]+)/);
-  if (resumeIdMatch?.[1]) {
+  if (resumeIdMatch?.[1] && HH_CONFIG.features.parseContacts) {
     const resumeId = resumeIdMatch[1];
 
     try {
@@ -171,12 +160,11 @@ export async function parseResumeExperience(
       console.log("⚠️ Не удалось получить контакты.");
       console.error(e);
     }
+  } else if (resumeIdMatch?.[1]) {
+    console.log("ℹ️ Парсинг контактов отключен в конфигурации");
   } else {
     console.log("⚠️ Не удалось извлечь ID резюме из URL.");
   }
-
-  // Clean up the 403 logging handler
-  page.off("response", log403Handler);
 
   return { experience, contacts, languages, about, education, courses };
 }

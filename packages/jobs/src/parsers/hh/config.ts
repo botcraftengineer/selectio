@@ -18,6 +18,9 @@ export const HH_CONFIG = {
     readingPage: { min: 2000, max: 5000 }, // Время "чтения" страницы
     scrollDelay: { min: 500, max: 1500 }, // Задержка при скролле
   },
+  features: {
+    parseContacts: false, // Включить/выключить парсинг контактов (отключено из-за 403)
+  },
   puppeteer: {
     headless: false,
     args: [
