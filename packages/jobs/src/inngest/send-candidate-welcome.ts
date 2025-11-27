@@ -1,9 +1,12 @@
-import { sendMessage } from "@selectio/telegram-bot";
+import { db } from "@selectio/db";
+import { eq } from "@selectio/db";
+import { telegramConversation, vacancyResponse } from "@selectio/db/schema";
+import { sendMessageByUsername } from "@selectio/telegram-bot";
 import { generateWelcomeMessage } from "../services/candidate-welcome-service";
 import { inngest } from "./client";
 
 /**
- * Inngest функция для отправки приветственного сообщения кандидату в Telegram
+ * Inngest функция для отправки приветственного сообщения кандидату в Telegram по username
  */
 export const sendCandidateWelcomeFunction = inngest.createFunction(
   {
@@ -13,14 +16,30 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
   },
   { event: "candidate/welcome" },
   async ({ event, step }) => {
-    const { responseId, chatId } = event.data;
+    const { responseId, username } = event.data;
+
+    // Получаем данные отклика
+    const response = await step.run("fetch-response-data", async () => {
+      const result = await db.query.vacancyResponse.findFirst({
+        where: eq(vacancyResponse.id, responseId),
+        with: {
+          vacancy: true,
+        },
+      });
+
+      if (!result) {
+        throw new Error(`Отклик не найден: ${responseId}`);
+      }
+
+      return result;
+    });
 
     const welcomeMessage = await step.run(
       "generate-welcome-message",
       async () => {
         console.log("🤖 Генерация приветственного сообщения", {
           responseId,
-          chatId,
+          username,
         });
 
         try {
@@ -42,34 +61,78 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
       }
     );
 
-    return await step.run("send-telegram-message", async () => {
-      console.log("📤 Отправка сообщения в Telegram", {
+    const result = await step.run("send-telegram-message", async () => {
+      console.log("📤 Отправка сообщения пользователю", {
         responseId,
-        chatId,
+        username,
       });
 
       try {
-        await sendMessage(chatId, welcomeMessage);
+        const sendResult = await sendMessageByUsername(
+          username,
+          welcomeMessage
+        );
+
+        if (!sendResult.success) {
+          throw new Error(sendResult.message);
+        }
 
         console.log("✅ Сообщение отправлено", {
           responseId,
-          chatId,
+          username,
+          chatId: sendResult.chatId,
         });
 
-        return {
-          success: true,
-          responseId,
-          chatId,
-          messageSent: true,
-        };
+        return sendResult;
       } catch (error) {
         console.error("❌ Ошибка отправки сообщения в Telegram", {
           responseId,
-          chatId,
+          username,
           error,
         });
         throw error;
       }
     });
+
+    // Если получили chatId, сохраняем в базу
+    if (result.chatId) {
+      const chatId = result.chatId;
+      await step.run("save-conversation", async () => {
+        await db
+          .insert(telegramConversation)
+          .values({
+            chatId,
+            candidateName: response.candidateName,
+            status: "ACTIVE",
+            metadata: JSON.stringify({
+              responseId,
+              vacancyId: response.vacancyId,
+              username,
+            }),
+          })
+          .onConflictDoUpdate({
+            target: telegramConversation.chatId,
+            set: {
+              candidateName: response.candidateName,
+              status: "ACTIVE",
+              metadata: JSON.stringify({
+                responseId,
+                vacancyId: response.vacancyId,
+                username,
+              }),
+            },
+          });
+
+        console.log(`✅ Сохранена беседа с chatId: ${chatId}`);
+      });
+    }
+
+    return {
+      success: true,
+      responseId,
+      username,
+      chatId: result.chatId,
+      messageSent: true,
+    };
   }
 );

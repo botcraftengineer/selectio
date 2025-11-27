@@ -53,14 +53,14 @@ export function ResponseActions({
   };
 
   const handleSendGreeting = () => {
-    sendByUsernameMutation.mutate({
-      responseId,
-      username: "@BotCraftEngineer",
-    });
     if (!telegramUsername) {
       toast.error("У кандидата не указан Telegram username");
       return;
     }
+    sendByUsernameMutation.mutate({
+      responseId,
+      username: telegramUsername,
+    });
   };
 
   const handleOpenResume = () => {

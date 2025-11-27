@@ -3,7 +3,6 @@ import { EventSchemas, Inngest } from "inngest";
 import {
   candidateWelcomeDataSchema,
   responseScreenDataSchema,
-  sendMessageByUsernameDataSchema,
   vacancyRequirementsExtractDataSchema,
   vacancyResponsesRefreshDataSchema,
   vacancyUpdateActiveDataSchema,
@@ -20,6 +19,5 @@ export const inngest = new Inngest({
     "vacancy/update.active": vacancyUpdateActiveDataSchema,
     "vacancy/responses.refresh": vacancyResponsesRefreshDataSchema,
     "candidate/welcome": candidateWelcomeDataSchema,
-    "telegram/send-by-username": sendMessageByUsernameDataSchema,
   }),
 });

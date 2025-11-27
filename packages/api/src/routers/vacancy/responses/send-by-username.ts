@@ -9,11 +9,10 @@ export const sendByUsername = protectedProcedure
     z.object({
       responseId: z.string(),
       username: z.string().min(1, "Username обязателен"),
-      message: z.string().optional(),
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const { responseId, username, message } = input;
+    const { responseId, username } = input;
 
     // Проверяем, что отклик существует
     const response = await ctx.db.query.vacancyResponse.findFirst({
@@ -26,16 +25,15 @@ export const sendByUsername = protectedProcedure
 
     // Отправляем событие в Inngest для асинхронной обработки
     await inngest.send({
-      name: "telegram/send-by-username",
+      name: "candidate/welcome",
       data: {
         responseId,
         username,
-        message,
       },
     });
 
     return {
       success: true,
-      message: "Сообщение отправляется в фоновом режиме",
+      message: "Приветственное сообщение отправляется в фоновом режиме",
     };
   });

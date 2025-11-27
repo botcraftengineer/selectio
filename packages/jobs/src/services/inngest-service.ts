@@ -100,51 +100,23 @@ export async function triggerVacancyResponsesRefresh(
  */
 export async function triggerCandidateWelcome(
   responseId: string,
-  chatId: string
+  username: string
 ): Promise<void> {
   try {
     await inngest.send({
       name: "candidate/welcome",
       data: {
         responseId,
-        chatId,
-      },
-    });
-
-    console.log(`✅ Inngest event sent for candidate welcome: ${responseId}`);
-  } catch (error) {
-    console.error(
-      `❌ Ошибка отправки Inngest события для приветствия кандидата ${responseId}:`,
-      error
-    );
-    throw error;
-  }
-}
-
-/**
- * Triggers sending message by username via Inngest
- */
-export async function triggerSendMessageByUsername(
-  responseId: string,
-  username: string,
-  message?: string
-): Promise<void> {
-  try {
-    await inngest.send({
-      name: "telegram/send-by-username",
-      data: {
-        responseId,
         username,
-        message,
       },
     });
 
     console.log(
-      `✅ Inngest event sent for sending message to @${username} (response: ${responseId})`
+      `✅ Inngest event sent for candidate welcome to @${username} (response: ${responseId})`
     );
   } catch (error) {
     console.error(
-      `❌ Ошибка отправки Inngest события для отправки сообщения @${username}:`,
+      `❌ Ошибка отправки Inngest события для приветствия кандидата ${responseId}:`,
       error
     );
     throw error;

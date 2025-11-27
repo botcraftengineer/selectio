@@ -30,14 +30,7 @@ export const vacancyResponsesRefreshDataSchema = z.object({
 // Schema for candidate welcome message event data
 export const candidateWelcomeDataSchema = z.object({
   responseId: z.string().min(1, "Response ID is required"),
-  chatId: z.string().min(1, "Chat ID is required"),
-});
-
-// Schema for sending message by username event data
-export const sendMessageByUsernameDataSchema = z.object({
-  responseId: z.string().min(1, "Response ID is required"),
   username: z.string().min(1, "Username is required"),
-  message: z.string().optional(),
 });
 
 /**
@@ -60,9 +53,6 @@ export const inngestEventSchemas = {
   "candidate/welcome": {
     data: candidateWelcomeDataSchema,
   },
-  "telegram/send-by-username": {
-    data: sendMessageByUsernameDataSchema,
-  },
 };
 
 /**
@@ -80,7 +70,4 @@ export type VacancyResponsesRefreshPayload = z.infer<
 >;
 export type CandidateWelcomePayload = z.infer<
   typeof candidateWelcomeDataSchema
->;
-export type SendMessageByUsernamePayload = z.infer<
-  typeof sendMessageByUsernameDataSchema
 >;
