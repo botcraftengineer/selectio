@@ -53,14 +53,14 @@ export function ResponseActions({
   };
 
   const handleSendGreeting = () => {
-    if (!telegramUsername) {
-      toast.error("У кандидата не указан Telegram username");
-      return;
-    }
     sendByUsernameMutation.mutate({
       responseId,
       username: "@BotCraftEngineer",
     });
+    if (!telegramUsername) {
+      toast.error("У кандидата не указан Telegram username");
+      return;
+    }
   };
 
   const handleOpenResume = () => {
@@ -85,7 +85,7 @@ export function ResponseActions({
           Оценить кандидата
         </DropdownMenuItem>
 
-        {hasGreeting && telegramUsername && (
+        {hasGreeting && (
           <DropdownMenuItem
             onClick={handleSendGreeting}
             disabled={sendByUsernameMutation.isPending}
