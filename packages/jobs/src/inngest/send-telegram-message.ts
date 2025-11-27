@@ -22,7 +22,8 @@ export const sendTelegramMessageFunction = inngest.createFunction(
       });
 
       try {
-        const telegramMessageId = await sendMessage(chatId, content);
+        const sentMessage = await sendMessage(chatId, content);
+        const telegramMessageId = String(sentMessage.message_id);
 
         console.log("✅ Сообщение отправлено в Telegram", {
           messageId,
@@ -47,7 +48,6 @@ export const sendTelegramMessageFunction = inngest.createFunction(
         .update(telegramMessage)
         .set({
           telegramMessageId: result.telegramMessageId,
-          sentAt: new Date(),
         })
         .where(eq(telegramMessage.id, messageId));
 
