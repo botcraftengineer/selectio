@@ -2,6 +2,7 @@ import type { Cookie } from "crawlee";
 import { and, eq } from "drizzle-orm";
 import { db } from "../client";
 import { integration, type NewIntegration } from "../schema";
+import { decryptCredentials, encryptCredentials } from "../utils/encryption";
 
 /**
  * Получить интеграцию по типу и userId
@@ -22,21 +23,32 @@ export async function getIntegration(userId: string, type: string) {
 export async function upsertIntegration(data: NewIntegration) {
   const existing = await getIntegration(data.userId, data.type);
 
+  // Шифруем credentials перед сохранением
+  const encryptedData = {
+    ...data,
+    credentials: encryptCredentials(data.credentials as Record<string, string>),
+  };
+
   if (existing) {
     const [updated] = await db
       .update(integration)
       .set({
-        ...data,
+        ...encryptedData,
         updatedAt: new Date(),
       })
       .where(eq(integration.id, existing.id))
       .returning();
 
-    return updated!;
+    if (!updated) throw new Error("Failed to update integration");
+    return updated;
   }
 
-  const [created] = await db.insert(integration).values(data).returning();
-  return created!;
+  const [created] = await db
+    .insert(integration)
+    .values(encryptedData)
+    .returning();
+  if (!created) throw new Error("Failed to create integration");
+  return created;
 }
 
 /**
@@ -56,7 +68,7 @@ export async function saveCookiesForIntegration(
   await db
     .update(integration)
     .set({
-      cookies: cookies as any,
+      cookies: cookies as unknown as typeof integration.$inferInsert.cookies,
       lastUsedAt: new Date(),
       updatedAt: new Date(),
     })
@@ -80,14 +92,19 @@ export async function loadCookiesForIntegration(
 }
 
 /**
- * Получить credentials для интеграции
+ * Получить credentials для интеграции (расшифрованные)
  */
 export async function getIntegrationCredentials(
   userId: string,
   type: string
 ): Promise<Record<string, string> | null> {
   const result = await getIntegration(userId, type);
-  return result?.credentials ?? null;
+  if (!result?.credentials) {
+    return null;
+  }
+
+  // Расшифровываем credentials перед возвратом
+  return decryptCredentials(result.credentials as Record<string, string>);
 }
 
 /**

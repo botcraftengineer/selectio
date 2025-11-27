@@ -17,8 +17,8 @@ const sidebarNavItems = [
     icon: Circle,
   },
   {
-    title: "Внешний вид",
-    href: "/settings/appearance",
+    title: "Интеграции",
+    href: "/settings/integrations",
     icon: Globe,
   },
   {
