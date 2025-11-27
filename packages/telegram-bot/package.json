@@ -20,7 +20,7 @@
   "dependencies": {
     "@selectio/db": "workspace:*",
     "@selectio/lib": "workspace:*",
-    "grammy": "^1.36.0"
+    "grammy": "^1.38.4"
   },
   "devDependencies": {
     "@selectio/tsconfig": "workspace:*",

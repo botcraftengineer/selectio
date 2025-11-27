@@ -13,6 +13,14 @@ export const bot = new Bot(TELEGRAM_BOT_TOKEN);
 
 bot.command("start", async (ctx) => {
   const chatId = ctx.chat.id.toString();
+  const username = ctx.from?.username;
+
+  console.log("🆔 Telegram Chat Info:", {
+    chatId,
+    username: username ? `@${username}` : "no username",
+    firstName: ctx.from?.first_name,
+    lastName: ctx.from?.last_name,
+  });
 
   await db
     .insert(telegramConversation)
@@ -28,7 +36,7 @@ bot.command("start", async (ctx) => {
     .returning();
 
   await ctx.reply(
-    "Привет! Я бот для общения с кандидатами. Напишите ваше сообщение."
+    `Привет! Я бот для общения с кандидатами.\n\nВаш Chat ID: ${chatId}\nUsername: ${username ? `@${username}` : "не указан"}`
   );
 });
 

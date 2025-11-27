@@ -15,6 +15,8 @@ import {
   IconSend,
   IconStar,
 } from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "~/trpc/react";
 
 interface ResponseActionsProps {
   responseId: string;
@@ -29,14 +31,28 @@ export function ResponseActions({
   candidateName,
   hasGreeting = false,
 }: ResponseActionsProps) {
+  const trpc = useTRPC();
+
+  const sendWelcomeMutation = useMutation(
+    trpc.vacancy.responses.sendWelcome.mutationOptions({
+      onSuccess: () => {
+        alert("Приветственное сообщение отправлено в Telegram!");
+      },
+      onError: (error) => {
+        console.error("Ошибка отправки приветствия:", error);
+        alert("Ошибка отправки сообщения");
+      },
+    })
+  );
+
   const handleRate = () => {
-    // TODO: Реализовать оценку кандидата
     console.log("Оценить кандидата:", responseId);
   };
 
   const handleSendGreeting = () => {
-    // TODO: Реализовать отправку приветственного сообщения
-    console.log("Отправить приветствие:", responseId);
+    // Тестовый chatId для @BotCraftEngineer
+    const testChatId = "5652886641";
+    sendWelcomeMutation.mutate({ responseId, chatId: testChatId });
   };
 
   const handleOpenResume = () => {
@@ -62,9 +78,14 @@ export function ResponseActions({
         </DropdownMenuItem>
 
         {hasGreeting && (
-          <DropdownMenuItem onClick={handleSendGreeting}>
+          <DropdownMenuItem
+            onClick={handleSendGreeting}
+            disabled={sendWelcomeMutation.isPending}
+          >
             <IconSend className="h-4 w-4" />
-            Отправить приветствие
+            {sendWelcomeMutation.isPending
+              ? "Отправка..."
+              : "Отправить приветствие"}
           </DropdownMenuItem>
         )}
 
