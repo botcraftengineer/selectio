@@ -1,4 +1,4 @@
-import { getIntegrationCredentials } from "@acme/db";
+import { getIntegrationCredentials } from "@selectio/db";
 import { PuppeteerCrawler } from "crawlee";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";

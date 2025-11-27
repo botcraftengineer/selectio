@@ -1,4 +1,7 @@
-import { loadCookiesForIntegration, saveCookiesForIntegration } from "@acme/db";
+import {
+  loadCookiesForIntegration,
+  saveCookiesForIntegration,
+} from "@selectio/db";
 import type { Cookie } from "crawlee";
 
 /**
