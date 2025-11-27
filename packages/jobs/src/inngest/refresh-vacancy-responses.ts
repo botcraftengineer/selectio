@@ -17,7 +17,7 @@ export const refreshVacancyResponsesFunction = inngest.createFunction(
   },
   { event: "vacancy/responses.refresh" },
   async ({ event, step }) => {
-    const { vacancyId, userId } = event.data;
+    const { vacancyId } = event.data;
 
     return await step.run("parse-vacancy-responses", async () => {
       console.log(`🚀 Запуск обновления откликов для вакансии ${vacancyId}`);
@@ -31,7 +31,7 @@ export const refreshVacancyResponsesFunction = inngest.createFunction(
       }
 
       try {
-        await refreshVacancyResponses(vacancyId, userId);
+        await refreshVacancyResponses(vacancyId);
 
         console.log(`✅ Отклики для вакансии ${vacancyId} обновлены успешно`);
         return { success: true, vacancyId };

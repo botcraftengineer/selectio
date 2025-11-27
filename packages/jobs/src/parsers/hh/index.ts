@@ -11,14 +11,17 @@ puppeteer.use(StealthPlugin());
 
 export { refreshVacancyResponses } from "./refresh-responses";
 
-export async function runHHParser(options?: { skipResponses?: boolean }) {
+export async function runHHParser(
+  userId: string,
+  options?: { skipResponses?: boolean }
+) {
   const email = env.HH_EMAIL;
   const password = env.HH_PASSWORD;
 
   console.log("🚀 Запуск парсера hh.ru...");
   console.log(`📧 Email: ${email}`);
 
-  const savedCookies = await loadCookies();
+  const savedCookies = await loadCookies(userId, "hh");
 
   // Всегда начинаем с страницы логина, чтобы проверить актуальность сессии
   const startUrl = HH_CONFIG.urls.login;
@@ -101,7 +104,7 @@ export async function runHHParser(options?: { skipResponses?: boolean }) {
         const loginInput = await page.$('input[type="text"][name="username"]');
 
         if (loginInput) {
-          await performLogin(page, log, email, password);
+          await performLogin(page, log, userId, email, password);
         } else {
           log.info("✅ Форма входа не найдена. Похоже, мы уже авторизованы.");
         }

@@ -72,6 +72,7 @@ async function setupPage(
 
 async function checkAndPerformLogin(
   page: Page,
+  userId: string,
   email: string,
   password: string
 ) {
@@ -91,17 +92,17 @@ async function checkAndPerformLogin(
     // Create a simple logger wrapper that implements the Log interface
     const log = new Log();
 
-    await performLogin(page, log, email, password);
+    await performLogin(page, log, userId, email, password);
   } else {
     console.log("✅ Успешно авторизованы");
   }
 
   // Сохраняем куки после успешной проверки/логина
   const cookies = await page.cookies();
-  await saveCookies(cookies);
+  await saveCookies(userId, "hh", cookies);
 }
 
-export async function runEnricher() {
+export async function runEnricher(userId: string) {
   const email = env.HH_EMAIL;
   const password = env.HH_PASSWORD;
 
@@ -118,14 +119,14 @@ export async function runEnricher() {
     return;
   }
 
-  const savedCookies = await loadCookies();
+  const savedCookies = await loadCookies(userId, "hh");
   const browser = await setupBrowser();
 
   try {
     const page = await setupPage(browser, savedCookies);
 
     // Проверяем авторизацию
-    await checkAndPerformLogin(page, email, password);
+    await checkAndPerformLogin(page, userId, email, password);
 
     console.log(`🚀 Начинаем обработку ${responsesToEnrich.length} резюме...`);
 
