@@ -13,6 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { triggerUpdateVacancies } from "~/actions/trigger";
 import { SiteHeader } from "~/components/layout";
 import { useTRPC } from "~/trpc/react";
@@ -29,9 +30,9 @@ export default function VacanciesPage() {
     try {
       const result = await triggerUpdateVacancies();
       if (result.success) {
-        alert("Обновление вакансий запущено");
+        toast.success("Обновление вакансий запущено");
       } else {
-        alert("Ошибка при запуске обновления");
+        toast.error("Ошибка при запуске обновления");
       }
     } finally {
       setIsUpdating(false);

@@ -16,6 +16,7 @@ import {
   IconStar,
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useTRPC } from "~/trpc/react";
 
 interface ResponseActionsProps {
@@ -36,11 +37,11 @@ export function ResponseActions({
   const sendWelcomeMutation = useMutation(
     trpc.vacancy.responses.sendWelcome.mutationOptions({
       onSuccess: () => {
-        alert("Приветственное сообщение отправлено в Telegram!");
+        toast.success("Приветственное сообщение отправлено в Telegram!");
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         console.error("Ошибка отправки приветствия:", error);
-        alert("Ошибка отправки сообщения");
+        toast.error("Ошибка отправки сообщения");
       },
     })
   );
