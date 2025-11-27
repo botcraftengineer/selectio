@@ -10,8 +10,8 @@ import {
   FormMessage,
   Input,
   Textarea,
-  toast,
 } from "@selectio/ui";
+import { toast } from "sonner";
 import {
   type CompanyFormValues,
   companyFormSchema,

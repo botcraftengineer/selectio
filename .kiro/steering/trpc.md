@@ -32,6 +32,7 @@ return (
 
 import { useTRPC } from "~/trpc/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function CreateBrandForm() {
 const trpc = useTRPC();
@@ -46,17 +47,10 @@ queryKey: trpc.brands.getAll.queryKey()
 });
 
       // Дополнительная логика после успешного создания
-      toast({
-        title: "Бренд создан",
-        description: `Бренд "${data.name}" успешно создан`
-      });
+      toast.success(`Бренд "${data.name}" успешно создан`);
     },
     onError: (error) => {
-      toast({
-        title: "Ошибка",
-        description: error.message || "Не удалось создать бренд",
-        variant: "destructive"
-      });
+      toast.error(error.message || "Не удалось создать бренд");
     }
 
 });

@@ -14,8 +14,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  toast,
 } from "@selectio/ui";
+import { toast } from "sonner";
 import {
   type AccountFormValues,
   accountFormSchema,

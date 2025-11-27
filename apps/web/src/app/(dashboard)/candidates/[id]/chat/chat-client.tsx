@@ -4,7 +4,7 @@ import { ChatContainer } from "~/components/chat";
 import type { ChatMessageProps, MessageSender } from "~/components/chat";
 import { useTRPC } from "~/trpc/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@selectio/ui";
+import { toast } from "sonner";
 
 interface ChatClientProps {
   responseId: string;
@@ -55,17 +55,10 @@ export function ChatClient({ responseId }: ChatClientProps) {
           });
         }
 
-        toast({
-          title: "Сообщение отправлено",
-          description: "Ваше сообщение успешно отправлено кандидату",
-        });
+        toast.success("Ваше сообщение успешно отправлено кандидату");
       },
       onError: (error) => {
-        toast({
-          title: "Ошибка отправки",
-          description: error.message || "Не удалось отправить сообщение",
-          variant: "destructive",
-        });
+        toast.error(error.message || "Не удалось отправить сообщение");
       },
     });
 
@@ -87,11 +80,7 @@ export function ChatClient({ responseId }: ChatClientProps) {
 
   const handleSendMessage = async (message: string) => {
     if (!conversation) {
-      toast({
-        title: "Ошибка",
-        description: "Беседа не найдена",
-        variant: "destructive",
-      });
+      toast.error("Беседа не найдена");
       return;
     }
 

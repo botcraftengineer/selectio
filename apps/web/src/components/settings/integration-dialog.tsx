@@ -20,9 +20,9 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  toast,
 } from "@selectio/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";

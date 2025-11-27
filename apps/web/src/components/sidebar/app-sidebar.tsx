@@ -14,6 +14,7 @@ import {
   IconFileDescription,
   IconInnerShadowTop,
   IconListDetails,
+  IconMessage,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
@@ -41,6 +42,11 @@ const data = {
       title: "Кандидаты",
       url: "/candidates",
       icon: IconUsers,
+    },
+    {
+      title: "Чаты",
+      url: "/chat",
+      icon: IconMessage,
     },
   ],
   navSecondary: [
