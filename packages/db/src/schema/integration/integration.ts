@@ -34,7 +34,7 @@ export const integration = pgTable("integrations", {
     >(),
 
   // Дополнительные метаданные
-  metadata: jsonb("metadata").$type<Record<string, any>>(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
 
   // Активна ли интеграция
   isActive: text("is_active").default("true").notNull(),

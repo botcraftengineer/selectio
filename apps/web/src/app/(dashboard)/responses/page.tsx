@@ -50,7 +50,6 @@ export default function ResponsesPage() {
           return response.screening !== null && response.screening.score >= 4;
         case "low-score":
           return response.screening !== null && response.screening.score < 4;
-        case "all":
         default:
           return true;
       }

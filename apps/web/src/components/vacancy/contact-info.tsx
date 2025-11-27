@@ -66,9 +66,9 @@ export function ContactInfo({ contacts, size = "md" }: ContactInfoProps) {
 
         const hasComment = contact.comment && contact.comment.length > 0;
         const isCommentTruncated =
-          hasComment && contact.comment!.length > maxCommentLength;
+          hasComment && contact.comment?.length > maxCommentLength;
         const truncatedComment = isCommentTruncated
-          ? `${contact.comment!.slice(0, maxCommentLength)}...`
+          ? `${contact.comment?.slice(0, maxCommentLength)}...`
           : contact.comment;
 
         const fullContent = hasComment

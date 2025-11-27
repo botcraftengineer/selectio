@@ -16,7 +16,6 @@ import {
   IconListDetails,
   IconMessage,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react";
 import type * as React from "react";
 import { NavMain, NavSecondary, NavUser } from "~/components/sidebar";

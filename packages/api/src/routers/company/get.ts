@@ -1,4 +1,3 @@
-import { companySettings } from "@selectio/db/schema";
 import { protectedProcedure } from "../../trpc";
 
 export const get = protectedProcedure.query(async ({ ctx }) => {

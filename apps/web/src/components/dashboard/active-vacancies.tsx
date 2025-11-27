@@ -34,7 +34,7 @@ export function ActiveVacancies() {
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div
-                key={i}
+                key={`skeleton-${i}`}
                 className="flex items-center gap-3 rounded-lg border p-3 animate-pulse"
               >
                 <div className="h-10 w-10 rounded-full bg-muted" />

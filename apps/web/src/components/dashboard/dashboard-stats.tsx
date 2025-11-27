@@ -24,7 +24,7 @@ export function DashboardStats() {
     return (
       <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="@container/card animate-pulse">
+          <Card key={`skeleton-${i}`} className="@container/card animate-pulse">
             <CardHeader>
               <CardDescription>Загрузка...</CardDescription>
               <CardTitle className="text-2xl font-semibold">—</CardTitle>
@@ -52,7 +52,7 @@ export function DashboardStats() {
 
   const isGoodProcessed = processedPercentage >= 50;
   const isGoodHighScore = highScorePercentage >= 30;
-  const isGoodTopScore = topScorePercentage >= 15;
+  const _isGoodTopScore = topScorePercentage >= 15;
   const isGoodAvgScore = stats.avgScore >= 3.0;
 
   return (

@@ -137,7 +137,7 @@ export function ScreeningResultModal({
                   <ul className="space-y-3">
                     {result.questions.map((question, idx) => (
                       <li
-                        key={`question-${idx}`}
+                        key={`question-${question.slice(0, 20)}-${idx}`}
                         className="flex gap-3 p-3 rounded-lg border bg-card"
                       >
                         <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium">

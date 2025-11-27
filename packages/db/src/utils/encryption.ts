@@ -2,8 +2,6 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
-const AUTH_TAG_LENGTH = 16;
-const SALT_LENGTH = 64;
 
 /**
  * Получить ключ шифрования из переменной окружения
@@ -47,9 +45,9 @@ export function decrypt(encryptedData: string): string {
     throw new Error("Неверный формат зашифрованных данных");
   }
 
-  const iv = Buffer.from(parts[0]!, "hex");
-  const authTag = Buffer.from(parts[1]!, "hex");
-  const encrypted = parts[2]!;
+  const iv = Buffer.from(parts[0] ?? "", "hex");
+  const authTag = Buffer.from(parts[1] ?? "", "hex");
+  const encrypted = parts[2] ?? "";
 
   const decipher = createDecipheriv(ALGORITHM, key, iv);
   decipher.setAuthTag(authTag);

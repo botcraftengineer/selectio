@@ -1,6 +1,6 @@
+import { db, telegramConversation, telegramMessage } from "@selectio/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod/v4";
-import { db, telegramConversation, telegramMessage } from "@selectio/db";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const getConversationRouter = createTRPCRouter({
@@ -51,7 +51,7 @@ export const getConversationRouter = createTRPCRouter({
 
   getByResponseId: protectedProcedure
     .input(z.object({ responseId: z.string().uuid() }))
-    .query(async ({ input }) => {
+    .query(async () => {
       // TODO: Связать conversation с response через metadata или отдельную таблицу
       // Пока возвращаем первую активную беседу
       const conversation = await db.query.telegramConversation.findFirst({
