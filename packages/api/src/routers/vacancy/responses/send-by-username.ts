@@ -1,6 +1,6 @@
 import { eq } from "@selectio/db";
 import { vacancyResponse } from "@selectio/db/schema";
-import { triggerSendMessageByUsername } from "@selectio/jobs";
+import { inngest } from "@selectio/jobs/client";
 import { z } from "zod/v4";
 import { protectedProcedure } from "../../../trpc";
 
@@ -25,7 +25,14 @@ export const sendByUsername = protectedProcedure
     }
 
     // Отправляем событие в Inngest для асинхронной обработки
-    await triggerSendMessageByUsername(responseId, username, message);
+    await inngest.send({
+      name: "telegram/send-by-username",
+      data: {
+        responseId,
+        username,
+        message,
+      },
+    });
 
     return {
       success: true,
