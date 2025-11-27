@@ -108,3 +108,33 @@ export async function triggerRefreshVacancyResponses(vacancyId: string) {
     return { success: false as const, error: "Failed to trigger refresh" };
   }
 }
+
+export async function triggerSendWelcomeBatch(responseIds: string[]) {
+  try {
+    if (responseIds.length === 0) {
+      return {
+        success: false as const,
+        error: "No responses provided",
+      };
+    }
+
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "candidate/welcome.batch",
+      data: {
+        responseIds,
+      },
+    });
+
+    return {
+      success: true as const,
+      count: responseIds.length,
+    };
+  } catch (error) {
+    console.error("Failed to trigger send-welcome-batch:", error);
+    return {
+      success: false as const,
+      error: "Failed to trigger batch welcome",
+    };
+  }
+}

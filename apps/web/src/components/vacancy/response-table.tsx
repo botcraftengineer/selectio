@@ -27,6 +27,7 @@ import {
   ArrowUpDown,
   Loader2,
   RefreshCw,
+  Send,
   Sparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -65,6 +66,7 @@ export function ResponseTable({ responses, vacancyId }: ResponseTableProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isProcessingAll, setIsProcessingAll] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSendingWelcome, setIsSendingWelcome] = useState(false);
   const [screeningFilter, setScreeningFilter] =
     useState<ScreeningFilter>("all");
 
@@ -285,6 +287,38 @@ export function ResponseTable({ responses, vacancyId }: ResponseTableProps) {
     }
   };
 
+  const handleSendWelcomeBatch = async () => {
+    if (selectedIds.size === 0 || !accessToken) return;
+
+    setIsSendingWelcome(true);
+
+    try {
+      const res = await fetch("/api/trigger/send-welcome-batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ responseIds: Array.from(selectedIds) }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        console.error("Failed to trigger welcome batch:", data.error);
+        return;
+      }
+
+      console.log(
+        `Запущена массовая отправка приветствий для ${data.count} откликов`
+      );
+
+      setSelectedIds(new Set());
+    } finally {
+      setIsSendingWelcome(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {responses.length > 0 && (
@@ -362,18 +396,33 @@ export function ResponseTable({ responses, vacancyId }: ResponseTableProps) {
         {selectedIds.size > 0 && (
           <div className="flex items-center justify-between gap-4 border-b bg-muted/50 px-4 py-3">
             <p className="text-sm font-medium">Выбрано: {selectedIds.size}</p>
-            <Button
-              onClick={handleBulkScreen}
-              disabled={!accessToken || isProcessing}
-              size="sm"
-            >
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
-              )}
-              Оценить выбранные
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSendWelcomeBatch}
+                disabled={!accessToken || isSendingWelcome}
+                size="sm"
+                variant="outline"
+              >
+                {isSendingWelcome ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4 mr-2" />
+                )}
+                Отправить приветствие
+              </Button>
+              <Button
+                onClick={handleBulkScreen}
+                disabled={!accessToken || isProcessing}
+                size="sm"
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2" />
+                )}
+                Оценить выбранные
+              </Button>
+            </div>
           </div>
         )}
 

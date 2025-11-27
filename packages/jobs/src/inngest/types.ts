@@ -33,6 +33,13 @@ export const candidateWelcomeDataSchema = z.object({
   username: z.string().min(1, "Username is required"),
 });
 
+// Schema for batch candidate welcome message event data
+export const candidateWelcomeBatchDataSchema = z.object({
+  responseIds: z
+    .array(z.string())
+    .min(1, "At least one response ID is required"),
+});
+
 /**
  * Inngest event schemas using Zod
  * Each event must have a 'data' field containing the payload
@@ -53,6 +60,9 @@ export const inngestEventSchemas = {
   "candidate/welcome": {
     data: candidateWelcomeDataSchema,
   },
+  "candidate/welcome.batch": {
+    data: candidateWelcomeBatchDataSchema,
+  },
 };
 
 /**
@@ -70,4 +80,7 @@ export type VacancyResponsesRefreshPayload = z.infer<
 >;
 export type CandidateWelcomePayload = z.infer<
   typeof candidateWelcomeDataSchema
+>;
+export type CandidateWelcomeBatchPayload = z.infer<
+  typeof candidateWelcomeBatchDataSchema
 >;
