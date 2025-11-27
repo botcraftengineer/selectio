@@ -15,6 +15,17 @@ export { triggerVacancyRequirementsExtraction } from "./services/trigger-service
 // Trigger tasks
 export { extractVacancyRequirementsTask } from "./trigger/extract-vacancy-requirements";
 export { screenResponseTask } from "./trigger/screen-response";
+// Inngest
+export {
+  extractVacancyRequirementsFunction,
+  inngest,
+  inngestFunctions,
+  screenResponseFunction,
+} from "./inngest";
+export {
+  triggerResponseScreening,
+  triggerVacancyRequirementsExtraction as triggerVacancyRequirementsExtractionInngest,
+} from "./services/inngest-service";
 // Types
 export type {
   ResumeScreeningData,
