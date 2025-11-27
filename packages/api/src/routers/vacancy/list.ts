@@ -1,6 +1,6 @@
 import { desc } from "@selectio/db";
-import { protectedProcedure } from "../../trpc";
 import { vacancy } from "@selectio/db/schema";
+import { protectedProcedure } from "../../trpc";
 
 export const list = protectedProcedure.query(({ ctx }) => {
   return ctx.db.query.vacancy.findMany({
