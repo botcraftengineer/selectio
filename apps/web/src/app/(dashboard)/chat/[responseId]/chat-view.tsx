@@ -8,16 +8,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
-export function ChatView({ responseId }: { responseId: string }) {
+export function ChatView({ conversationId }: { conversationId: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Получаем conversation по responseId
-  const { data: conversation } = useQuery(
-    trpc.telegram.conversation.getByResponseId.queryOptions({ responseId })
-  );
+  // Получаем conversation по ID
+  const conversationQueryOptions =
+    trpc.telegram.conversation.getById.queryOptions({
+      id: conversationId,
+    });
+  const { data: currentConversation } = useQuery(conversationQueryOptions);
 
   // Получаем сообщения
   const {
@@ -26,9 +28,9 @@ export function ChatView({ responseId }: { responseId: string }) {
     error,
   } = useQuery({
     ...trpc.telegram.messages.getByConversationId.queryOptions({
-      conversationId: conversation?.id ?? "",
+      conversationId,
     }),
-    enabled: !!conversation?.id,
+    enabled: !!conversationId,
   });
 
   // Отправка сообщения
@@ -38,7 +40,7 @@ export function ChatView({ responseId }: { responseId: string }) {
         queryClient.invalidateQueries({
           queryKey: [
             ["telegram", "messages", "getByConversationId"],
-            { input: { conversationId: conversation?.id }, type: "query" },
+            { input: { conversationId }, type: "query" },
           ],
         });
         setMessage("");
@@ -50,10 +52,10 @@ export function ChatView({ responseId }: { responseId: string }) {
   );
 
   const handleSendMessage = () => {
-    if (!message.trim() || !conversation?.id) return;
+    if (!message.trim() || !conversationId) return;
 
     sendMessage({
-      conversationId: conversation.id,
+      conversationId,
       sender: "ADMIN",
       contentType: "TEXT",
       content: message,
@@ -85,7 +87,7 @@ export function ChatView({ responseId }: { responseId: string }) {
     );
   }
 
-  if (error || !conversation) {
+  if (error || !currentConversation) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
         <div className="text-center">
@@ -99,11 +101,15 @@ export function ChatView({ responseId }: { responseId: string }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
+    <div className="flex flex-col h-full">
       {/* Заголовок */}
       <div className="border-b px-6 py-4">
-        <h1 className="text-xl font-semibold">{conversation.candidateName}</h1>
-        <p className="text-sm text-muted-foreground">@{conversation.chatId}</p>
+        <h1 className="text-xl font-semibold">
+          {currentConversation.candidateName}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          @{currentConversation.chatId}
+        </p>
       </div>
 
       {/* Сообщения */}
@@ -111,24 +117,37 @@ export function ChatView({ responseId }: { responseId: string }) {
         <div className="space-y-4">
           {messages.map((msg) => {
             const isAdmin = msg.sender === "ADMIN";
+            const isBot = msg.sender === "BOT";
+
+            const senderLabel = isAdmin
+              ? "Вы"
+              : isBot
+                ? "Бот"
+                : (currentConversation.candidateName ?? "Кандидат");
+
+            const bgColor = isAdmin
+              ? "bg-teal-500 text-white"
+              : isBot
+                ? "bg-blue-500 text-white"
+                : "bg-muted text-foreground";
+
+            const timeColor = isAdmin
+              ? "text-teal-100"
+              : isBot
+                ? "text-blue-100"
+                : "text-muted-foreground";
+
             return (
               <div
                 key={msg.id}
                 className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                    isAdmin
-                      ? "bg-teal-500 text-white"
-                      : "bg-muted text-foreground"
-                  }`}
-                >
+                <div className={`max-w-[70%] rounded-lg px-4 py-2 ${bgColor}`}>
+                  <p className="text-xs font-semibold mb-1 opacity-80">
+                    {senderLabel}
+                  </p>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      isAdmin ? "text-teal-100" : "text-muted-foreground"
-                    }`}
-                  >
+                  <p className={`text-xs mt-1 ${timeColor}`}>
                     {format(msg.createdAt, "HH:mm", { locale: ru })}
                   </p>
                 </div>

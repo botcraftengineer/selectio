@@ -7,5 +7,5 @@ export default async function ChatPage({
 }) {
   const { responseId } = await params;
 
-  return <ChatView responseId={responseId} />;
+  return <ChatView conversationId={responseId} />;
 }

@@ -1,9 +1,33 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod/v4";
-import { db, telegramConversation } from "@selectio/db";
+import { db, telegramConversation, telegramMessage } from "@selectio/db";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const getConversationRouter = createTRPCRouter({
+  getAll: protectedProcedure.query(async () => {
+    const conversations = await db.query.telegramConversation.findMany({
+      orderBy: [desc(telegramConversation.updatedAt)],
+      with: {
+        messages: {
+          orderBy: [desc(telegramMessage.createdAt)],
+          limit: 1,
+        },
+      },
+    });
+
+    return conversations;
+  }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => {
+      const conversation = await db.query.telegramConversation.findFirst({
+        where: eq(telegramConversation.id, input.id),
+      });
+
+      return conversation;
+    }),
+
   getByResponseId: protectedProcedure
     .input(z.object({ responseId: z.string().uuid() }))
     .query(async ({ input }) => {
