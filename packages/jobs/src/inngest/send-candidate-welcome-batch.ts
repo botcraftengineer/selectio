@@ -81,6 +81,7 @@ export const sendCandidateWelcomeBatchFunction = inngest.createFunction(
                 .insert(telegramConversation)
                 .values({
                   chatId: sendResult.chatId,
+                  responseId: response.id,
                   candidateName: response.candidateName,
                   status: "ACTIVE",
                   metadata: JSON.stringify({
@@ -92,6 +93,7 @@ export const sendCandidateWelcomeBatchFunction = inngest.createFunction(
                 .onConflictDoUpdate({
                   target: telegramConversation.chatId,
                   set: {
+                    responseId: response.id,
                     candidateName: response.candidateName,
                     status: "ACTIVE",
                     metadata: JSON.stringify({

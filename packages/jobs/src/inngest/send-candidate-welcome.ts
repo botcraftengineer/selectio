@@ -1,5 +1,4 @@
-import { db } from "@selectio/db";
-import { eq } from "@selectio/db";
+import { db, eq } from "@selectio/db";
 import {
   responseScreening,
   telegramConversation,
@@ -113,6 +112,7 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
           .insert(telegramConversation)
           .values({
             chatId,
+            responseId,
             candidateName: response.candidateName,
             status: "ACTIVE",
             metadata: JSON.stringify({
@@ -126,6 +126,7 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
           .onConflictDoUpdate({
             target: telegramConversation.chatId,
             set: {
+              responseId,
               candidateName: response.candidateName,
               status: "ACTIVE",
               metadata: JSON.stringify({
