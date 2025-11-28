@@ -5,7 +5,6 @@ import { loadCookies, saveCookies } from "../../utils/cookies";
 export async function performLogin(
   page: Page,
   log: Log,
-  userId: string,
   email: string,
   password: string,
 ) {
@@ -66,7 +65,7 @@ export async function performLogin(
   const cookies = await page.cookies();
   log.info(`🍪 Получено ${cookies.length} cookies`);
 
-  await saveCookies(userId, "hh", cookies);
+  await saveCookies("hh", cookies);
 }
 
 export { loadCookies, saveCookies };

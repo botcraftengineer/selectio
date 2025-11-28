@@ -8,12 +8,11 @@ import type { Cookie } from "crawlee";
  * Сохраняет cookies в базу данных
  */
 export async function saveCookies(
-  userId: string,
   integrationType: string,
   cookies: Cookie[],
 ): Promise<void> {
   try {
-    await saveCookiesForIntegration(userId, integrationType, cookies);
+    await saveCookiesForIntegration(integrationType, cookies);
     console.log(`✓ Cookies сохранены для интеграции ${integrationType}`);
   } catch (error) {
     console.error("Ошибка при сохранении cookies:", error);
@@ -25,11 +24,10 @@ export async function saveCookies(
  * Загружает cookies из базы данных
  */
 export async function loadCookies(
-  userId: string,
   integrationType: string,
 ): Promise<Cookie[] | null> {
   try {
-    const cookies = await loadCookiesForIntegration(userId, integrationType);
+    const cookies = await loadCookiesForIntegration(integrationType);
     if (cookies) {
       console.log(
         `✓ Загружено ${cookies.length} cookies для ${integrationType}`,

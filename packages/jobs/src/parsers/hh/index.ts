@@ -11,11 +11,8 @@ puppeteer.use(StealthPlugin());
 
 export { refreshVacancyResponses } from "./refresh-responses";
 
-export async function runHHParser(
-  userId: string,
-  options?: { skipResponses?: boolean },
-) {
-  const credentials = await getIntegrationCredentials(userId, "hh");
+export async function runHHParser(options?: { skipResponses?: boolean }) {
+  const credentials = await getIntegrationCredentials("hh");
   if (!credentials?.email || !credentials?.password) {
     throw new Error("HH credentials не найдены в интеграциях");
   }
@@ -25,7 +22,7 @@ export async function runHHParser(
   console.log("🚀 Запуск парсера hh.ru...");
   console.log(`📧 Email: ${email}`);
 
-  const savedCookies = await loadCookies(userId, "hh");
+  const savedCookies = await loadCookies("hh");
 
   // Всегда начинаем с страницы логина, чтобы проверить актуальность сессии
   const startUrl = HH_CONFIG.urls.login;
@@ -108,7 +105,7 @@ export async function runHHParser(
         const loginInput = await page.$('input[type="text"][name="username"]');
 
         if (loginInput) {
-          await performLogin(page, log, userId, email, password);
+          await performLogin(page, log, email, password);
         } else {
           log.info("✅ Форма входа не найдена. Похоже, мы уже авторизованы.");
         }

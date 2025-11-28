@@ -1,8 +1,8 @@
-import { getUserIntegrations } from "@selectio/db";
+import { getAllIntegrations } from "@selectio/db";
 import { protectedProcedure } from "../../trpc";
 
-export const listIntegrations = protectedProcedure.query(async ({ ctx }) => {
-  const integrations = await getUserIntegrations(ctx.session.user.id);
+export const listIntegrations = protectedProcedure.query(async () => {
+  const integrations = await getAllIntegrations();
 
   // Не возвращаем credentials на клиент
   return integrations.map((int: (typeof integrations)[number]) => ({

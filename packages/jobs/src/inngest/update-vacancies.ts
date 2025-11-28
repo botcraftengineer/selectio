@@ -19,8 +19,7 @@ export const updateVacanciesFunction = inngest.createFunction(
       console.log("🚀 Запуск обновления вакансий через Inngest");
 
       try {
-        const userId = env.USER_ID || "system";
-        await runHHParser(userId, { skipResponses: true });
+        await runHHParser({ skipResponses: true });
         console.log("✅ Обновление вакансий завершено успешно");
         return { success: true };
       } catch (error) {

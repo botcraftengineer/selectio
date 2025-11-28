@@ -4,7 +4,7 @@ import { protectedProcedure } from "../../trpc";
 
 export const deleteIntegrationProcedure = protectedProcedure
   .input(z.object({ type: z.string() }))
-  .mutation(async ({ ctx, input }) => {
-    await deleteIntegration(ctx.session.user.id, input.type);
+  .mutation(async ({ input }) => {
+    await deleteIntegration(input.type);
     return { success: true };
   });

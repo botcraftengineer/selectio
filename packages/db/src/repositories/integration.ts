@@ -1,17 +1,17 @@
 import type { Cookie } from "crawlee";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../client";
 import { integration, type NewIntegration } from "../schema";
 import { decryptCredentials, encryptCredentials } from "../utils/encryption";
 
 /**
- * Получить интеграцию по типу и userId
+ * Получить интеграцию по типу
  */
-export async function getIntegration(userId: string, type: string) {
+export async function getIntegration(type: string) {
   const result = await db
     .select()
     .from(integration)
-    .where(and(eq(integration.userId, userId), eq(integration.type, type)))
+    .where(eq(integration.type, type))
     .limit(1);
 
   return result[0] ?? null;
@@ -21,7 +21,7 @@ export async function getIntegration(userId: string, type: string) {
  * Создать или обновить интеграцию
  */
 export async function upsertIntegration(data: NewIntegration) {
-  const existing = await getIntegration(data.userId, data.type);
+  const existing = await getIntegration(data.type);
 
   // Шифруем credentials перед сохранением
   const encryptedData = {
@@ -55,14 +55,13 @@ export async function upsertIntegration(data: NewIntegration) {
  * Сохранить cookies для интеграции
  */
 export async function saveCookiesForIntegration(
-  userId: string,
   type: string,
   cookies: Cookie[],
 ) {
-  const existing = await getIntegration(userId, type);
+  const existing = await getIntegration(type);
 
   if (!existing) {
-    throw new Error(`Integration ${type} not found for user ${userId}`);
+    throw new Error(`Integration ${type} not found`);
   }
 
   await db
@@ -79,10 +78,9 @@ export async function saveCookiesForIntegration(
  * Загрузить cookies для интеграции
  */
 export async function loadCookiesForIntegration(
-  userId: string,
   type: string,
 ): Promise<Cookie[] | null> {
-  const result = await getIntegration(userId, type);
+  const result = await getIntegration(type);
 
   if (!result?.cookies) {
     return null;
@@ -95,10 +93,9 @@ export async function loadCookiesForIntegration(
  * Получить credentials для интеграции (расшифрованные)
  */
 export async function getIntegrationCredentials(
-  userId: string,
   type: string,
 ): Promise<Record<string, string> | null> {
-  const result = await getIntegration(userId, type);
+  const result = await getIntegration(type);
   if (!result?.credentials) {
     return null;
   }
@@ -110,8 +107,8 @@ export async function getIntegrationCredentials(
 /**
  * Обновить время последнего использования
  */
-export async function updateLastUsed(userId: string, type: string) {
-  const existing = await getIntegration(userId, type);
+export async function updateLastUsed(type: string) {
+  const existing = await getIntegration(type);
 
   if (existing) {
     await db
@@ -124,17 +121,17 @@ export async function updateLastUsed(userId: string, type: string) {
 }
 
 /**
- * Получить все интеграции пользователя
+ * Получить все интеграции
  */
-export async function getUserIntegrations(userId: string) {
-  return db.select().from(integration).where(eq(integration.userId, userId));
+export async function getAllIntegrations() {
+  return db.select().from(integration);
 }
 
 /**
  * Удалить интеграцию
  */
-export async function deleteIntegration(userId: string, type: string) {
-  const existing = await getIntegration(userId, type);
+export async function deleteIntegration(type: string) {
+  const existing = await getIntegration(type);
 
   if (existing) {
     await db.delete(integration).where(eq(integration.id, existing.id));

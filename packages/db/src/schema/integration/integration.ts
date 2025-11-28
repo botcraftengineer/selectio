@@ -1,15 +1,10 @@
-import { relations } from "drizzle-orm";
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { user } from "../auth";
 
 export const integration = pgTable("integrations", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
 
   // Тип интеграции (hh, linkedin, etc.)
-  type: text("type").notNull(),
+  type: text("type").notNull().unique(),
 
   // Название интеграции (для отображения)
   name: text("name").notNull(),
@@ -48,13 +43,6 @@ export const integration = pgTable("integrations", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
-
-export const integrationRelations = relations(integration, ({ one }) => ({
-  user: one(user, {
-    fields: [integration.userId],
-    references: [user.id],
-  }),
-}));
 
 export type Integration = typeof integration.$inferSelect;
 export type NewIntegration = typeof integration.$inferInsert;

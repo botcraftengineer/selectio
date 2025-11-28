@@ -1,4 +1,4 @@
-import { getUserIntegrations, upsertIntegration } from "@selectio/db";
+import { getIntegration, upsertIntegration } from "@selectio/db";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 
@@ -12,18 +12,14 @@ export const updateIntegration = protectedProcedure
       isActive: z.string().optional(),
     }),
   )
-  .mutation(async ({ ctx, input }) => {
-    const existing = await getUserIntegrations(ctx.session.user.id);
-    const integration = existing.find(
-      (i: (typeof existing)[number]) => i.type === input.type,
-    );
+  .mutation(async ({ input }) => {
+    const integration = await getIntegration(input.type);
 
     if (!integration) {
       throw new Error("Интеграция не найдена");
     }
 
     const updated = await upsertIntegration({
-      userId: ctx.session.user.id,
       type: input.type,
       name: input.name ?? integration.name,
       credentials: input.credentials ?? integration.credentials,

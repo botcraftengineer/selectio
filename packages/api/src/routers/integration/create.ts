@@ -11,9 +11,8 @@ export const createIntegration = protectedProcedure
       metadata: z.record(z.string(), z.any()).optional(),
     }),
   )
-  .mutation(async ({ ctx, input }) => {
+  .mutation(async ({ input }) => {
     const integration = await upsertIntegration({
-      userId: ctx.session.user.id,
       type: input.type,
       name: input.name,
       credentials: input.credentials,
