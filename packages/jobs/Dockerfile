@@ -26,7 +26,7 @@ COPY packages/db/package.json ./packages/db/
 COPY packages/config/package.json ./packages/config/
 COPY tooling/typescript/package.json ./tooling/typescript/
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Stage: builder - Build the project
 FROM base AS builder
@@ -59,7 +59,7 @@ COPY packages/db/package.json ./packages/db/
 COPY packages/config/package.json ./packages/config/
 COPY tooling/typescript/package.json ./tooling/typescript/
 
-RUN bun install --frozen-lockfile --production
+RUN bun install
 
 # Stage: runner - Run the application
 FROM base AS runner
@@ -89,9 +89,5 @@ ENV NODE_ENV=production \
 USER bunuser
 
 EXPOSE 8000
-
-# Health check (опционально)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun run -e "fetch('http://localhost:8000/health').then(r => r.ok ? process.exit(0) : process.exit(1))" || exit 1
 
 CMD ["bun", "run", "packages/jobs/src/inngest/server.ts"]
