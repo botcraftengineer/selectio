@@ -1,6 +1,5 @@
 import { db, eq } from "@selectio/db";
 import {
-  responseScreening,
   telegramConversation,
   telegramMessage,
   vacancyResponse,

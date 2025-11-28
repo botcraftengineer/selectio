@@ -61,7 +61,7 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
     handleParseNewResumes,
   } = useResponseActions(vacancyId, selectedIds, setSelectedIds);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset selection when filters change
   useEffect(() => {
     setSelectedIds(new Set());
   }, [currentPage, sortField, sortDirection, screeningFilter]);

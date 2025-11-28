@@ -24,8 +24,7 @@ async function setupBrowser(): Promise<Browser> {
 
 async function setupPage(
   browser: Browser,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  savedCookies: any[] | null,
+  savedCookies: unknown[] | null,
 ): Promise<Page> {
   const page = await browser.newPage();
 
@@ -39,8 +38,7 @@ async function setupPage(
     Object.defineProperty(navigator, "languages", {
       get: () => ["ru-RU", "ru", "en-US", "en"],
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).chrome = {
+    (window as { chrome?: unknown }).chrome = {
       runtime: {},
     };
     const originalQuery = window.navigator.permissions.query;

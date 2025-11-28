@@ -48,19 +48,21 @@ export function ChatList() {
           <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex-1 space-y-0">
-          {Array.from({ length: 5 }, (_, i) => (
-            <div
-              key={`skeleton-${i}`}
-              className="flex items-start gap-3 px-4 py-3 border-b"
-            >
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-full" />
+          {Array.from({ length: 5 }, (_, index) => `skeleton-${index}`).map(
+            (key) => (
+              <div
+                key={key}
+                className="flex items-start gap-3 px-4 py-3 border-b"
+              >
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
     );

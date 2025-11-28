@@ -13,7 +13,6 @@ import {
   IconDashboard,
   IconFileDescription,
   IconInnerShadowTop,
-  IconListDetails,
   IconMessage,
   IconSettings,
 } from "@tabler/icons-react";

@@ -1,4 +1,3 @@
-import { env } from "@selectio/config";
 import { runHHParser } from "../parsers/hh";
 import { inngest } from "./client";
 

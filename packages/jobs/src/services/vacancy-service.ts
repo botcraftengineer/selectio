@@ -31,9 +31,7 @@ export async function hasVacancyDescription(
 
     if (!existingVacancy) return false;
 
-    return !!(
-      existingVacancy.description && existingVacancy.description.trim()
-    );
+    return !!existingVacancy.description?.trim();
   } catch (error) {
     console.error(`❌ Ошибка проверки описания вакансии:`, error);
     return false;
@@ -98,7 +96,7 @@ export async function updateVacancyDescription(
     console.log(`✅ Описание вакансии обновлено: ${vacancyId}`);
 
     // Запускаем задание для извлечения требований вакансии
-    if (description && description.trim()) {
+    if (description?.trim()) {
       console.log(`🎯 Запуск извлечения требований вакансии: ${vacancyId}`);
       // Импортируем динамически, чтобы избежать циклических зависимостей
       const { triggerVacancyRequirementsExtraction } = await import(
@@ -162,7 +160,7 @@ export async function saveVacancyToDb(vacancyData: VacancyData) {
     }
 
     // Запускаем извлечение требований, если есть описание
-    if (vacancyData.description && vacancyData.description.trim()) {
+    if (vacancyData.description?.trim()) {
       console.log(
         `🎯 Запуск извлечения требований вакансии: ${vacancyData.id}`,
       );

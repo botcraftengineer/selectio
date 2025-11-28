@@ -10,7 +10,11 @@ export async function parseResumeExperience(
   console.log(`📄 Переход на страницу резюме: ${url}`);
 
   // Set up 403 error logging
-  const log403Handler = async (response: any) => {
+  const log403Handler = async (response: {
+    status: () => number;
+    url: () => string;
+    request: () => { method: () => string };
+  }) => {
     if (response.status() === 403) {
       console.log(`🚫 403 FORBIDDEN: ${response.url()}`);
       console.log(`   Method: ${response.request().method()}`);
@@ -141,7 +145,10 @@ export async function parseResumeExperience(
             resolve(null);
           }, HH_CONFIG.timeouts.contacts);
 
-          const responseHandler = async (response: any) => {
+          const responseHandler = async (response: {
+            url: () => string;
+            json: () => Promise<unknown>;
+          }) => {
             const url = response.url();
             if (
               url.includes(`/resume/contacts/${resumeId}`) &&
@@ -171,10 +178,14 @@ export async function parseResumeExperience(
 
           // Парсим телефон из контактов
           if (contacts && typeof contacts === "object" && "phone" in contacts) {
-            const phoneData = (contacts as any).phone;
+            const phoneData = (
+              contacts as {
+                phone?: Array<{ formatted?: string; raw?: string }>;
+              }
+            ).phone;
             if (Array.isArray(phoneData) && phoneData.length > 0) {
               const firstPhone = phoneData[0];
-              phone = firstPhone.formatted || firstPhone.raw || null;
+              phone = firstPhone?.formatted || firstPhone?.raw || null;
               if (phone) {
                 console.log(`📞 Телефон извлечен: ${phone}`);
               }

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { cn } from "@selectio/ui";
-import { ScrollArea } from "./scroll-area";
-import { ChatMessage, type ChatMessageProps } from "./chat-message";
-import { ChatInput } from "./chat-input";
-import { ChatHeader } from "./chat-header";
 import { format, isToday, isYesterday } from "date-fns";
 import { ru } from "date-fns/locale";
+import { useEffect, useRef, useState } from "react";
+import { ChatHeader } from "./chat-header";
+import { ChatInput } from "./chat-input";
+import { ChatMessage, type ChatMessageProps } from "./chat-message";
+import { ScrollArea } from "./scroll-area";
 
 interface ChatContainerProps {
   candidateName: string;
@@ -33,6 +33,7 @@ export function ChatContainer({
   const messagesLength = messages.length;
 
   // Auto-scroll to bottom when new messages arrive
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only trigger on message count change
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector(

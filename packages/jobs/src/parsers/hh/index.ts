@@ -58,7 +58,7 @@ export async function runHHParser(options?: { skipResponses?: boolean }) {
           });
 
           // Скрываем автоматизацию Chrome
-          (window as any).chrome = {
+          (window as { chrome?: unknown }).chrome = {
             runtime: {},
           };
 
@@ -76,7 +76,7 @@ export async function runHHParser(options?: { skipResponses?: boolean }) {
 
         if (savedCookies) {
           log.info("🍪 Восстанавливаем сохраненные куки...");
-          await page.browserContext().setCookie(...(savedCookies as any[]));
+          await page.browserContext().setCookie(...(savedCookies as never[]));
         }
 
         // Устанавливаем реалистичный User-Agent

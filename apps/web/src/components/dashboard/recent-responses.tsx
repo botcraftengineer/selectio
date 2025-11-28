@@ -33,18 +33,20 @@ export function RecentResponses() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={`skeleton-${i}`}
-                className="flex items-center gap-3 rounded-lg border p-3 animate-pulse"
-              >
-                <div className="h-10 w-10 rounded-full bg-muted" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 bg-muted rounded" />
-                  <div className="h-3 w-1/2 bg-muted rounded" />
+            {Array.from({ length: 3 }, (_, index) => `skeleton-${index}`).map(
+              (key) => (
+                <div
+                  key={key}
+                  className="flex items-center gap-3 rounded-lg border p-3 animate-pulse"
+                >
+                  <div className="h-10 w-10 rounded-full bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 bg-muted rounded" />
+                    <div className="h-3 w-1/2 bg-muted rounded" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </CardContent>
       </Card>
