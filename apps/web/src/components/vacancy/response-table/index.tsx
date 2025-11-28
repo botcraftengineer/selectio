@@ -1,7 +1,9 @@
 "use client";
 
 import { Pagination, Table, TableBody } from "@selectio/ui";
-import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useTRPC } from "~/trpc/react";
 import type { VacancyResponse } from "~/types/vacancy";
 import { ResponseRow } from "../response-row";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -12,18 +14,14 @@ import { useResponseActions } from "./use-response-actions";
 import { useResponseTable } from "./use-response-table";
 
 interface ResponseTableProps {
-  responses: VacancyResponse[];
   vacancyId: string;
   accessToken?: string;
 }
 
-const ITEMS_PER_PAGE = 25;
+const ITEMS_PER_PAGE = 50;
 
-export function ResponseTable({
-  responses,
-  vacancyId,
-  accessToken,
-}: ResponseTableProps) {
+export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
+  const trpc = useTRPC();
   const {
     currentPage,
     setCurrentPage,
@@ -34,10 +32,19 @@ export function ResponseTable({
     setSelectedIds,
     screeningFilter,
     setScreeningFilter,
-    filteredResponses,
-    sortedResponses,
     handleSelectOne,
-  } = useResponseTable(responses);
+  } = useResponseTable();
+
+  const { data, isLoading } = useQuery(
+    trpc.vacancy.responses.list.queryOptions({
+      vacancyId,
+      page: currentPage,
+      limit: ITEMS_PER_PAGE,
+      sortField,
+      sortDirection,
+      screeningFilter,
+    }),
+  );
 
   const {
     isProcessing,
@@ -54,40 +61,37 @@ export function ResponseTable({
     handleParseNewResumes,
   } = useResponseActions(vacancyId, selectedIds, setSelectedIds);
 
-  const totalPages = Math.ceil(sortedResponses.length / ITEMS_PER_PAGE);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [currentPage, sortField, sortDirection, screeningFilter]);
 
-  const paginatedResponses = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return sortedResponses.slice(startIndex, endIndex);
-  }, [sortedResponses, currentPage]);
+  const responses = data?.responses ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 0;
 
   const allSelected =
-    paginatedResponses.length > 0 &&
-    paginatedResponses.every((r: VacancyResponse) => selectedIds.has(r.id));
+    responses.length > 0 &&
+    responses.every((r: VacancyResponse) => selectedIds.has(r.id));
 
   const handleSelectAll = () => {
     if (allSelected) {
-      const newSelected = new Set(selectedIds);
-      for (const r of paginatedResponses) {
-        newSelected.delete(r.id);
-      }
-      setSelectedIds(newSelected);
+      setSelectedIds(new Set());
     } else {
-      const newSelected = new Set(selectedIds);
-      for (const r of paginatedResponses) {
-        newSelected.add(r.id);
-      }
-      setSelectedIds(newSelected);
+      setSelectedIds(new Set(responses.map((r) => r.id)));
     }
   };
 
+  if (isLoading) {
+    return <div className="text-center py-8">Загрузка...</div>;
+  }
+
   return (
     <div className="space-y-4">
-      {responses.length > 0 && (
+      {total > 0 && (
         <ResponseTableToolbar
-          totalResponses={responses.length}
-          filteredCount={filteredResponses.length}
+          totalResponses={total}
+          filteredCount={responses.length}
           screeningFilter={screeningFilter}
           onFilterChange={setScreeningFilter}
           isRefreshing={isRefreshing}
@@ -116,16 +120,16 @@ export function ResponseTable({
           <ResponseTableHeader
             allSelected={allSelected}
             onSelectAll={handleSelectAll}
-            hasResponses={paginatedResponses.length > 0}
+            hasResponses={responses.length > 0}
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
           />
           <TableBody>
-            {filteredResponses.length === 0 ? (
-              <EmptyState hasResponses={responses.length > 0} colSpan={8} />
+            {responses.length === 0 ? (
+              <EmptyState hasResponses={total > 0} colSpan={8} />
             ) : (
-              paginatedResponses.map((response) => (
+              responses.map((response: VacancyResponse) => (
                 <ResponseRow
                   key={response.id}
                   response={response}
@@ -138,13 +142,12 @@ export function ResponseTable({
           </TableBody>
         </Table>
 
-        {responses.length > 0 && (
+        {total > 0 && (
           <div className="border-t px-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 Показано {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-                {Math.min(currentPage * ITEMS_PER_PAGE, sortedResponses.length)}{" "}
-                из {sortedResponses.length}
+                {Math.min(currentPage * ITEMS_PER_PAGE, total)} из {total}
               </p>
               <Pagination
                 currentPage={currentPage}

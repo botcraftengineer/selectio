@@ -1,4 +1,9 @@
-export type SortField = "score" | "detailedScore" | "status" | null;
+export type SortField =
+  | "score"
+  | "detailedScore"
+  | "status"
+  | "createdAt"
+  | null;
 export type SortDirection = "asc" | "desc";
 
 export const STATUS_ORDER = {

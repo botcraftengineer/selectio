@@ -14,11 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
 import { SiteHeader } from "~/components/layout";
-import {
-  EmptyResponses,
-  ResponseCards,
-  ResponseTable,
-} from "~/components/vacancy";
+import { ResponseTable } from "~/components/vacancy";
 import { useTRPC } from "~/trpc/react";
 
 interface VacancyResponsesPageProps {
@@ -34,11 +30,8 @@ export default function VacancyResponsesPage({
   const { data: vacancy, isLoading: vacancyLoading } = useQuery(
     trpc.vacancy.getById.queryOptions({ id }),
   );
-  const { data: responses, isLoading: responsesLoading } = useQuery(
-    trpc.vacancy.responses.list.queryOptions({ vacancyId: id }),
-  );
 
-  const isLoading = vacancyLoading || responsesLoading;
+  const isLoading = vacancyLoading;
 
   if (isLoading) {
     return (
@@ -85,25 +78,17 @@ export default function VacancyResponsesPage({
                 </Link>
               </div>
 
-              {!responses || responses.length === 0 ? (
-                <EmptyResponses />
-              ) : (
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Отклики на вакансию</CardTitle>
-                      <CardDescription>
-                        Всего откликов: {responses.length}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponseTable responses={responses} vacancyId={id} />
-                    </CardContent>
-                  </Card>
-
-                  <ResponseCards responses={responses} />
-                </div>
-              )}
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Отклики на вакансию</CardTitle>
+                    <CardDescription>Управление откликами</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponseTable vacancyId={id} />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
