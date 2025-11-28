@@ -1,8 +1,18 @@
-import type { Cookie } from "crawlee";
 import { eq } from "drizzle-orm";
 import { db } from "../client";
 import { integration, type NewIntegration } from "../schema";
 import { decryptCredentials, encryptCredentials } from "../utils/encryption";
+
+export interface Cookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  expires?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: "Strict" | "Lax" | "None";
+}
 
 /**
  * Получить интеграцию по типу
