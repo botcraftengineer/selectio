@@ -10,7 +10,7 @@ RUN turbo prune @selectio/web --docker
 
 FROM base AS installer
 RUN apk update
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
 COPY --from=builder /app/out/json/ .
