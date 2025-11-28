@@ -26,7 +26,7 @@
     "studio": "bun with-env drizzle-kit studio",
     "generate-key": "bun src/scripts/generate-encryption-key.ts",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
     "@selectio/config": "workspace:*",

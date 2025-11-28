@@ -16,7 +16,7 @@
     "dev": "bun with-env email dev -p 3002",
     "build": "tsup",
     "export": "email export",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
     "@radix-ui/colors": "3.0.0",
@@ -40,7 +40,6 @@
     "@types/nodemailer": "^7.0.4",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "dotenv-cli": "11.0.0",
     "tsup": "8.5.1",
     "typescript": "5.9.3"
   }

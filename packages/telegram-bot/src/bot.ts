@@ -1,9 +1,10 @@
+import { env } from "@selectio/config";
 import { db } from "@selectio/db/client";
 import { telegramConversation, telegramMessage } from "@selectio/db/schema";
 import { eq } from "drizzle-orm";
 import { Bot } from "grammy";
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_BOT_TOKEN = env.TELEGRAM_BOT_TOKEN;
 
 if (!TELEGRAM_BOT_TOKEN) {
   throw new Error("TELEGRAM_BOT_TOKEN не установлен");

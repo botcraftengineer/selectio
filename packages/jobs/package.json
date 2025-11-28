@@ -27,7 +27,7 @@
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "trigger:deploy": "cross-env CI=true SKIP_ENV_VALIDATION=true bun with-env trigger deploy",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.29",

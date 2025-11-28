@@ -13,13 +13,13 @@
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "bun with-env bun run src/index.ts",
-    "test:mtcute": "bun with-env bun run src/test-mtcute.ts",
+    "dev": "bun run --env-file ../../.env src/index.ts",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
     "@mtcute/bun": "^0.27.1",
+    "@selectio/config": "workspace:*",
     "@selectio/db": "workspace:*",
     "@selectio/lib": "workspace:*",
     "grammy": "^1.38.4"

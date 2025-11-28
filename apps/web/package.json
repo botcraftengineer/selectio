@@ -11,7 +11,7 @@
     "check": "biome check .",
     "start": "bun with-env next start",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

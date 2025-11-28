@@ -1,9 +1,9 @@
 import { TelegramClient } from "@mtcute/bun";
+import { env } from "@selectio/config";
 
-const API_ID = Number.parseInt(process.env.TELEGRAM_API_ID || "0");
-const API_HASH = process.env.TELEGRAM_API_HASH || "";
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-
+const API_ID = Number.parseInt(env.TELEGRAM_API_ID || "0", 10);
+const API_HASH = env.TELEGRAM_API_HASH || "";
+const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || "";
 if (!API_ID || !API_HASH || !BOT_TOKEN) {
   throw new Error(
     "TELEGRAM_API_ID, TELEGRAM_API_HASH и TELEGRAM_BOT_TOKEN должны быть установлены",

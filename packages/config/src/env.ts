@@ -46,6 +46,11 @@ export const env = createEnv({
     // Jobs
     PORT: z.string().optional().default("8000").transform(Number),
     USER_ID: z.string().optional(),
+
+    // Telegram
+    TELEGRAM_API_ID: z.string().min(1).optional(),
+    TELEGRAM_API_HASH: z.string().min(1).optional(),
+    TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
   },
   client: {},
   clientPrefix: "NEXT_PUBLIC_",
@@ -76,6 +81,9 @@ export const env = createEnv({
     LANGFUSE_BASE_URL: process.env.LANGFUSE_BASE_URL,
     PORT: process.env.PORT,
     USER_ID: process.env.USER_ID,
+    TELEGRAM_API_ID: process.env.TELEGRAM_API_ID,
+    TELEGRAM_API_HASH: process.env.TELEGRAM_API_HASH,
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
