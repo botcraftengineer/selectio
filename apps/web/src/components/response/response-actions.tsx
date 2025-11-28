@@ -12,11 +12,14 @@ import {
   IconDots,
   IconExternalLink,
   IconMessage,
+  IconRefresh,
   IconSend,
   IconStar,
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
+import { triggerRefreshSingleResume } from "~/actions/trigger";
 import { useTRPC } from "~/trpc/react";
 
 interface ResponseActionsProps {
@@ -35,6 +38,7 @@ export function ResponseActions({
   hasGreeting = false,
 }: ResponseActionsProps) {
   const trpc = useTRPC();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const sendByUsernameMutation = useMutation(
     trpc.vacancy.responses.sendByUsername.mutationOptions({
@@ -72,6 +76,23 @@ export function ResponseActions({
     console.log("Открыть чат с:", candidateName);
   };
 
+  const handleRefreshResume = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await triggerRefreshSingleResume(responseId);
+      if (!result.success) {
+        toast.error("Не удалось обновить резюме");
+        return;
+      }
+      toast.success("Обновление резюме запущено");
+    } catch (error) {
+      console.error("Ошибка обновления резюме:", error);
+      toast.error("Ошибка обновления резюме");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -103,6 +124,11 @@ export function ResponseActions({
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={handleRefreshResume} disabled={isRefreshing}>
+          <IconRefresh className="h-4 w-4" />
+          {isRefreshing ? "Обновление..." : "Обновить резюме"}
+        </DropdownMenuItem>
 
         <DropdownMenuItem onClick={handleOpenResume}>
           <IconExternalLink className="h-4 w-4" />

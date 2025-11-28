@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   triggerParseNewResumes,
   triggerRefreshVacancyResponses,
@@ -156,10 +157,11 @@ export function useResponseActions(
 
       if (!result.success) {
         console.error("Failed to trigger parse resumes:", result.error);
+        toast.error("Не удалось запустить парсинг резюме");
         return;
       }
 
-      console.log("Запущен парсинг резюме новых откликов");
+      toast.success("Парсинг резюме запущен");
 
       setTimeout(() => {
         void queryClient.invalidateQueries(

@@ -8,7 +8,7 @@ export const HH_CONFIG = {
   timeouts: {
     networkIdle: 30000,
     selector: 10000,
-    contacts: 15000,
+    contacts: 10000,
     navigation: 120000,
     requestHandler: 300,
   },

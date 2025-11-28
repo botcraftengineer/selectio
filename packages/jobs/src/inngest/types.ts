@@ -62,6 +62,11 @@ export const parseNewResumesDataSchema = z.object({
   vacancyId: z.string().min(1, "Vacancy ID is required"),
 });
 
+// Schema for refreshing single resume event data
+export const refreshSingleResumeDataSchema = z.object({
+  responseId: z.string().min(1, "Response ID is required"),
+});
+
 // Schema for telegram message send event data
 export const telegramMessageSendDataSchema = z.object({
   messageId: z.string().min(1, "Message ID is required"),
@@ -104,6 +109,9 @@ export const inngestEventSchemas = {
   "response/resume.parse-new": {
     data: parseNewResumesDataSchema,
   },
+  "response/resume.refresh": {
+    data: refreshSingleResumeDataSchema,
+  },
   "telegram/message.send": {
     data: telegramMessageSendDataSchema,
   },
@@ -138,6 +146,9 @@ export type ScreenResponsesBatchPayload = z.infer<
   typeof screenResponsesBatchDataSchema
 >;
 export type ParseNewResumesPayload = z.infer<typeof parseNewResumesDataSchema>;
+export type RefreshSingleResumePayload = z.infer<
+  typeof refreshSingleResumeDataSchema
+>;
 export type TelegramMessageSendPayload = z.infer<
   typeof telegramMessageSendDataSchema
 >;

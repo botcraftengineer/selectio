@@ -1,5 +1,6 @@
 import { extractVacancyRequirementsFunction } from "./extract-vacancy-requirements";
 import { parseNewResumesFunction } from "./parse-new-resumes";
+import { refreshSingleResumeFunction } from "./refresh-single-resume";
 import { refreshVacancyResponsesFunction } from "./refresh-vacancy-responses";
 import { screenAllResponsesFunction } from "./screen-all-responses";
 import { screenNewResponsesFunction } from "./screen-new-responses";
@@ -13,6 +14,7 @@ import { updateVacanciesFunction } from "./update-vacancies";
 export { inngest } from "./client";
 export { extractVacancyRequirementsFunction } from "./extract-vacancy-requirements";
 export { parseNewResumesFunction } from "./parse-new-resumes";
+export { refreshSingleResumeFunction } from "./refresh-single-resume";
 export { refreshVacancyResponsesFunction } from "./refresh-vacancy-responses";
 export { screenAllResponsesFunction } from "./screen-all-responses";
 export { screenNewResponsesFunction } from "./screen-new-responses";
@@ -31,6 +33,7 @@ export const inngestFunctions = [
   screenAllResponsesFunction,
   screenResponsesBatchFunction,
   parseNewResumesFunction,
+  refreshSingleResumeFunction,
   updateVacanciesFunction,
   refreshVacancyResponsesFunction,
   sendCandidateWelcomeFunction,

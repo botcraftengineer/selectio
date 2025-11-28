@@ -152,3 +152,19 @@ export async function triggerParseNewResumes(vacancyId: string) {
     return { success: false as const, error: "Failed to trigger parsing" };
   }
 }
+
+export async function triggerRefreshSingleResume(responseId: string) {
+  try {
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "response/resume.refresh",
+      data: {
+        responseId,
+      },
+    });
+    return { success: true as const };
+  } catch (error) {
+    console.error("Failed to trigger refresh-single-resume:", error);
+    return { success: false as const, error: "Failed to trigger refresh" };
+  }
+}
