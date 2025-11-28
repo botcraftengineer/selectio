@@ -33,10 +33,6 @@ export const env = createEnv({
     AWS_REGION: z.string().default("us-east-1"),
     AWS_S3_BUCKET: z.string().default("acme-bucket"),
 
-    // HH.ru Integration
-    HH_EMAIL: z.string().email().optional(),
-    HH_PASSWORD: z.string().min(1).optional(),
-
     // AI Services
     OPENAI_API_KEY: z.string().min(1).optional(),
     DEEPSEEK_API_KEY: z.string().min(1).optional(),
@@ -74,8 +70,6 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     AWS_REGION: process.env.AWS_REGION,
     AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
-    HH_EMAIL: process.env.HH_EMAIL,
-    HH_PASSWORD: process.env.HH_PASSWORD,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     LANGFUSE_SECRET_KEY: process.env.LANGFUSE_SECRET_KEY,
