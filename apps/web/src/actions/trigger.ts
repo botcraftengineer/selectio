@@ -136,3 +136,19 @@ export async function triggerSendWelcomeBatch(responseIds: string[]) {
     };
   }
 }
+
+export async function triggerParseNewResumes(vacancyId: string) {
+  try {
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "response/resume.parse-new",
+      data: {
+        vacancyId,
+      },
+    });
+    return { success: true as const };
+  } catch (error) {
+    console.error("Failed to trigger parse-new-resumes:", error);
+    return { success: false as const, error: "Failed to trigger parsing" };
+  }
+}

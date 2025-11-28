@@ -45,11 +45,13 @@ export function ResponseTable({
     isProcessingNew,
     isRefreshing,
     isSendingWelcome,
+    isParsingResumes,
     handleBulkScreen,
     handleScreenAll,
     handleScreenNew,
     handleRefreshResponses,
     handleSendWelcomeBatch,
+    handleParseNewResumes,
   } = useResponseActions(vacancyId, selectedIds, setSelectedIds);
 
   const totalPages = Math.ceil(sortedResponses.length / ITEMS_PER_PAGE);
@@ -91,9 +93,11 @@ export function ResponseTable({
           isRefreshing={isRefreshing}
           isProcessingNew={isProcessingNew}
           isProcessingAll={isProcessingAll}
+          isParsingResumes={isParsingResumes}
           onRefresh={handleRefreshResponses}
           onScreenNew={handleScreenNew}
           onScreenAll={handleScreenAll}
+          onParseResumes={handleParseNewResumes}
         />
       )}
 

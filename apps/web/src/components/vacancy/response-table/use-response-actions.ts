@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
+  triggerParseNewResumes,
   triggerRefreshVacancyResponses,
   triggerScreenAllResponses,
   triggerScreenNewResponses,
@@ -19,6 +20,7 @@ export function useResponseActions(
   const [isProcessingNew, setIsProcessingNew] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSendingWelcome, setIsSendingWelcome] = useState(false);
+  const [isParsingResumes, setIsParsingResumes] = useState(false);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -146,16 +148,41 @@ export function useResponseActions(
     }
   };
 
+  const handleParseNewResumes = async () => {
+    setIsParsingResumes(true);
+
+    try {
+      const result = await triggerParseNewResumes(vacancyId);
+
+      if (!result.success) {
+        console.error("Failed to trigger parse resumes:", result.error);
+        return;
+      }
+
+      console.log("Запущен парсинг резюме новых откликов");
+
+      setTimeout(() => {
+        void queryClient.invalidateQueries(
+          trpc.vacancy.responses.list.pathFilter(),
+        );
+      }, 3000);
+    } finally {
+      setIsParsingResumes(false);
+    }
+  };
+
   return {
     isProcessing,
     isProcessingAll,
     isProcessingNew,
     isRefreshing,
     isSendingWelcome,
+    isParsingResumes,
     handleBulkScreen,
     handleScreenAll,
     handleScreenNew,
     handleRefreshResponses,
     handleSendWelcomeBatch,
+    handleParseNewResumes,
   };
 }

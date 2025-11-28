@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
   Button,
 } from "@selectio/ui";
-import { Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { FileText, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { ResponseFilters, type ScreeningFilter } from "~/components/response";
 
 interface ResponseTableToolbarProps {
@@ -21,9 +21,11 @@ interface ResponseTableToolbarProps {
   isRefreshing: boolean;
   isProcessingNew: boolean;
   isProcessingAll: boolean;
+  isParsingResumes: boolean;
   onRefresh: () => void;
   onScreenNew: () => void;
   onScreenAll: () => void;
+  onParseResumes: () => void;
 }
 
 export function ResponseTableToolbar({
@@ -34,9 +36,11 @@ export function ResponseTableToolbar({
   isRefreshing,
   isProcessingNew,
   isProcessingAll,
+  isParsingResumes,
   onRefresh,
   onScreenNew,
   onScreenAll,
+  onParseResumes,
 }: ResponseTableToolbarProps) {
   return (
     <div className="flex items-center justify-between">
@@ -58,6 +62,33 @@ export function ResponseTableToolbar({
           )}
           {isRefreshing ? "Обновление..." : "Получить новые отклики"}
         </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button disabled={isParsingResumes} variant="outline">
+              {isParsingResumes ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
+              {isParsingResumes ? "Парсинг..." : "Распарсить резюме"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Парсинг резюме новых откликов</AlertDialogTitle>
+              <AlertDialogDescription>
+                Будут распарсены резюме откликов, у которых ещё нет данных
+                резюме. Процесс будет выполняться в фоновом режиме.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Отмена</AlertDialogCancel>
+              <AlertDialogAction onClick={onParseResumes}>
+                Запустить парсинг
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button disabled={isProcessingNew} variant="outline">

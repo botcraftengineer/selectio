@@ -1,5 +1,5 @@
-import { inngest } from "./client";
 import { extractVacancyRequirements } from "../services/screening-prompt-service";
+import { inngest } from "./client";
 
 /**
  * Inngest function for extracting vacancy requirements using AI
