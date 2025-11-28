@@ -103,13 +103,15 @@ export function ResponseRow({
       </TableCell>
       <TableCell>
         <div className="text-sm text-muted-foreground">
-          {new Date(response.createdAt).toLocaleDateString("ru-RU", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {response.respondedAt
+            ? new Date(response.respondedAt).toLocaleDateString("ru-RU", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "—"}
         </div>
       </TableCell>
       <TableCell className="text-right">

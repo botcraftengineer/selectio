@@ -1,80 +1,62 @@
 "use server";
 
-import { auth, tasks } from "@trigger.dev/sdk";
-
-export async function createTriggerPublicToken(taskId: string) {
-  try {
-    const publicToken = await auth.createPublicToken({
-      scopes: {
-        read: {
-          tasks: [taskId],
-        },
-        write: {
-          tasks: [taskId],
-        },
-        trigger: {
-          tasks: [taskId],
-        },
-      },
-      expirationTime: "15m",
-    });
-
-    return { success: true, token: publicToken };
-  } catch (error) {
-    console.error("Failed to create Trigger.dev public token:", error);
-    return { success: false, error: "Failed to create token" };
-  }
-}
-
 export async function triggerScreenResponse(responseId: string) {
   try {
-    const handle = await tasks.trigger("screen-response", { responseId });
-    return { success: true as const, runId: handle.id };
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "response/screen",
+      data: {
+        responseId,
+      },
+    });
+    return { success: true as const };
   } catch (error) {
     console.error("Failed to trigger screen-response:", error);
-    return { success: false as const, error: "Failed to trigger task" };
+    return { success: false as const, error: "Failed to trigger screening" };
   }
 }
 
 export async function triggerScreenAllResponses(vacancyId: string) {
   try {
-    const { db } = await import("@selectio/db/client");
-    const { vacancyResponse } = await import("@selectio/db/schema");
-    const { eq } = await import("@selectio/db");
-
-    // Получаем все отклики для вакансии
-    const responses = await db.query.vacancyResponse.findMany({
-      where: eq(vacancyResponse.vacancyId, vacancyId),
-      columns: {
-        id: true,
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "response/screen.all",
+      data: {
+        vacancyId,
       },
     });
+    return { success: true as const };
+  } catch (error) {
+    console.error("Failed to trigger screen-all-responses:", error);
+    return { success: false as const, error: "Failed to trigger screening" };
+  }
+}
 
-    if (responses.length === 0) {
+export async function triggerScreenResponsesBatch(responseIds: string[]) {
+  try {
+    if (responseIds.length === 0) {
       return {
         success: false as const,
-        error: "No responses found for this vacancy",
+        error: "No responses provided",
       };
     }
 
-    // Используем batch для эффективной обработки большого количества откликов
-    const batchHandle = await tasks.batchTrigger(
-      "screen-response",
-      responses.map((response) => ({
-        payload: { responseId: response.id },
-      })),
-    );
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "response/screen.batch",
+      data: {
+        responseIds,
+      },
+    });
 
     return {
       success: true as const,
-      count: responses.length,
-      batchId: batchHandle.batchId,
     };
   } catch (error) {
-    console.error("Failed to trigger screen-all-responses:", error);
+    console.error("Failed to trigger screen-responses-batch:", error);
     return {
       success: false as const,
-      error: "Failed to trigger tasks",
+      error: "Failed to trigger batch screening",
     };
   }
 }

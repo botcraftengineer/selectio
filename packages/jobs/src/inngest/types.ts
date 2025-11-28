@@ -45,6 +45,18 @@ export const screenNewResponsesDataSchema = z.object({
   vacancyId: z.string().min(1, "Vacancy ID is required"),
 });
 
+// Schema for screening all responses event data
+export const screenAllResponsesDataSchema = z.object({
+  vacancyId: z.string().min(1, "Vacancy ID is required"),
+});
+
+// Schema for batch screening responses event data
+export const screenResponsesBatchDataSchema = z.object({
+  responseIds: z
+    .array(z.string())
+    .min(1, "At least one response ID is required"),
+});
+
 // Schema for telegram message send event data
 export const telegramMessageSendDataSchema = z.object({
   messageId: z.string().min(1, "Message ID is required"),
@@ -78,6 +90,12 @@ export const inngestEventSchemas = {
   "response/screen.new": {
     data: screenNewResponsesDataSchema,
   },
+  "response/screen.all": {
+    data: screenAllResponsesDataSchema,
+  },
+  "response/screen.batch": {
+    data: screenResponsesBatchDataSchema,
+  },
   "telegram/message.send": {
     data: telegramMessageSendDataSchema,
   },
@@ -104,6 +122,12 @@ export type CandidateWelcomeBatchPayload = z.infer<
 >;
 export type ScreenNewResponsesPayload = z.infer<
   typeof screenNewResponsesDataSchema
+>;
+export type ScreenAllResponsesPayload = z.infer<
+  typeof screenAllResponsesDataSchema
+>;
+export type ScreenResponsesBatchPayload = z.infer<
+  typeof screenResponsesBatchDataSchema
 >;
 export type TelegramMessageSendPayload = z.infer<
   typeof telegramMessageSendDataSchema
