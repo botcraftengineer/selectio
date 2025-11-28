@@ -1,4 +1,5 @@
-import { asc, count, desc, eq } from "@selectio/db";
+import type { SQL } from "@selectio/db";
+import { asc, desc, eq } from "@selectio/db";
 import { vacancyResponse } from "@selectio/db/schema";
 import { z } from "zod/v4";
 import { protectedProcedure } from "../../../trpc";
@@ -32,14 +33,7 @@ export const list = protectedProcedure
 
     const whereCondition = eq(vacancyResponse.vacancyId, vacancyId);
 
-    const [totalResult] = await ctx.db
-      .select({ count: count() })
-      .from(vacancyResponse)
-      .where(whereCondition);
-
-    const total = totalResult?.count ?? 0;
-
-    let orderByClause;
+    let orderByClause: SQL;
     if (sortField === "createdAt") {
       orderByClause =
         sortDirection === "asc"

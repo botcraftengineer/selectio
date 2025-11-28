@@ -18,7 +18,7 @@ interface ResponseTableProps {
   accessToken?: string;
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 25;
 
 export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
   const trpc = useTRPC();
