@@ -58,6 +58,7 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
     handleScreenNew,
     handleScreeningDialogClose,
     handleRefreshResponses,
+    handleRefreshComplete,
     handleSendWelcomeBatch,
     handleParseNewResumes,
   } = useResponseActions(vacancyId, selectedIds, setSelectedIds);
@@ -101,6 +102,7 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
           isProcessingAll={isProcessingAll}
           isParsingResumes={isParsingResumes}
           onRefresh={handleRefreshResponses}
+          onRefreshComplete={handleRefreshComplete}
           onScreenNew={handleScreenNew}
           onScreenAll={handleScreenAll}
           onParseResumes={handleParseNewResumes}

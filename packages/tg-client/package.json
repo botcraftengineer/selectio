@@ -1,8 +1,8 @@
 {
-  "name": "@selectio/telegram-bot",
+  "name": "@selectio/tg-client",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "version": "0.1.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,17 +13,12 @@
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "bun run --env-file ../../.env src/start.ts",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env": "bun run --env-file ../../.env"
+    "dev": "tsc",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@ai-sdk/openai": "2.0.74",
-    "@selectio/config": "workspace:*",
-    "@selectio/db": "workspace:*",
-    "@selectio/lib": "workspace:*",
-    "ai": "^5.0.104",
-    "grammy": "^1.38.4"
+    "@mtcute/bun": "0.27.1",
+    "@selectio/config": "workspace:*"
   },
   "devDependencies": {
     "@selectio/tsconfig": "workspace:*",

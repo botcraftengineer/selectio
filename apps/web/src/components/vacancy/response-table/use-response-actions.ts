@@ -115,21 +115,24 @@ export function useResponseActions(
       if (!result.success) {
         console.error("Failed to trigger refresh:", result.error);
         setIsRefreshing(false);
+        toast.error("Не удалось запустить обновление откликов");
         return result;
       }
 
-      setTimeout(() => {
-        void queryClient.invalidateQueries(
-          trpc.vacancy.responses.list.pathFilter(),
-        );
-        setIsRefreshing(false);
-      }, 3000);
-
+      toast.success("Обновление откликов запущено");
       return result;
     } catch (error) {
       setIsRefreshing(false);
+      toast.error("Произошла ошибка");
       throw error;
     }
+  };
+
+  const handleRefreshComplete = () => {
+    setIsRefreshing(false);
+    void queryClient.invalidateQueries(
+      trpc.vacancy.responses.list.pathFilter(),
+    );
   };
 
   const handleSendWelcomeBatch = async () => {
@@ -197,6 +200,7 @@ export function useResponseActions(
     handleScreenNew,
     handleScreeningDialogClose,
     handleRefreshResponses,
+    handleRefreshComplete,
     handleSendWelcomeBatch,
     handleParseNewResumes,
   };

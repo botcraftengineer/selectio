@@ -48,6 +48,11 @@ export const env = createEnv({
     TELEGRAM_API_ID: z.string().min(1).optional(),
     TELEGRAM_API_HASH: z.string().min(1).optional(),
     TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
+
+    // Inngest
+    INNGEST_EVENT_KEY: z.string().min(1).optional(),
+    INNGEST_SIGNING_KEY: z.string().min(1).optional(),
+    INNGEST_BASE_URL: z.string().url().optional().default("https://inn.gs"),
   },
   client: {},
   clientPrefix: "NEXT_PUBLIC_",
@@ -80,6 +85,9 @@ export const env = createEnv({
     TELEGRAM_API_ID: process.env.TELEGRAM_API_ID,
     TELEGRAM_API_HASH: process.env.TELEGRAM_API_HASH,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+    INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
+    INNGEST_BASE_URL: process.env.INNGEST_BASE_URL,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",

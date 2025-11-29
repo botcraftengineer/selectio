@@ -124,15 +124,24 @@ bot.on("message:voice", async (ctx) => {
       throw new Error("Не удалось создать запись сообщения");
     }
 
-    // Запускаем транскрибацию в фоне через Inngest
-    const { inngest } = await import("@selectio/jobs/client");
-    await inngest.send({
-      name: "telegram/voice.transcribe",
-      data: {
-        messageId: message.id,
-        fileId,
-      },
-    });
+    // Запускаем транскрибацию в фоне через Inngest HTTP API
+    if (env.INNGEST_EVENT_KEY) {
+      await fetch(`${env.INNGEST_BASE_URL}/e/${env.INNGEST_EVENT_KEY}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "telegram/voice.transcribe",
+          data: {
+            messageId: message.id,
+            fileId,
+          },
+        }),
+      });
+    } else {
+      console.warn("⚠️ INNGEST_EVENT_KEY не установлен, событие не отправлено");
+    }
 
     // Обновляем прогресс ответов
     if (totalQuestions > 0 && questionAnswers.length < totalQuestions) {

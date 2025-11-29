@@ -4,7 +4,7 @@ import {
   telegramMessage,
   vacancyResponse,
 } from "@selectio/db/schema";
-import { sendMessageByUsername } from "@selectio/telegram-bot";
+import { sendMessageByUsername } from "@selectio/tg-client";
 import { generateWelcomeMessage } from "../services/candidate-welcome-service";
 import { inngest } from "./client";
 

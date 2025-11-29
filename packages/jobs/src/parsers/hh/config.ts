@@ -23,7 +23,7 @@ export const HH_CONFIG = {
     parseContacts: true, // Включить/выключить парсинг контактов (отключено из-за 403)
   },
   puppeteer: {
-    headless: true,
+    headless: false,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

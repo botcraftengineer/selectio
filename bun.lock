@@ -153,6 +153,7 @@
         "@selectio/db": "workspace:*",
         "@selectio/lib": "workspace:*",
         "@selectio/telegram-bot": "workspace:*",
+        "@selectio/tg-client": "workspace:*",
         "@t3-oss/env-core": "0.13.8",
         "@trigger.dev/sdk": "4.1.2",
         "ai": "^5.0.104",
@@ -197,13 +198,25 @@
       "version": "0.1.0",
       "dependencies": {
         "@ai-sdk/openai": "2.0.74",
-        "@mtcute/bun": "0.27.1",
         "@selectio/config": "workspace:*",
         "@selectio/db": "workspace:*",
-        "@selectio/jobs": "workspace:*",
         "@selectio/lib": "workspace:*",
         "ai": "^5.0.104",
         "grammy": "^1.38.4",
+      },
+      "devDependencies": {
+        "@selectio/tsconfig": "workspace:*",
+        "@types/bun": "1.3.3",
+        "@types/node": "24.10.1",
+        "typescript": "5.9.3",
+      },
+    },
+    "packages/tg-client": {
+      "name": "@selectio/tg-client",
+      "version": "0.1.0",
+      "dependencies": {
+        "@mtcute/bun": "0.27.1",
+        "@selectio/config": "workspace:*",
       },
       "devDependencies": {
         "@selectio/tsconfig": "workspace:*",
@@ -1257,6 +1270,8 @@
     "@selectio/tailwind-config": ["@selectio/tailwind-config@workspace:tooling/tailwind"],
 
     "@selectio/telegram-bot": ["@selectio/telegram-bot@workspace:packages/telegram-bot"],
+
+    "@selectio/tg-client": ["@selectio/tg-client@workspace:packages/tg-client"],
 
     "@selectio/tsconfig": ["@selectio/tsconfig@workspace:tooling/typescript"],
 

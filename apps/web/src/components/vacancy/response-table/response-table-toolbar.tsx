@@ -12,7 +12,6 @@ import {
   Button,
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -35,6 +34,7 @@ interface ResponseTableToolbarProps {
   isProcessingAll: boolean;
   isParsingResumes: boolean;
   onRefresh: () => void;
+  onRefreshComplete: () => void;
   onScreenNew: () => void;
   onScreenAll: () => void;
   onParseResumes: () => void;
@@ -52,6 +52,7 @@ export function ResponseTableToolbar({
   isProcessingAll,
   isParsingResumes,
   onRefresh,
+  onRefreshComplete,
   onScreenNew,
   onScreenAll,
   onParseResumes,
@@ -76,11 +77,11 @@ export function ResponseTableToolbar({
     refreshToken: () => fetchRefreshVacancyResponsesToken(vacancyId),
     enabled: refreshDialogOpen && refreshStatus === "loading",
   });
-  console.log(refreshSubscription);
+  console.log(refreshDialogOpen, refreshStatus);
   // Подписка на статус выполнения parse
   const parseSubscription = useInngestSubscription({
     refreshToken: getParseResumesToken,
-    enabled: parseDialogOpen && parseStatus === "loading",
+    enabled: parseDialogOpen,
   });
 
   // Обновляем статус на основе данных подписки для refresh
@@ -97,13 +98,15 @@ export function ResponseTableToolbar({
 
         if (statusData.status === "completed") {
           setRefreshStatus("success");
+          onRefreshComplete();
         } else if (statusData.status === "error") {
           setRefreshStatus("error");
           setRefreshError(statusData.message);
+          onRefreshComplete();
         }
       }
     }
-  }, [refreshSubscription.latestData]);
+  }, [refreshSubscription.latestData, onRefreshComplete]);
 
   // Обновляем статус на основе данных подписки для parse
   useEffect(() => {
@@ -134,7 +137,7 @@ export function ResponseTableToolbar({
     setRefreshStatus("loading");
 
     try {
-      onRefresh();
+      await onRefresh();
     } catch (error) {
       setRefreshStatus("error");
       setRefreshError(
