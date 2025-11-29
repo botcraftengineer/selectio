@@ -17,8 +17,11 @@ import {
   DialogTitle,
 } from "@selectio/ui";
 import { FileText, Loader2, RefreshCw, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
-import { fetchRefreshVacancyResponsesToken } from "~/actions/realtime";
+import { useCallback, useEffect, useState } from "react";
+import {
+  fetchRefreshVacancyResponsesToken,
+  fetchScreenNewResponsesToken,
+} from "~/actions/realtime";
 import { getParseResumesToken } from "~/actions/trigger";
 import { ResponseFilters, type ScreeningFilter } from "~/components/response";
 import { ScreeningProgressDialog } from "../screening-progress-dialog";
@@ -82,6 +85,31 @@ function ParseSubscription({
   return null;
 }
 
+// Компонент для подписки на screen new - монтируется только когда нужен
+function ScreenNewSubscription({
+  vacancyId,
+  onMessage,
+}: {
+  vacancyId: string;
+  onMessage: (message: string) => void;
+}) {
+  const subscription = useInngestSubscription({
+    refreshToken: () => fetchScreenNewResponsesToken(vacancyId),
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (subscription.latestData) {
+      const data = subscription.latestData;
+      if (data.kind === "data") {
+        onMessage(JSON.stringify({ topic: data.topic, data: data.data }));
+      }
+    }
+  }, [subscription.latestData, onMessage]);
+
+  return null;
+}
+
 interface ResponseTableToolbarProps {
   vacancyId: string;
   totalResponses: number;
@@ -134,6 +162,20 @@ export function ResponseTableToolbar({
   const [parseMessage, setParseMessage] = useState<string>("");
   const [parseSubscriptionActive, setParseSubscriptionActive] = useState(false);
 
+  const [screenNewDialogOpen, setScreenNewDialogOpen] = useState(false);
+  const [screenNewError, setScreenNewError] = useState<string | null>(null);
+  const [screenNewStatus, setScreenNewStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [screenNewMessage, setScreenNewMessage] = useState<string>("");
+  const [screenNewProgress, setScreenNewProgress] = useState<{
+    total: number;
+    processed: number;
+    failed: number;
+  } | null>(null);
+  const [screenNewSubscriptionActive, setScreenNewSubscriptionActive] =
+    useState(false);
+
   // Обработчик сообщений от refresh подписки
   const handleRefreshMessage = (messageStr: string) => {
     const statusData = JSON.parse(messageStr) as {
@@ -170,6 +212,72 @@ export function ResponseTableToolbar({
       setParseError(statusData.message);
     }
   };
+
+  // Обработчик закрытия диалога screen new
+  const handleScreenNewDialogClose = useCallback(() => {
+    setScreenNewDialogOpen(false);
+    setScreenNewError(null);
+    setScreenNewMessage("");
+    setScreenNewProgress(null);
+    setScreenNewStatus("idle");
+    setScreenNewSubscriptionActive(false);
+    onScreeningDialogClose();
+  }, [onScreeningDialogClose]);
+
+  // Обработчик сообщений от screen new подписки
+  const handleScreenNewMessage = useCallback(
+    (messageStr: string) => {
+      const message = JSON.parse(messageStr) as {
+        topic: string;
+        data: any;
+      };
+
+      if (message.topic === "progress") {
+        const progressData = message.data as {
+          status: string;
+          message: string;
+          total?: number;
+          processed?: number;
+          failed?: number;
+        };
+        setScreenNewMessage(progressData.message);
+        if (progressData.total !== undefined) {
+          setScreenNewProgress({
+            total: progressData.total,
+            processed: progressData.processed || 0,
+            failed: progressData.failed || 0,
+          });
+        }
+      } else if (message.topic === "result") {
+        const resultData = message.data as {
+          success: boolean;
+          total: number;
+          processed: number;
+          failed: number;
+        };
+        setScreenNewProgress({
+          total: resultData.total,
+          processed: resultData.processed,
+          failed: resultData.failed,
+        });
+        if (resultData.success) {
+          setScreenNewStatus("success");
+          setScreenNewMessage(
+            `Оценка завершена! Обработано: ${resultData.processed} из ${resultData.total}`,
+          );
+        } else {
+          setScreenNewStatus("error");
+          setScreenNewError("Процесс завершился с ошибками");
+        }
+
+        // Автоматически закрываем диалог через 3 секунды после завершения
+        setTimeout(() => {
+          handleScreenNewDialogClose();
+        }, 3000);
+      }
+    },
+    [handleScreenNewDialogClose],
+  );
 
   const handleRefreshClick = async () => {
     setRefreshError(null);
@@ -223,6 +331,23 @@ export function ResponseTableToolbar({
     }
   };
 
+  const handleScreenNewClick = async () => {
+    setScreenNewError(null);
+    setScreenNewMessage("");
+    setScreenNewProgress(null);
+    setScreenNewStatus("loading");
+    setScreenNewSubscriptionActive(true); // Активируем подписку один раз
+
+    try {
+      await onScreenNew();
+    } catch (error) {
+      setScreenNewStatus("error");
+      setScreenNewError(
+        error instanceof Error ? error.message : "Произошла ошибка",
+      );
+    }
+  };
+
   return (
     <>
       {/* Условный рендеринг подписок - монтируются один раз при запуске процесса */}
@@ -234,6 +359,12 @@ export function ResponseTableToolbar({
       )}
       {parseSubscriptionActive && (
         <ParseSubscription onMessage={handleParseMessage} />
+      )}
+      {screenNewSubscriptionActive && (
+        <ScreenNewSubscription
+          vacancyId={vacancyId}
+          onMessage={handleScreenNewMessage}
+        />
       )}
 
       <div className="flex items-center justify-between">
@@ -404,24 +535,143 @@ export function ResponseTableToolbar({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button
-            disabled={isProcessingNew}
-            variant="outline"
-            onClick={onScreenNew}
+          <Dialog
+            open={screenNewDialogOpen}
+            onOpenChange={setScreenNewDialogOpen}
           >
-            {isProcessingNew ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
-            )}
-            {isProcessingNew ? "Оценка..." : "Оценить новые"}
-          </Button>
-
-          <ScreeningProgressDialog
-            vacancyId={vacancyId}
-            isOpen={isProcessingNew}
-            onClose={onScreeningDialogClose}
-          />
+            <Button
+              disabled={isProcessingNew}
+              variant="outline"
+              onClick={() => setScreenNewDialogOpen(true)}
+            >
+              {isProcessingNew ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2" />
+              )}
+              {isProcessingNew ? "Оценка..." : "Оценить новые"}
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Оценка новых откликов</DialogTitle>
+                <div>
+                  {screenNewStatus === "idle" && (
+                    <>
+                      Будет запущен процесс оценки новых откликов (без
+                      скрининга). Процесс будет выполняться в фоновом режиме, и
+                      результаты появятся в таблице автоматически.
+                    </>
+                  )}
+                  {screenNewStatus === "loading" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>
+                          {screenNewMessage || "Запускаем оценку откликов..."}
+                        </span>
+                      </div>
+                      {screenNewProgress && screenNewProgress.total > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Прогресс:
+                            </span>
+                            <span className="font-medium">
+                              {screenNewProgress.processed} /{" "}
+                              {screenNewProgress.total}
+                            </span>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-2">
+                            <div
+                              className="bg-primary h-2 rounded-full transition-all"
+                              style={{
+                                width: `${Math.round((screenNewProgress.processed / screenNewProgress.total) * 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {screenNewStatus === "success" && (
+                    <div className="space-y-4">
+                      <div className="text-green-600">
+                        ✓ {screenNewMessage || "Процесс успешно завершен!"}
+                      </div>
+                      {screenNewProgress && (
+                        <div className="grid grid-cols-3 gap-4 p-4 rounded-lg border bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-foreground">
+                              {screenNewProgress.total}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Всего
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              {screenNewProgress.processed}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Успешно
+                            </div>
+                          </div>
+                          {screenNewProgress.failed > 0 && (
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-destructive">
+                                {screenNewProgress.failed}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Ошибок
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {screenNewStatus === "error" && (
+                    <div className="text-red-600">
+                      ✗ Ошибка:{" "}
+                      {screenNewError || "Не удалось запустить процесс"}
+                    </div>
+                  )}
+                </div>
+              </DialogHeader>
+              <DialogFooter>
+                {screenNewStatus === "idle" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleScreenNewDialogClose}
+                    >
+                      Отмена
+                    </Button>
+                    <Button onClick={handleScreenNewClick}>
+                      Оценить отклики
+                    </Button>
+                  </>
+                )}
+                {screenNewStatus === "loading" && (
+                  <Button disabled>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Выполняется...
+                  </Button>
+                )}
+                {screenNewStatus === "success" && (
+                  <Button onClick={handleScreenNewDialogClose}>Закрыть</Button>
+                )}
+                {screenNewStatus === "error" && (
+                  <Button
+                    variant="destructive"
+                    onClick={handleScreenNewDialogClose}
+                  >
+                    Закрыть
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button disabled={isProcessingAll} variant="default">

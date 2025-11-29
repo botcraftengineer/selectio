@@ -108,7 +108,7 @@ export const screenNewResponsesFunction = inngest.createFunction(
 
     // Обрабатываем каждый отклик
     const results = await Promise.allSettled(
-      responses.map(async (response, index) => {
+      responses.map(async (response) => {
         return await step.run(`screen-response-${response.id}`, async () => {
           try {
             console.log(`🎯 Скрининг отклика: ${response.id}`);
@@ -119,25 +119,6 @@ export const screenNewResponsesFunction = inngest.createFunction(
               score: result.score,
               detailedScore: result.detailedScore,
             });
-
-            // Отправляем прогресс после каждого обработанного отклика
-            const vacancyResponses = responsesByVacancy[response.vacancyId];
-            if (vacancyResponses) {
-              const processedCount = results
-                .slice(0, index + 1)
-                .filter((r) => r.status === "fulfilled").length;
-
-              await publish(
-                screenNewResponsesChannel(response.vacancyId).progress({
-                  vacancyId: response.vacancyId,
-                  status: "processing",
-                  message: `Обработано ${processedCount} из ${vacancyResponses.length} откликов`,
-                  total: vacancyResponses.length,
-                  processed: processedCount,
-                  failed: 0,
-                }),
-              );
-            }
 
             return {
               responseId: response.id,

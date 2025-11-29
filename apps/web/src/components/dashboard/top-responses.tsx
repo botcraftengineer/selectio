@@ -18,16 +18,9 @@ import { useTRPC } from "~/trpc/react";
 export function TopResponses() {
   const trpc = useTRPC();
 
-  const { data: responses, isLoading } = useQuery(
-    trpc.vacancy.responses.listAll.queryOptions(),
+  const { data: topResponses = [], isLoading } = useQuery(
+    trpc.vacancy.responses.listTop.queryOptions({ limit: 5 }),
   );
-
-  // Фильтруем отклики с оценками и сортируем по убыванию
-  const topResponses =
-    responses
-      ?.filter((r) => r.screening?.score)
-      .sort((a, b) => (b.screening?.score ?? 0) - (a.screening?.score ?? 0))
-      .slice(0, 5) ?? [];
 
   if (isLoading) {
     return (
@@ -108,7 +101,7 @@ export function TopResponses() {
                       variant={index === 0 ? "default" : "outline"}
                       className="h-5 px-1.5"
                     >
-                      {response.screening.score.toFixed(1)}
+                      {response.screening.detailedScore}
                     </Badge>
                   )}
                 </div>
@@ -125,15 +118,6 @@ export function TopResponses() {
             </Link>
           ))}
         </div>
-        {responses &&
-          responses.filter((r) => r.screening?.score).length > 5 && (
-            <Link
-              href="/responses"
-              className="mt-4 block text-center text-sm text-primary hover:underline"
-            >
-              Показать все отклики
-            </Link>
-          )}
       </CardContent>
     </Card>
   );
