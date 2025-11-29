@@ -4,6 +4,7 @@ export {
   inngest,
   inngestFunctions,
   refreshVacancyResponsesFunction,
+  screenNewResponsesChannel,
   screenResponseFunction,
   sendCandidateWelcomeFunction,
   sendTelegramMessageFunction,

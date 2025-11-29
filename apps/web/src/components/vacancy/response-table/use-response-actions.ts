@@ -84,19 +84,26 @@ export function useResponseActions(
 
       if (!result.success) {
         console.error("Failed to trigger screen new:", result.error);
+        toast.error("Не удалось запустить оценку откликов");
         return;
       }
 
-      console.log("Запущена оценка новых откликов");
+      toast.success("Оценка новых откликов запущена");
 
-      setTimeout(() => {
-        void queryClient.invalidateQueries(
-          trpc.vacancy.responses.list.pathFilter(),
-        );
-      }, 2000);
-    } finally {
+      // Не сбрасываем isProcessingNew сразу - это будет сделано после закрытия диалога
+    } catch (error) {
+      console.error("Error triggering screen new:", error);
+      toast.error("Произошла ошибка");
       setIsProcessingNew(false);
     }
+  };
+
+  const handleScreeningDialogClose = () => {
+    setIsProcessingNew(false);
+    // Обновляем список откликов после закрытия диалога
+    void queryClient.invalidateQueries(
+      trpc.vacancy.responses.list.pathFilter(),
+    );
   };
 
   const handleRefreshResponses = async () => {
@@ -184,6 +191,7 @@ export function useResponseActions(
     handleBulkScreen,
     handleScreenAll,
     handleScreenNew,
+    handleScreeningDialogClose,
     handleRefreshResponses,
     handleSendWelcomeBatch,
     handleParseNewResumes,

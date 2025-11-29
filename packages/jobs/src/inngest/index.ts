@@ -12,6 +12,7 @@ import { sendTelegramMessageFunction } from "./send-telegram-message";
 import { transcribeVoiceFunction } from "./transcribe-voice";
 import { updateVacanciesFunction } from "./update-vacancies";
 
+export { screenNewResponsesChannel } from "./channels";
 export { inngest } from "./client";
 export { extractVacancyRequirementsFunction } from "./extract-vacancy-requirements";
 export { parseNewResumesFunction } from "./parse-new-resumes";
@@ -27,19 +28,18 @@ export { sendTelegramMessageFunction } from "./send-telegram-message";
 export { transcribeVoiceFunction } from "./transcribe-voice";
 export { updateVacanciesFunction } from "./update-vacancies";
 
-// Export all functions as an array for easy registration
 export const inngestFunctions = [
   extractVacancyRequirementsFunction,
-  screenResponseFunction,
-  screenNewResponsesFunction,
-  screenAllResponsesFunction,
-  screenResponsesBatchFunction,
   parseNewResumesFunction,
   refreshSingleResumeFunction,
-  updateVacanciesFunction,
   refreshVacancyResponsesFunction,
-  sendCandidateWelcomeFunction,
+  screenAllResponsesFunction,
+  screenNewResponsesFunction,
+  screenResponseFunction,
+  screenResponsesBatchFunction,
   sendCandidateWelcomeBatchFunction,
+  sendCandidateWelcomeFunction,
   sendTelegramMessageFunction,
   transcribeVoiceFunction,
+  updateVacanciesFunction,
 ];
