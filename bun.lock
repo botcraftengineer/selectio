@@ -196,7 +196,7 @@
       "name": "@selectio/telegram-bot",
       "version": "0.1.0",
       "dependencies": {
-        "@ai-sdk/openai": "^2.0.74",
+        "@ai-sdk/openai": "2.0.74",
         "@mtcute/bun": "^0.27.1",
         "@selectio/config": "workspace:*",
         "@selectio/db": "workspace:*",
