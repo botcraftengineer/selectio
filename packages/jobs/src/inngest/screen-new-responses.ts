@@ -1,45 +1,37 @@
-import { db, inArray } from "@selectio/db";
-import { vacancyResponse } from "@selectio/db/schema";
+import { db } from "@selectio/db";
 import { screenResponse } from "../services/response-screening-service";
 import { screenNewResponsesChannel } from "./channels";
 import { inngest } from "./client";
 
 /**
  * Inngest функция для оценки только новых откликов (без скрининга)
+ * Обрабатывает одну вакансию за раз
  */
 export const screenNewResponsesFunction = inngest.createFunction(
   {
     id: "screen-new-responses",
     name: "Screen New Responses",
-    batchEvents: {
-      maxSize: 4,
-      timeout: "10s",
-    },
   },
   { event: "response/screen.new" },
-  async ({ events, step, publish }) => {
-    console.log(`🚀 Запуск оценки новых откликов для ${events.length} событий`);
+  async ({ event, step, publish }) => {
+    const { vacancyId } = event.data;
 
-    // Собираем все vacancyIds из всех событий
-    const vacancyIds = events.map((evt) => evt.data.vacancyId);
+    console.log(`🚀 Запуск оценки новых откликов для вакансии: ${vacancyId}`);
 
-    console.log(`📋 Вакансии для обработки: ${vacancyIds.join(", ")}`);
-
-    // Отправляем уведомление о начале для каждой вакансии
-    for (const vacancyId of vacancyIds) {
-      await publish(
-        screenNewResponsesChannel(vacancyId).progress({
-          vacancyId,
-          status: "started",
-          message: "Начинаем поиск новых откликов...",
-        }),
-      );
-    }
+    // Отправляем уведомление о начале
+    await publish(
+      screenNewResponsesChannel(vacancyId).progress({
+        vacancyId,
+        status: "started",
+        message: "Начинаем поиск новых откликов...",
+      }),
+    );
 
     // Получаем новые отклики (без скрининга)
     const responses = await step.run("fetch-new-responses", async () => {
       const allResponses = await db.query.vacancyResponse.findMany({
-        where: inArray(vacancyResponse.vacancyId, vacancyIds),
+        where: (vacancyResponse, { eq }) =>
+          eq(vacancyResponse.vacancyId, vacancyId),
         columns: {
           id: true,
           vacancyId: true,
@@ -59,18 +51,15 @@ export const screenNewResponsesFunction = inngest.createFunction(
     if (responses.length === 0) {
       console.log("ℹ️ Нет новых откликов для оценки");
 
-      // Отправляем уведомление о завершении
-      for (const vacancyId of vacancyIds) {
-        await publish(
-          screenNewResponsesChannel(vacancyId).result({
-            vacancyId,
-            success: true,
-            total: 0,
-            processed: 0,
-            failed: 0,
-          }),
-        );
-      }
+      await publish(
+        screenNewResponsesChannel(vacancyId).result({
+          vacancyId,
+          success: true,
+          total: 0,
+          processed: 0,
+          failed: 0,
+        }),
+      );
 
       return {
         success: true,
@@ -80,31 +69,17 @@ export const screenNewResponsesFunction = inngest.createFunction(
       };
     }
 
-    // Группируем отклики по вакансиям для отчетности
-    const responsesByVacancy = responses.reduce(
-      (acc, r) => {
-        if (!acc[r.vacancyId]) acc[r.vacancyId] = [];
-        acc[r.vacancyId]!.push(r);
-        return acc;
-      },
-      {} as Record<string, typeof responses>,
-    );
-
     // Отправляем прогресс о найденных откликах
-    for (const [vacancyId, vacancyResponses] of Object.entries(
-      responsesByVacancy,
-    )) {
-      await publish(
-        screenNewResponsesChannel(vacancyId).progress({
-          vacancyId,
-          status: "processing",
-          message: `Найдено ${vacancyResponses.length} новых откликов. Начинаем оценку...`,
-          total: vacancyResponses.length,
-          processed: 0,
-          failed: 0,
-        }),
-      );
-    }
+    await publish(
+      screenNewResponsesChannel(vacancyId).progress({
+        vacancyId,
+        status: "processing",
+        message: `Найдено ${responses.length} новых откликов. Начинаем оценку...`,
+        total: responses.length,
+        processed: 0,
+        failed: 0,
+      }),
+    );
 
     // Обрабатываем каждый отклик
     const results = await Promise.allSettled(
@@ -146,32 +121,16 @@ export const screenNewResponsesFunction = inngest.createFunction(
       `✅ Завершено: успешно ${successful}, ошибок ${failed} из ${responses.length}`,
     );
 
-    // Отправляем финальные результаты для каждой вакансии
-    for (const [vacancyId, vacancyResponses] of Object.entries(
-      responsesByVacancy,
-    )) {
-      const vacancyResults = results.filter((r) => {
-        if (r.status === "fulfilled") {
-          return r.value.vacancyId === vacancyId;
-        }
-        return false;
-      });
-
-      const vacancySuccessful = vacancyResults.filter(
-        (r) => r.status === "fulfilled",
-      ).length;
-      const vacancyFailed = vacancyResponses.length - vacancySuccessful;
-
-      await publish(
-        screenNewResponsesChannel(vacancyId).result({
-          vacancyId,
-          success: true,
-          total: vacancyResponses.length,
-          processed: vacancySuccessful,
-          failed: vacancyFailed,
-        }),
-      );
-    }
+    // Отправляем финальный результат
+    await publish(
+      screenNewResponsesChannel(vacancyId).result({
+        vacancyId,
+        success: true,
+        total: responses.length,
+        processed: successful,
+        failed,
+      }),
+    );
 
     return {
       success: true,

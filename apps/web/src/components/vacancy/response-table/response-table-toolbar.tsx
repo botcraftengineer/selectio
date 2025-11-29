@@ -537,7 +537,11 @@ export function ResponseTableToolbar({
           </Dialog>
           <Dialog
             open={screenNewDialogOpen}
-            onOpenChange={setScreenNewDialogOpen}
+            onOpenChange={(open) => {
+              if (!open && screenNewStatus !== "loading") {
+                handleScreenNewDialogClose();
+              }
+            }}
           >
             <Button
               disabled={isProcessingNew}
