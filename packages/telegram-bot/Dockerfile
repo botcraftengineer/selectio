@@ -33,6 +33,10 @@ ENV NODE_ENV=production
 # Don't run production as root
 RUN addgroup --system --gid 1001 bunjs
 RUN adduser --system --uid 1001 bunjs
+
+# Create storage directory with proper permissions
+RUN mkdir -p /app/storage && chown -R bunjs:bunjs /app/storage
+
 USER bunjs
 
 COPY --from=installer /app .

@@ -4,7 +4,7 @@
       "command": "uvx",
       "args": ["mcp-server-fetch"],
       "env": {},
-      "disabled": true,
+      "disabled": false,
       "autoApprove": []
     },
     "Context7": {

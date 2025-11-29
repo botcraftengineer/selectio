@@ -4,7 +4,6 @@ export {
   inngest,
   inngestFunctions,
   parseNewResumesChannel,
-  refreshVacancyResponsesChannel,
   refreshVacancyResponsesFunction,
   screenNewResponsesChannel,
   screenResponseFunction,
