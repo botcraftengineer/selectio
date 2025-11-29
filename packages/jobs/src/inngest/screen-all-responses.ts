@@ -84,7 +84,7 @@ export const screenAllResponsesFunction = inngest.createFunction(
     const responsesByVacancy = responses.reduce(
       (acc, r) => {
         if (!acc[r.vacancyId]) acc[r.vacancyId] = [];
-        acc[r.vacancyId].push(r);
+        acc[r.vacancyId]?.push(r);
         return acc;
       },
       {} as Record<string, typeof responses>,
@@ -122,6 +122,7 @@ export const screenAllResponsesFunction = inngest.createFunction(
 
             return {
               responseId: response.id,
+              vacancyId: response.vacancyId,
               success: true,
               score: result.score,
             };
@@ -129,6 +130,7 @@ export const screenAllResponsesFunction = inngest.createFunction(
             console.error(`❌ Ошибка скрининга для ${response.id}:`, error);
             return {
               responseId: response.id,
+              vacancyId: response.vacancyId,
               success: false,
               error: error instanceof Error ? error.message : "Unknown error",
             };
