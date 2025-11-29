@@ -16,7 +16,7 @@ COPY packages/telegram-bot/package.json ./packages/telegram-bot/
 COPY tooling/typescript/package.json ./tooling/typescript/
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install --ignore-scripts
 
 # --- Builder Stage ---
 FROM base AS builder
