@@ -22,6 +22,7 @@
     "@mtcute/bun": "0.27.1",
     "@selectio/config": "workspace:*",
     "@selectio/db": "workspace:*",
+    "@selectio/jobs": "workspace:*",
     "@selectio/lib": "workspace:*",
     "ai": "^5.0.104",
     "grammy": "^1.38.4"

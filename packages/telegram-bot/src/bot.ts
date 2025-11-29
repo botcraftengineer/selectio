@@ -125,8 +125,14 @@ bot.on("message:voice", async (ctx) => {
     }
 
     // Запускаем транскрибацию в фоне через Inngest
-    const { triggerVoiceTranscription } = await import("@selectio/jobs");
-    await triggerVoiceTranscription(message.id, fileId);
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "telegram/voice.transcribe",
+      data: {
+        messageId: message.id,
+        fileId,
+      },
+    });
 
     // Обновляем прогресс ответов
     if (totalQuestions > 0 && questionAnswers.length < totalQuestions) {
