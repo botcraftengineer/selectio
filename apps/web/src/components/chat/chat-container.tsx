@@ -77,61 +77,67 @@ export function ChatContainer({
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-[#0f1419] dark:bg-[#0f1419]",
+        "flex flex-col h-full min-h-0 bg-[#0f1419] dark:bg-[#0f1419]",
         className,
       )}
     >
       {/* Header */}
-      <ChatHeader
-        candidateName={candidateName}
-        candidateEmail={candidateEmail}
-        avatarUrl={avatarUrl}
-      />
+      <div className="flex-shrink-0">
+        <ChatHeader
+          candidateName={candidateName}
+          candidateEmail={candidateEmail}
+          avatarUrl={avatarUrl}
+        />
+      </div>
 
       {/* Messages area with Telegram pattern background */}
-      <ScrollArea
-        ref={scrollAreaRef}
-        className="flex-1 relative"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      >
-        <div className="p-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full min-h-[300px]">
-              <div className="text-center text-gray-400">
-                <p className="text-sm">Нет сообщений</p>
-                <p className="text-xs mt-1">Начните диалог с кандидатом</p>
-              </div>
-            </div>
-          ) : (
-            Object.entries(groupedMessages).map(([date, msgs]) => (
-              <div key={date} className="space-y-1">
-                {/* Date separator */}
-                <div className="flex justify-center my-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
-                    <span className="text-xs text-white/70">
-                      {getDateLabel(date)}
-                    </span>
-                  </div>
+      <div className="flex-1 min-h-0 relative">
+        <ScrollArea
+          ref={scrollAreaRef}
+          className="h-full"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        >
+          <div className="p-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full min-h-[300px]">
+                <div className="text-center text-gray-400">
+                  <p className="text-sm">Нет сообщений</p>
+                  <p className="text-xs mt-1">Начните диалог с кандидатом</p>
                 </div>
-
-                {/* Messages */}
-                {msgs.map((message) => (
-                  <ChatMessage key={message.id} {...message} />
-                ))}
               </div>
-            ))
-          )}
-        </div>
-      </ScrollArea>
+            ) : (
+              Object.entries(groupedMessages).map(([date, msgs]) => (
+                <div key={date} className="space-y-1">
+                  {/* Date separator */}
+                  <div className="flex justify-center my-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+                      <span className="text-xs text-white/70">
+                        {getDateLabel(date)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  {msgs.map((message) => (
+                    <ChatMessage key={message.id} {...message} />
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Input */}
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        disabled={isSending || isLoading}
-        placeholder="Сообщение"
-      />
+      <div className="flex-shrink-0">
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          disabled={isSending || isLoading}
+          placeholder="Сообщение"
+        />
+      </div>
     </div>
   );
 }

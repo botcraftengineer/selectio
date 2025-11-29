@@ -127,20 +127,26 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
   return (
     <div className="flex h-full">
-      <div className="flex flex-col flex-1">
-        <ChatHeader
-          candidateName={currentConversation.candidateName}
-          chatId={currentConversation.chatId}
-        />
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex-shrink-0">
+          <ChatHeader
+            candidateName={currentConversation.candidateName ?? "Кандидат"}
+            candidateEmail={currentConversation.chatId}
+          />
+        </div>
 
-        <ChatMessages
-          messages={messages}
-          candidateName={currentConversation.candidateName}
-          onTranscribe={handleTranscribe}
-          transcribingMessageId={transcribingMessageId}
-        />
+        <div className="flex-1 min-h-0">
+          <ChatMessages
+            messages={messages}
+            candidateName={currentConversation.candidateName}
+            onTranscribe={handleTranscribe}
+            transcribingMessageId={transcribingMessageId}
+          />
+        </div>
 
-        <ChatInput onSendMessage={handleSendMessage} isSending={isSending} />
+        <div className="flex-shrink-0">
+          <ChatInput onSendMessage={handleSendMessage} disabled={isSending} />
+        </div>
       </div>
 
       <ChatSidebar

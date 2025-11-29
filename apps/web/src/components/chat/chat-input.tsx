@@ -1,5 +1,5 @@
-import { Button, Input } from "@selectio/ui";
-import { Send } from "lucide-react";
+import { Button, Textarea } from "@selectio/ui";
+import { Paperclip, Send, Smile } from "lucide-react";
 import { useState } from "react";
 
 interface ChatInputProps {
@@ -11,7 +11,7 @@ interface ChatInputProps {
 export function ChatInput({
   onSendMessage,
   disabled = false,
-  placeholder = "Введите сообщение...",
+  placeholder = "Send a message...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
 
@@ -29,20 +29,43 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t px-6 py-4">
-      <div className="flex gap-2">
-        <Input
+    <div className="border-t bg-white dark:bg-gray-900 px-4 py-3">
+      <div className="relative">
+        <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
           disabled={disabled}
-          className="flex-1"
+          className="min-h-[80px] resize-none pr-12 pb-12"
         />
+
+        <div className="absolute bottom-2 left-2 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-500 hover:text-gray-700"
+            disabled={disabled}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-500 hover:text-gray-700"
+            disabled={disabled}
+          >
+            <Smile className="h-4 w-4" />
+          </Button>
+        </div>
+
         <Button
           onClick={handleSend}
           disabled={!message.trim() || disabled}
           size="icon"
+          className="absolute bottom-2 right-2 h-8 w-8 rounded-full"
         >
           <Send className="h-4 w-4" />
         </Button>

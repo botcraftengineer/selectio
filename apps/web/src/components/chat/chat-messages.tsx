@@ -28,15 +28,21 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
-  });
+  }, [messages.length]);
 
   return (
-    <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef}>
-      <div className="space-y-4">
+    <ScrollArea className="h-full" ref={scrollRef}>
+      <div className="px-6 py-4 space-y-4">
         {messages.map((msg) => (
           <ChatMessage
             key={msg.id}
