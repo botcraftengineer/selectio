@@ -47,6 +47,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
       conversationId,
     }),
     enabled: !!conversationId,
+    refetchInterval: 3000,
   });
 
   const sendMessageMutationOptions =

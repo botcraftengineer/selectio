@@ -8,7 +8,7 @@ import { transcribeVoiceRouter } from "./transcribe-voice";
 export const telegramRouter = createTRPCRouter({
   conversation: getConversationRouter,
   messages: getMessagesRouter,
-  sendMessage: sendMessageRouter.mutate,
+  sendMessage: sendMessageRouter,
   file: getFileUrlRouter,
   transcribeVoice: transcribeVoiceRouter,
 });

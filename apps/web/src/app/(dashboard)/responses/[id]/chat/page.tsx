@@ -38,7 +38,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   });
 
   const sendMessageMutation = useMutation(
-    trpc.telegram.sendMessage.mutationOptions({
+    trpc.telegram.sendMessage.mutate.mutationOptions({
       onSuccess: () => {
         setMessage("");
         refetch();
