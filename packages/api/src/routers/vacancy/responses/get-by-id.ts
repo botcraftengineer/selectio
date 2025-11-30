@@ -11,6 +11,7 @@ export const getById = protectedProcedure
       with: {
         vacancy: true,
         screening: true,
+        conversation: true,
       },
     });
   });

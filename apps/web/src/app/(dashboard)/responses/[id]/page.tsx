@@ -73,13 +73,20 @@ export default function ResponseDetailPage({
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="px-4 lg:px-6">
-              <div className="mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <Link href="/responses">
                   <Button variant="ghost" size="sm">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Назад к откликам
                   </Button>
                 </Link>
+                {response.conversation && (
+                  <Link href={`/responses/${id}/chat`}>
+                    <Button variant="default" size="sm">
+                      💬 Открыть чат
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <div className="space-y-6">
