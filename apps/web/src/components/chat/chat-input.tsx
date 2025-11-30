@@ -11,7 +11,7 @@ interface ChatInputProps {
 export function ChatInput({
   onSendMessage,
   disabled = false,
-  placeholder = "Send a message...",
+  placeholder = "Напишите сообщение...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
 
@@ -29,46 +29,38 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t bg-white dark:bg-gray-900 px-4 py-3">
-      <div className="relative">
-        <Textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyPress}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="min-h-[80px] resize-none pr-12 pb-12"
-        />
+    <div className="border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="p-4">
+        <div className="relative">
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="w-full min-h-[60px] max-h-40 resize-none rounded-3xl pl-12 pr-14 py-4 focus-visible:ring-1 border-2"
+            rows={1}
+          />
 
-        <div className="absolute bottom-2 left-2 flex items-center gap-2">
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-500 hover:text-gray-700"
+            className="absolute left-2 top-3 h-9 w-9 text-muted-foreground hover:text-foreground"
             disabled={disabled}
           >
-            <Paperclip className="h-4 w-4" />
+            <Paperclip className="h-5 w-5" />
           </Button>
+
           <Button
-            type="button"
-            variant="ghost"
+            onClick={handleSend}
+            disabled={!message.trim() || disabled}
             size="icon"
-            className="h-8 w-8 text-gray-500 hover:text-gray-700"
-            disabled={disabled}
+            className="absolute right-2 top-3 h-9 w-9 rounded-full"
           >
-            <Smile className="h-4 w-4" />
+            <Send className="h-4 w-4" />
           </Button>
         </div>
-
-        <Button
-          onClick={handleSend}
-          disabled={!message.trim() || disabled}
-          size="icon"
-          className="absolute bottom-2 right-2 h-8 w-8 rounded-full"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

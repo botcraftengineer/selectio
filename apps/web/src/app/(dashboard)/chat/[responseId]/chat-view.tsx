@@ -131,16 +131,16 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-background">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <ChatHeader
             candidateName={currentConversation.candidateName ?? "Кандидат"}
             candidateEmail={currentConversation.chatId}
           />
         </div>
 
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 bg-muted/30">
           <ChatMessages
             messages={messages}
             candidateName={currentConversation.candidateName}
@@ -149,7 +149,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
           />
         </div>
 
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <ChatInput onSendMessage={handleSendMessage} disabled={isSending} />
         </div>
       </div>
