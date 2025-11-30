@@ -107,13 +107,20 @@ bot.on("message:voice", async (ctx) => {
     const questionAnswers = (metadata.questionAnswers as unknown[]) || [];
     const totalQuestions = (metadata.totalQuestions as number) || 0;
 
+    // Определяем контекст голосового сообщения
+    const isInterviewMode =
+      totalQuestions > 0 && questionAnswers.length < totalQuestions;
+    const messageContent = isInterviewMode
+      ? `Ответ на вопрос ${questionAnswers.length + 1}`
+      : "Голосовое сообщение";
+
     const [message] = await db
       .insert(telegramMessage)
       .values({
         conversationId: conversation.id,
         sender: "CANDIDATE",
         contentType: "VOICE",
-        content: `Ответ на вопрос ${questionAnswers.length + 1}`,
+        content: messageContent,
         fileId,
         voiceDuration: voice.duration.toString(),
         telegramMessageId: ctx.message.message_id.toString(),
