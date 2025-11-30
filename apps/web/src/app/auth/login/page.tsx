@@ -9,7 +9,7 @@ export default function LoginPage() {
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
             <GalleryVerticalEnd className="size-4" aria-label="Company logo" />
           </div>
-          Selectio Inc.
+          Selectio
         </a>
         <LoginForm />
       </div>

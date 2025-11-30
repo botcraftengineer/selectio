@@ -68,7 +68,7 @@ export function AppSidebar({
             >
               <a href="/">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Selectio Inc.</span>
+                <span className="text-base font-semibold">Selectio</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
