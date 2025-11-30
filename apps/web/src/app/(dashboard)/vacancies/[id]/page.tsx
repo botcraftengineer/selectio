@@ -38,8 +38,8 @@ export default function VacancyDetailPage({
   const { data: vacancy, isLoading: vacancyLoading } = useQuery(
     trpc.vacancy.getById.queryOptions({ id }),
   );
-  const { data: responses, isLoading: responsesLoading } = useQuery(
-    trpc.vacancy.responses.list.queryOptions({ vacancyId: id }),
+  const { data: responsesCount, isLoading: responsesLoading } = useQuery(
+    trpc.vacancy.responses.getCount.queryOptions({ vacancyId: id }),
   );
   const { data: analytics } = useQuery({
     ...trpc.vacancy.getAnalytics.queryOptions({ vacancyId: id }),
@@ -113,7 +113,7 @@ export default function VacancyDetailPage({
                     </TabsTrigger>
                     <TabsTrigger value="responses" asChild>
                       <Link href={`/vacancies/${id}/responses`}>
-                        Отклики ({responses?.total ?? 0})
+                        Отклики ({responsesCount?.total ?? 0})
                       </Link>
                     </TabsTrigger>
                   </TabsList>
