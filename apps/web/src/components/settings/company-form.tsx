@@ -11,13 +11,13 @@ import {
   Input,
   Textarea,
 } from "@selectio/ui";
-import { toast } from "sonner";
 import {
   type CompanyFormValues,
   companyFormSchema,
 } from "@selectio/validators";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { useTRPC } from "~/trpc/react";
 
@@ -66,9 +66,6 @@ export function CompanyForm({
                 Название компании
               </FormLabel>
               <Input placeholder="ООО Рога и Копыта" {...field} />
-              <p className="text-sm text-amber-700/70">
-                Название вашей компании
-              </p>
               <FormMessage />
             </FormItem>
           )}
@@ -83,9 +80,6 @@ export function CompanyForm({
                 Сайт
               </FormLabel>
               <Input placeholder="https://example.com" {...field} />
-              <p className="text-sm text-amber-700/70">
-                Веб-сайт вашей компании
-              </p>
               <FormMessage />
             </FormItem>
           )}
@@ -104,9 +98,6 @@ export function CompanyForm({
                 className="min-h-[120px]"
                 {...field}
               />
-              <p className="text-sm text-amber-700/70">
-                Краткое описание вашей компании
-              </p>
               <FormMessage />
             </FormItem>
           )}

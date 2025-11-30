@@ -21,6 +21,7 @@ import {
   IconLogout,
   IconUserCircle,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "~/auth/client";
 
@@ -103,9 +104,11 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Аккаунт
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <IconUserCircle />
+                  Аккаунт
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

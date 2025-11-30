@@ -3,7 +3,6 @@
 import { Skeleton } from "@selectio/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileForm } from "~/components/settings/profile-form";
-import { SettingsSidebar } from "~/components/settings/settings-sidebar";
 import { useTRPC } from "~/trpc/react";
 
 export default function SettingsProfilePage() {
@@ -12,23 +11,38 @@ export default function SettingsProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-10 pb-16 max-w-5xl">
-        <div className="space-y-1">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <aside className="lg:w-[240px] shrink-0">
-            <div className="rounded-lg border p-2">
-              <SettingsSidebar />
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="flex-1">
+          <div className="rounded-lg border p-6 space-y-8">
+            {/* Avatar skeleton */}
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <Skeleton className="h-10 w-32" />
             </div>
-          </aside>
-          <div className="flex-1">
-            <div className="rounded-lg border p-6 space-y-4">
+
+            {/* Username field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
               <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-4 w-full max-w-md" />
             </div>
+
+            {/* Email field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-4 w-80" />
+            </div>
+
+            {/* Bio field skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+
+            {/* Button skeleton */}
+            <Skeleton className="h-10 w-36" />
           </div>
         </div>
       </div>
@@ -36,29 +50,16 @@ export default function SettingsProfilePage() {
   }
 
   return (
-    <div className="space-y-6 p-10 pb-16 max-w-5xl">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and set e-mail preferences.
-        </p>
-      </div>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <aside className="lg:w-[240px] shrink-0">
-          <div className="rounded-lg border p-2">
-            <SettingsSidebar />
-          </div>
-        </aside>
-        <div className="flex-1">
-          <div className="rounded-lg border p-6">
-            <ProfileForm
-              initialData={{
-                username: user?.username || "",
-                email: user?.email || "",
-                bio: user?.bio || "",
-              }}
-            />
-          </div>
+    <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="flex-1">
+        <div className="rounded-lg border p-6">
+          <ProfileForm
+            initialData={{
+              username: user?.username || "",
+              email: user?.email || "",
+              bio: user?.bio || "",
+            }}
+          />
         </div>
       </div>
     </div>
