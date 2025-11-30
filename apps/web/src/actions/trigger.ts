@@ -233,3 +233,26 @@ export async function triggerSendWelcome(responseId: string, username: string) {
     return { success: false as const, error: "Failed to trigger welcome" };
   }
 }
+
+export async function triggerGenerateRequirements(
+  vacancyId: string,
+  description: string,
+) {
+  try {
+    const { inngest } = await import("@selectio/jobs/client");
+    await inngest.send({
+      name: "vacancy/requirements.extract",
+      data: {
+        vacancyId,
+        description,
+      },
+    });
+    return { success: true as const };
+  } catch (error) {
+    console.error("Failed to trigger generate-requirements:", error);
+    return {
+      success: false as const,
+      error: "Failed to trigger requirements generation",
+    };
+  }
+}

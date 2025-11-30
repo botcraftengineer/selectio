@@ -11,8 +11,7 @@
     "clean": "git clean -xdf .cache .turbo node_modules",
     "format": "biome format .",
     "lint": "biome lint .",
-    "check": "biome check .",
-    "typecheck": "tsc --noEmit"
+    "check": "biome check ."
   },
   "dependencies": {
     "@tailwindcss/postcss": "4.1.17",
