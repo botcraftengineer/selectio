@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   const session = await getSession();
 
   if (!session?.user) {
-    return <>{children}</>;
+    redirect("/auth/signin");
   }
 
   // Проверяем роль пользователя из сессии
@@ -25,6 +25,11 @@ export default async function DashboardLayout({
   const caller = await api();
   const userWorkspaces = await caller.workspace.list();
 
+  // Если нет workspaces, редирект на создание
+  if (userWorkspaces.length === 0) {
+    redirect("/onboarding");
+  }
+
   // Преобразуем данные для компонента
   const workspaces = userWorkspaces.map((uw) => ({
     id: uw.workspace.id,
@@ -33,6 +38,12 @@ export default async function DashboardLayout({
     logo: uw.workspace.logo,
     role: uw.role,
   }));
+
+  // Редирект на первый workspace
+  const firstWorkspace = workspaces[0];
+  if (firstWorkspace) {
+    redirect(`/${firstWorkspace.slug}`);
+  }
 
   return (
     <SidebarProvider>

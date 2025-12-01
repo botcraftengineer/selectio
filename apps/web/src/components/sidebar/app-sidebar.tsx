@@ -24,33 +24,32 @@ import {
   WorkspaceSwitcher,
 } from "~/components/sidebar";
 
-const data = {
+const getNavData = (workspaceSlug?: string) => ({
   navMain: [
     {
       title: "Панель управления",
-      url: "/",
+      url: workspaceSlug ? `/${workspaceSlug}` : "/",
       icon: IconDashboard,
     },
     {
       title: "Вакансии",
-      url: "/vacancies",
+      url: workspaceSlug ? `/${workspaceSlug}/vacancies` : "/vacancies",
       icon: IconFileDescription,
     },
-
     {
       title: "Чаты",
-      url: "/chat",
+      url: workspaceSlug ? `/${workspaceSlug}/chat` : "/chat",
       icon: IconMessage,
     },
   ],
   navSecondary: [
     {
       title: "Настройки",
-      url: "/settings",
+      url: workspaceSlug ? `/${workspaceSlug}/settings` : "/settings",
       icon: IconSettings,
     },
   ],
-};
+});
 
 type WorkspaceWithRole = {
   id: string;
@@ -76,6 +75,9 @@ export function AppSidebar({
   activeWorkspaceId?: string;
   onWorkspaceChange?: (workspaceId: string) => void;
 }) {
+  const activeWorkspace = workspaces?.find((w) => w.id === activeWorkspaceId);
+  const data = getNavData(activeWorkspace?.slug);
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -83,10 +85,10 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="/">
-                <IconInnerShadowTop className="!size-5" />
+              <a href={activeWorkspace ? `/${activeWorkspace.slug}` : "/"}>
+                <IconInnerShadowTop className="size-5!" />
                 <span className="text-base font-semibold">Selectio</span>
               </a>
             </SidebarMenuButton>

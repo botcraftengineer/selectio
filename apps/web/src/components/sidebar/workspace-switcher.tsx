@@ -46,6 +46,7 @@ export function WorkspaceSwitcher({
   const handleWorkspaceChange = (workspace: WorkspaceWithRole) => {
     setActiveWorkspace(workspace);
     onWorkspaceChange?.(workspace.id);
+    window.location.href = `/${workspace.slug}`;
   };
 
   const getRoleLabel = (role: string) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@selectio/ui";
-import { Building2, Circle, Globe, User } from "lucide-react";
+import { Building2, Globe, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,11 +10,6 @@ const sidebarNavItems = [
     title: "Профиль",
     href: "/settings/profile",
     icon: User,
-  },
-  {
-    title: "Аккаунт",
-    href: "/settings",
-    icon: Circle,
   },
   {
     title: "Компания",
@@ -28,26 +23,29 @@ const sidebarNavItems = [
   },
 ];
 
-export function SettingsSidebar() {
+export function SettingsSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-col space-y-1">
-      {sidebarNavItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
-            pathname === item.href
-              ? "bg-accent text-foreground"
-              : "text-foreground",
-          )}
-        >
-          <item.icon className="h-4 w-4" />
-          {item.title}
-        </Link>
-      ))}
+      {sidebarNavItems.map((item) => {
+        const href = `/${workspaceSlug}${item.href}`;
+        return (
+          <Link
+            key={item.href}
+            href={href}
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+              pathname === href
+                ? "bg-accent text-foreground"
+                : "text-foreground",
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            {item.title}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

@@ -47,6 +47,35 @@ export const workspaceRouter = createTRPCRouter({
       return workspace;
     }),
 
+  // Получить workspace по slug
+  bySlug: protectedProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const workspace = await workspaceRepository.findBySlug(input.slug);
+
+      if (!workspace) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Workspace не найден",
+        });
+      }
+
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        workspace.id,
+        ctx.session.user.id,
+      );
+
+      if (!access) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Нет доступа к workspace",
+        });
+      }
+
+      return { workspace, role: access.role };
+    }),
+
   // Создать workspace
   create: protectedProcedure
     .input(createWorkspaceSchema)

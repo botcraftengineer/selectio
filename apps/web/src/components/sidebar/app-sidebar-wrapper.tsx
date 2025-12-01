@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { AppSidebar } from "./app-sidebar";
@@ -21,11 +21,20 @@ export function AppSidebarWrapper({
 }: Omit<ComponentProps<typeof AppSidebar>, "onWorkspaceChange"> & {
   workspaces?: WorkspaceWithRole[];
 }) {
-  const router = useRouter();
+  const params = useParams();
+  const workspaceSlug = params.workspaceSlug as string | undefined;
+
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<
     string | undefined
   >(() => {
     if (typeof window === "undefined") return workspaces?.[0]?.id;
+
+    // Если есть workspaceSlug в URL, используем его
+    if (workspaceSlug) {
+      const workspace = workspaces?.find((w) => w.slug === workspaceSlug);
+      if (workspace) return workspace.id;
+    }
+
     const saved = localStorage.getItem(ACTIVE_WORKSPACE_KEY);
     if (saved) {
       const savedWorkspace = workspaces?.find((w) => w.id === saved);
@@ -33,6 +42,15 @@ export function AppSidebarWrapper({
     }
     return workspaces?.[0]?.id;
   });
+
+  useEffect(() => {
+    if (workspaceSlug) {
+      const workspace = workspaces?.find((w) => w.slug === workspaceSlug);
+      if (workspace && workspace.id !== activeWorkspaceId) {
+        setActiveWorkspaceId(workspace.id);
+      }
+    }
+  }, [workspaceSlug, workspaces, activeWorkspaceId]);
 
   useEffect(() => {
     if (activeWorkspaceId) {
@@ -44,7 +62,7 @@ export function AppSidebarWrapper({
     setActiveWorkspaceId(workspaceId);
     const workspace = workspaces?.find((w) => w.id === workspaceId);
     if (workspace) {
-      router.push(`/workspace/${workspace.slug}`);
+      window.location.href = `/${workspace.slug}`;
     }
   };
 
