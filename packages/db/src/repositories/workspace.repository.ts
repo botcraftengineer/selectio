@@ -135,6 +135,68 @@ export class WorkspaceRepository {
       },
     });
   }
+
+  // Создать invite link
+  async createInviteLink(
+    workspaceId: string,
+    createdBy: string,
+    role: "owner" | "admin" | "member" = "member",
+    expiresInDays: number = 7,
+  ) {
+    const { workspaceInvite } = await import("../schema");
+    const { nanoid } = await import("nanoid");
+
+    const token = nanoid(32);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    const [invite] = await db
+      .insert(workspaceInvite)
+      .values({
+        workspaceId,
+        token,
+        role,
+        expiresAt,
+        createdBy,
+      })
+      .returning();
+
+    return invite;
+  }
+
+  // Получить активный invite link для workspace
+  async getActiveInviteLink(workspaceId: string) {
+    const { workspaceInvite } = await import("../schema");
+    const { gt } = await import("drizzle-orm");
+
+    return db.query.workspaceInvite.findFirst({
+      where: (invite, { and, eq }) =>
+        and(
+          eq(invite.workspaceId, workspaceId),
+          gt(invite.expiresAt, new Date()),
+        ),
+      orderBy: (invite, { desc }) => [desc(invite.createdAt)],
+    });
+  }
+
+  // Получить invite по токену
+  async getInviteByToken(token: string) {
+    const { workspaceInvite } = await import("../schema");
+
+    return db.query.workspaceInvite.findFirst({
+      where: eq(workspaceInvite.token, token),
+      with: {
+        workspace: true,
+      },
+    });
+  }
+
+  // Удалить invite
+  async deleteInvite(inviteId: string) {
+    const { workspaceInvite } = await import("../schema");
+    const { eq: eqOp } = await import("drizzle-orm");
+    await db.delete(workspaceInvite).where(eqOp(workspaceInvite.id, inviteId));
+  }
 }
 
 export const workspaceRepository = new WorkspaceRepository();

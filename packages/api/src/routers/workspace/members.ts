@@ -34,6 +34,121 @@ export const workspaceMembers = {
       return member;
     }),
 
+  // Создать invite link
+  createInviteLink: protectedProcedure
+    .input(
+      z.object({
+        workspaceId: z.string().regex(/^ws_[0-9a-f]{32}$/),
+        role: z.enum(["owner", "admin", "member"]).default("member"),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (!access || (access.role !== "owner" && access.role !== "admin")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Недостаточно прав для создания приглашений",
+        });
+      }
+
+      const invite = await workspaceRepository.createInviteLink(
+        input.workspaceId,
+        ctx.session.user.id,
+        input.role,
+      );
+
+      return invite;
+    }),
+
+  // Получить активный invite link
+  getInviteLink: protectedProcedure
+    .input(z.object({ workspaceId: z.string().regex(/^ws_[0-9a-f]{32}$/) }))
+    .query(async ({ input, ctx }) => {
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (!access) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Нет доступа к workspace",
+        });
+      }
+
+      const invite = await workspaceRepository.getActiveInviteLink(
+        input.workspaceId,
+      );
+
+      return invite;
+    }),
+
+  // Получить информацию о приглашении по токену
+  getInviteByToken: protectedProcedure
+    .input(z.object({ token: z.string() }))
+    .query(async ({ input }) => {
+      const invite = await workspaceRepository.getInviteByToken(input.token);
+
+      if (!invite) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Приглашение не найдено",
+        });
+      }
+
+      return invite;
+    }),
+
+  // Принять приглашение
+  acceptInvite: protectedProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const invite = await workspaceRepository.getInviteByToken(input.token);
+
+      if (!invite) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Приглашение не найдено",
+        });
+      }
+
+      // Проверка срока действия
+      if (new Date(invite.expiresAt) < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Срок действия приглашения истек",
+        });
+      }
+
+      // Проверка, не является ли пользователь уже участником
+      const existingMember = await workspaceRepository.checkAccess(
+        invite.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (existingMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Вы уже являетесь участником этого workspace",
+        });
+      }
+
+      // Добавить пользователя в workspace
+      await workspaceRepository.addUser(
+        invite.workspaceId,
+        ctx.session.user.id,
+        invite.role,
+      );
+
+      return { success: true, workspace: invite.workspace };
+    }),
+
   // Удалить пользователя из workspace
   removeUser: protectedProcedure
     .input(

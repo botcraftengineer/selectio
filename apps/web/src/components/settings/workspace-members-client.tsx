@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -56,6 +57,67 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+function MembersLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-9 w-9" />
+        </div>
+      </div>
+
+      {/* Filters Skeleton */}
+      <div className="flex gap-3">
+        <Skeleton className="h-10 w-[140px]" />
+        <Skeleton className="h-10 w-full max-w-sm ml-auto" />
+      </div>
+
+      {/* Table Skeleton */}
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Имя</TableHead>
+              <TableHead>Роль</TableHead>
+              <TableHead className="w-[50px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(5)].map((_, i) => (
+              <TableRow key={`skeleton-${i}`}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-48" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-10 w-[120px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Stats Skeleton */}
+      <Skeleton className="h-4 w-48" />
+    </div>
+  );
+}
+
 export function WorkspaceMembersClient({
   workspaceId,
   currentUserId,
@@ -69,7 +131,8 @@ export function WorkspaceMembersClient({
 
   const { InviteMemberModal, setShowInviteMemberModal } =
     useInviteMemberModal(workspaceId);
-  const { InviteLinkModal, setShowInviteLinkModal } = useInviteLinkModal();
+  const { InviteLinkModal, setShowInviteLinkModal } =
+    useInviteLinkModal(workspaceId);
 
   // Получение участников
   const { data: members, isLoading } = useQuery(
@@ -101,11 +164,7 @@ export function WorkspaceMembersClient({
   }, [members, searchQuery, roleFilter]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Загрузка...</div>
-      </div>
-    );
+    return <MembersLoadingSkeleton />;
   }
 
   return (
