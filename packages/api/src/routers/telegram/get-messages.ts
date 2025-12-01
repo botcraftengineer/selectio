@@ -1,4 +1,5 @@
 import { db, telegramMessage } from "@selectio/db";
+import { uuidv7Schema } from "@selectio/validators";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { protectedProcedure } from "../../trpc";
 
 export const getMessagesRouter = {
   getByConversationId: protectedProcedure
-    .input(z.object({ conversationId: z.string().uuid() }))
+    .input(z.object({ conversationId: uuidv7Schema }))
     .query(async ({ input }) => {
       const messages = await db.query.telegramMessage.findMany({
         where: eq(telegramMessage.conversationId, input.conversationId),

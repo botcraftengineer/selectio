@@ -1,3 +1,4 @@
+import { uuidv7Schema } from "@selectio/validators";
 import { sql } from "drizzle-orm";
 import {
   integer,
@@ -30,7 +31,7 @@ export const responseScreening = pgTable("response_screenings", {
 export const CreateResponseScreeningSchema = createInsertSchema(
   responseScreening,
   {
-    responseId: z.string().uuid(),
+    responseId: uuidv7Schema,
     score: z.number().int().min(1).max(5),
     detailedScore: z.number().int().min(0).max(100),
     questions: z.array(z.string()).optional(),

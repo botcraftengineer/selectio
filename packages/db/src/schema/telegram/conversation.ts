@@ -1,3 +1,4 @@
+import { uuidv7Schema } from "@selectio/validators";
 import { sql } from "drizzle-orm";
 import {
   pgEnum,
@@ -38,7 +39,7 @@ export const CreateTelegramConversationSchema = createInsertSchema(
   telegramConversation,
   {
     chatId: z.string().max(100),
-    responseId: z.string().uuid().optional(),
+    responseId: uuidv7Schema.optional(),
     candidateName: z.string().max(500).optional(),
     status: z.enum(["ACTIVE", "COMPLETED", "CANCELLED"]).default("ACTIVE"),
     metadata: z.string().optional(),

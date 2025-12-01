@@ -3,6 +3,9 @@ import { z } from "zod";
 // Общая схема для workspaceId
 export const workspaceIdSchema = z.string().regex(/^ws_[0-9a-f]{32}$/);
 
+// Общая схема для UUIDv7
+export const uuidv7Schema = z.uuidv7();
+
 export const createWorkspaceSchema = z.object({
   name: z.string().min(1, "Название обязательно").max(100),
   slug: z

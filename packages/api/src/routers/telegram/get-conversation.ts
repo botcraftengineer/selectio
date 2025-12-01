@@ -1,8 +1,9 @@
 import { db, telegramConversation, telegramMessage } from "@selectio/db";
+import { uuidv7Schema } from "@selectio/validators";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
 export const getConversationRouter = {
   getAll: protectedProcedure
@@ -41,7 +42,7 @@ export const getConversationRouter = {
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: uuidv7Schema }))
     .query(async ({ input }) => {
       const conversation = await db.query.telegramConversation.findFirst({
         where: eq(telegramConversation.id, input.id),
@@ -51,7 +52,7 @@ export const getConversationRouter = {
     }),
 
   getByResponseId: protectedProcedure
-    .input(z.object({ responseId: z.string().uuid() }))
+    .input(z.object({ responseId: uuidv7Schema }))
     .query(async () => {
       // TODO: Связать conversation с response через metadata или отдельную таблицу
       // Пока возвращаем первую активную беседу

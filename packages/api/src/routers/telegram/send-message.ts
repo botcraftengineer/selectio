@@ -6,6 +6,7 @@ import {
   telegramMessage,
 } from "@selectio/db";
 import { inngest } from "@selectio/jobs/client";
+import { uuidv7Schema } from "@selectio/validators";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
@@ -60,7 +61,7 @@ export const sendMessageRouter = {
   mutate: protectedProcedure
     .input(
       z.object({
-        conversationId: z.string().uuid(),
+        conversationId: uuidv7Schema,
         text: z.string().min(1),
       }),
     )

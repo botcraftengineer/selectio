@@ -1,4 +1,5 @@
 import { inngest } from "@selectio/jobs/client";
+import { uuidv7Schema } from "@selectio/validators";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
@@ -7,8 +8,8 @@ export const transcribeVoiceRouter = {
   trigger: protectedProcedure
     .input(
       z.object({
-        messageId: z.string().uuid(),
-        fileId: z.string().uuid(),
+        messageId: uuidv7Schema,
+        fileId: uuidv7Schema,
       }),
     )
     .mutation(async ({ input }) => {
