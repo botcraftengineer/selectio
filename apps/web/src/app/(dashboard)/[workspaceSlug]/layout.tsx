@@ -13,7 +13,7 @@ export default async function WorkspaceLayout({
   const session = await getSession();
 
   if (!session?.user) {
-    redirect("/auth/login");
+    redirect("/auth/signin");
   }
 
   const { workspaceSlug } = await params;

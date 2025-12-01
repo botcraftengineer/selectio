@@ -6,6 +6,7 @@ export const accountFormSchema = z.object({
     .min(2, { message: "Name must be at least 2 characters." })
     .max(30, { message: "Name must not be longer than 30 characters." }),
   language: z.string({ message: "Please select a language." }).optional(),
+  image: z.string().nullable().optional(),
 });
 
 export type AccountFormValues = z.infer<typeof accountFormSchema>;

@@ -11,7 +11,7 @@ export default function AccessDeniedPage() {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/auth/login"); // redirect to login page
+          router.push("/auth/signin"); // redirect to login page
         },
       },
     });

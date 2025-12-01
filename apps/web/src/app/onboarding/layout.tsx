@@ -10,7 +10,7 @@ export default async function OnboardingLayout({
   const session = await getSession();
 
   if (!session?.user) {
-    redirect("/auth/login");
+    redirect("/auth/signin");
   }
 
   return <>{children}</>;

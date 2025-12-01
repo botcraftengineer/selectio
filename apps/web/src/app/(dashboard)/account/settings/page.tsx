@@ -207,7 +207,20 @@ export default function AccountSettingsPage() {
           </div>
         </CardContent>
         <CardFooter className="border-t px-6 py-4">
-          <Button disabled>Сохранить изменения</Button>
+          <Button
+            onClick={() =>
+              updateAccount.mutate({
+                name,
+                language: user?.language || "ru",
+                image: avatar,
+              })
+            }
+            disabled={
+              updateAccount.isPending || !avatar || avatar === user?.image
+            }
+          >
+            Сохранить изменения
+          </Button>
         </CardFooter>
       </Card>
 

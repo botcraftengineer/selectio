@@ -46,7 +46,7 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       setEmail(storedEmail);
     } else {
       // Redirect back to login if no email found
-      router.push("/auth/login");
+      router.push("/auth/signin");
     }
   }, [router]);
 
