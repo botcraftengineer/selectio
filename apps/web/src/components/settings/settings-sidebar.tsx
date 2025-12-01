@@ -1,11 +1,16 @@
 "use client";
 
 import { cn } from "@selectio/ui";
-import { Building2, Globe, User } from "lucide-react";
+import { Building2, Globe, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sidebarNavItems = [
+  {
+    title: "Workspace",
+    href: "/settings",
+    icon: Settings,
+  },
   {
     title: "Профиль",
     href: "/settings/profile",

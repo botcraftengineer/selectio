@@ -1,8 +1,9 @@
 import { getDownloadUrl, getFileUrl } from "@selectio/lib";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
-export const getFileUrlRouter = createTRPCRouter({
+export const getFileUrlRouter = {
   getUrl: protectedProcedure
     .input(z.object({ key: z.string() }))
     .query(async ({ input }) => {
@@ -12,4 +13,4 @@ export const getFileUrlRouter = createTRPCRouter({
         : await getDownloadUrl(input.key);
       return { url };
     }),
-});
+} satisfies TRPCRouterRecord;

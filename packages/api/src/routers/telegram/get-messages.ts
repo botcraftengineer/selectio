@@ -1,9 +1,10 @@
 import { db, telegramMessage } from "@selectio/db";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
-export const getMessagesRouter = createTRPCRouter({
+export const getMessagesRouter = {
   getByConversationId: protectedProcedure
     .input(z.object({ conversationId: z.string().uuid() }))
     .query(async ({ input }) => {
@@ -56,4 +57,4 @@ export const getMessagesRouter = createTRPCRouter({
 
       return messages;
     }),
-});
+} satisfies TRPCRouterRecord;

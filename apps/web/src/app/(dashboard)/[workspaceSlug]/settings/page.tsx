@@ -1,10 +1,50 @@
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function SettingsPage({
-  params,
-}: {
-  params: Promise<{ workspaceSlug: string }>;
-}) {
-  const { workspaceSlug } = await params;
-  redirect(`/${workspaceSlug}/settings/profile`);
+import { Skeleton } from "@selectio/ui";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { WorkspaceForm } from "~/components/settings/workspace-form";
+import { useTRPC } from "~/trpc/react";
+
+export default function SettingsPage() {
+  const trpc = useTRPC();
+  const params = useParams();
+  const workspaceSlug = params.workspaceSlug as string;
+
+  const { data: workspace, isLoading } = useQuery(
+    trpc.workspace.getBySlug.queryOptions({ slug: workspaceSlug }),
+  );
+
+  if (isLoading) {
+    return (
+      <div className="rounded-lg border p-6 space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-32" />
+      </div>
+    );
+  }
+
+  if (!workspace) {
+    return (
+      <div className="rounded-lg border p-6">
+        <p className="text-muted-foreground">Workspace не найден</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border p-6">
+        <WorkspaceForm
+          initialData={{
+            name: workspace.name,
+            slug: workspace.slug,
+            logo: workspace.logo,
+          }}
+          workspaceId={workspace.id}
+        />
+      </div>
+    </div>
+  );
 }

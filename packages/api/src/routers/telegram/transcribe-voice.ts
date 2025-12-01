@@ -1,8 +1,9 @@
 import { inngest } from "@selectio/jobs/client";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
-export const transcribeVoiceRouter = createTRPCRouter({
+export const transcribeVoiceRouter = {
   trigger: protectedProcedure
     .input(
       z.object({
@@ -24,4 +25,4 @@ export const transcribeVoiceRouter = createTRPCRouter({
         messageId: input.messageId,
       };
     }),
-});
+} satisfies TRPCRouterRecord;

@@ -6,10 +6,11 @@ import {
   telegramMessage,
 } from "@selectio/db";
 import { inngest } from "@selectio/jobs/client";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
-export const sendMessageRouter = createTRPCRouter({
+export const sendMessageRouter = {
   send: protectedProcedure
     .input(
       CreateTelegramMessageSchema.extend({
@@ -97,4 +98,4 @@ export const sendMessageRouter = createTRPCRouter({
 
       return message;
     }),
-});
+} satisfies TRPCRouterRecord;
