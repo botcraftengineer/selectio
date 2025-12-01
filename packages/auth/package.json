@@ -20,11 +20,11 @@
   "dependencies": {
     "@selectio/config": "workspace:*",
     "@selectio/db": "workspace:*",
-    "better-auth": "1.4.4-beta.2",
+    "better-auth": "1.4.4",
     "zod": "4.1.13"
   },
   "devDependencies": {
-    "@better-auth/cli": "1.4.4-beta.2",
+    "@better-auth/cli": "1.4.4",
     "@selectio/tsconfig": "workspace:*",
     "typescript": "5.9.3"
   }
