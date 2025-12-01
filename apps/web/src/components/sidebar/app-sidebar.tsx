@@ -17,7 +17,12 @@ import {
   IconSettings,
 } from "@tabler/icons-react";
 import type * as React from "react";
-import { NavMain, NavSecondary, NavUser } from "~/components/sidebar";
+import {
+  NavMain,
+  NavSecondary,
+  NavUser,
+  WorkspaceSwitcher,
+} from "~/components/sidebar";
 
 const data = {
   navMain: [
@@ -47,8 +52,19 @@ const data = {
   ],
 };
 
+type WorkspaceWithRole = {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  role: "owner" | "admin" | "member";
+};
+
 export function AppSidebar({
   user,
+  workspaces,
+  activeWorkspaceId,
+  onWorkspaceChange,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -56,6 +72,9 @@ export function AppSidebar({
     email: string;
     avatar: string;
   };
+  workspaces?: WorkspaceWithRole[];
+  activeWorkspaceId?: string;
+  onWorkspaceChange?: (workspaceId: string) => void;
 }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -73,6 +92,13 @@ export function AppSidebar({
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        {workspaces && workspaces.length > 0 && (
+          <WorkspaceSwitcher
+            workspaces={workspaces}
+            activeWorkspaceId={activeWorkspaceId}
+            onWorkspaceChange={onWorkspaceChange}
+          />
+        )}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
