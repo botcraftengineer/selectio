@@ -1,8 +1,9 @@
+import { sql } from "drizzle-orm";
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { workspace } from "../workspace/workspace";
 
 export const integration = pgTable("integrations", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
 
   // Workspace к которому принадлежит интеграция
   workspaceId: uuid("workspace_id")

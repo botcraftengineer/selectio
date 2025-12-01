@@ -1,7 +1,7 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const workspace = pgTable("workspaces", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: text("id").primaryKey(),
 
   // Название workspace (компании)
   name: text("name").notNull(),

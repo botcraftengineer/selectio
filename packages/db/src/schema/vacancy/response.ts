@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   jsonb,
   pgEnum,
@@ -30,7 +31,7 @@ export const hrSelectionStatusEnum = pgEnum("hr_selection_status", [
 ]);
 
 export const vacancyResponse = pgTable("vacancy_responses", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
   vacancyId: varchar("vacancy_id", { length: 50 })
     .notNull()
     .references(() => vacancy.id, { onDelete: "cascade" }),

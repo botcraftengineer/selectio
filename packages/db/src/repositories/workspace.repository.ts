@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { db } from "../client";
 import { userWorkspace, workspace } from "../schema";
 
@@ -11,7 +12,11 @@ export class WorkspaceRepository {
     website?: string;
     logo?: string;
   }) {
-    const [newWorkspace] = await db.insert(workspace).values(data).returning();
+    const id = `ws_${nanoid()}`;
+    const [newWorkspace] = await db
+      .insert(workspace)
+      .values({ ...data, id })
+      .returning();
     return newWorkspace;
   }
 

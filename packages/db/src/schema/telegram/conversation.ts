@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgEnum,
   pgTable,
@@ -18,7 +19,7 @@ export const conversationStatusEnum = pgEnum("conversation_status", [
 ]);
 
 export const telegramConversation = pgTable("telegram_conversations", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
   chatId: varchar("chat_id", { length: 100 }).notNull().unique(),
   responseId: uuid("response_id").references(() => vacancyResponse.id, {
     onDelete: "cascade",

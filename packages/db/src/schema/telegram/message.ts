@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgEnum,
   pgTable,
@@ -23,7 +24,7 @@ export const messageContentTypeEnum = pgEnum("message_content_type", [
 ]);
 
 export const telegramMessage = pgTable("telegram_messages", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
   conversationId: uuid("conversation_id")
     .notNull()
     .references(() => telegramConversation.id, { onDelete: "cascade" }),

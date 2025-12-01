@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgEnum,
   pgTable,
@@ -12,7 +13,7 @@ import { z } from "zod";
 export const fileProviderEnum = pgEnum("file_provider", ["S3"]);
 
 export const file = pgTable("files", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
   provider: fileProviderEnum("provider").default("S3").notNull(),
   key: text("key").notNull(),
   fileName: varchar("file_name", { length: 500 }).notNull(),

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   integer,
   jsonb,
@@ -14,7 +15,7 @@ import { vacancyResponse } from "./response";
  * Таблица для результатов скрининга откликов
  */
 export const responseScreening = pgTable("response_screenings", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v7()`),
   responseId: uuid("response_id")
     .notNull()
     .references(() => vacancyResponse.id, { onDelete: "cascade" }),
