@@ -63,7 +63,7 @@ export async function performLogin(
   log.info("✅ Авторизация выполнена!");
   log.info(`🌐 Текущий URL: ${page.url()}`);
 
-  const cookies = await page.cookies();
+  const cookies = await page.browser().cookies();
   log.info(`🍪 Получено ${cookies.length} cookies`);
 
   await saveCookies("hh", cookies, workspaceId);

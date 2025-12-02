@@ -1,7 +1,7 @@
 import os from "node:os";
 import { getIntegrationCredentials } from "@selectio/db";
 import { Log } from "crawlee";
-import type { Browser, Page } from "puppeteer";
+import type { Browser, BrowserContext, CookieData, Page } from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import {
@@ -29,7 +29,7 @@ async function setupBrowser(): Promise<Browser> {
 
 async function setupPage(
   browser: Browser,
-  savedCookies: Parameters<Page["setCookie"]> | null,
+  savedCookies: Parameters<BrowserContext["setCookie"]> | null,
 ): Promise<Page> {
   const page = await browser.newPage();
 
@@ -59,12 +59,13 @@ async function setupPage(
   // Restore cookies
   if (savedCookies && savedCookies.length > 0) {
     console.log("🍪 Восстанавливаем сохраненные куки...");
-    await page.setCookie(...savedCookies);
+    await page.browserContext().setCookie(...savedCookies);
   }
 
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  );
+  await page.setUserAgent({
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  });
 
   await page.setViewport({
     width: 1920,
@@ -103,7 +104,7 @@ async function checkAndPerformLogin(
   }
 
   // Сохраняем куки после успешной проверки/логина
-  const cookies = await page.cookies();
+  const cookies = await page.browserContext().cookies();
   await saveCookies("hh", cookies, workspaceId);
 }
 
@@ -132,7 +133,7 @@ export async function runEnricher(workspaceId?: string) {
   const browser = await setupBrowser();
 
   try {
-    const page = await setupPage(browser, savedCookies);
+    const page = await setupPage(browser, savedCookies as CookieData[]);
 
     // Проверяем авторизацию
     await checkAndPerformLogin(page, email, password, workspaceId);

@@ -188,7 +188,7 @@ export async function runHHParser(options?: {
         throw error;
       }
     },
-    maxRequestsPerCrawl: 10,
+    maxRequestsPerCrawl: 100,
     requestHandlerTimeoutSecs: HH_CONFIG.timeouts.requestHandler,
   });
 

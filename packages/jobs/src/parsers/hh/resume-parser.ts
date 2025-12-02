@@ -80,20 +80,6 @@ export async function parseResumeExperience(
 ): Promise<ResumeExperience> {
   console.log(`📄 Переход на страницу резюме: ${url}`);
 
-  // Set up 403 error logging
-  const log403Handler = async (response: {
-    status: () => number;
-    url: () => string;
-    request: () => { method: () => string };
-  }) => {
-    if (response.status() === 403) {
-      console.log(`🚫 403 FORBIDDEN: ${response.url()}`);
-      console.log(`   Method: ${response.request().method()}`);
-    }
-  };
-
-  page.on("response", log403Handler);
-
   // Переходим на страницу резюме, если мы еще не там
   if (page.url() !== url) {
     await page.goto(url, {
@@ -288,9 +274,6 @@ export async function parseResumeExperience(
       console.log(`   ${error.message}`);
     }
   }
-
-  // Clean up the 403 logging handler
-  page.off("response", log403Handler);
 
   return {
     experience,

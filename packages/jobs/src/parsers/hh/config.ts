@@ -20,7 +20,7 @@ export const HH_CONFIG = {
     scrollDelay: { min: 500, max: 1500 }, // Задержка при скролле
   },
   features: {
-    parseContacts: true, // Включить/выключить парсинг контактов (отключено из-за 403)
+    parseContacts: true,
   },
   puppeteer: {
     headless: true,

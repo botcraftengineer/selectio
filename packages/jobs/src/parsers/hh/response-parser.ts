@@ -261,7 +261,7 @@ async function filterResponsesNeedingDetails(
       if (!hasDetails) {
         responsesNeedingDetails.push(response);
         console.log(
-          `� ПТребуется парсинг ${i + 1}/${responses.length}: ${response.name}`,
+          `Требуется парсинг ${i + 1}/${responses.length}: ${response.name}`,
         );
       } else {
         console.log(
