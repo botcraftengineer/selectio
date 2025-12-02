@@ -58,9 +58,9 @@ async function setupPage(
     await page.setCookie(...savedCookies);
   }
 
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  );
+  await page.setUserAgent({
+    userAgent: HH_CONFIG.userAgent,
+  });
 
   await page.setViewport({
     width: 1920,
@@ -107,9 +107,9 @@ export const refreshSingleResumeFunction = inngest.createFunction(
   async ({ event, step }) => {
     const { responseId } = event.data;
 
-    console.log(`🚀 Запуск обновления резюме для отклика: ${responseId}`);
-
     const response = await step.run("fetch-response", async () => {
+      console.log(`🚀 Запуск обновления резюме для отклика: ${responseId}`);
+
       const result = await db.query.vacancyResponse.findFirst({
         where: eq(vacancyResponse.id, responseId),
         columns: {

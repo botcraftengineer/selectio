@@ -5,6 +5,8 @@ export const HH_CONFIG = {
     vacancies: "https://hh.ru/employer/vacancies?hhtmFrom=vacancy",
     baseUrl: "https://hh.ru",
   },
+  userAgent:
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   timeouts: {
     networkIdle: 30000,
     selector: 10000,

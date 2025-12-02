@@ -57,13 +57,13 @@ async function downloadResumePdf(page: Page): Promise<Buffer | null> {
     const cookieString = cookies
       .map((cookie) => `${cookie.name}=${cookie.value}`)
       .join("; ");
-
+    console.log(`🍪 Куки: ${cookieString}`);
     const response = await fetch(fullPdfUrl, {
       headers: {
         Cookie: cookieString,
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": HH_CONFIG.userAgent,
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
