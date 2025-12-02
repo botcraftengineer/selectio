@@ -83,6 +83,20 @@ export const analyzeInterviewFunction = inngest.createFunction(
           throw new Error("Следующий вопрос не сгенерирован");
         }
 
+        // Умная пауза перед отправкой (имитация естественного времени набора)
+        const questionLength = result.nextQuestion.length;
+        // Базовая пауза 1-2 секунды + ~30-50мс на символ
+        const baseDelay = 1000 + Math.random() * 1000;
+        const typingDelay = questionLength * (30 + Math.random() * 20);
+        const totalDelay = Math.min(baseDelay + typingDelay, 5000); // Максимум 5 секунд
+
+        console.log("⏳ Пауза перед отправкой вопроса", {
+          delay: Math.round(totalDelay),
+          questionLength,
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, totalDelay));
+
         // Создаем запись сообщения в БД
         const [newMessage] = await db
           .insert(telegramMessage)
