@@ -29,6 +29,7 @@ interface ResponseActionsProps {
   resumeUrl: string;
   candidateName?: string | null;
   telegramUsername?: string | null;
+  phone?: string | null;
 }
 
 export function ResponseActions({
@@ -36,6 +37,7 @@ export function ResponseActions({
   resumeUrl,
   candidateName,
   telegramUsername,
+  phone,
 }: ResponseActionsProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSendingWelcome, setIsSendingWelcome] = useState(false);
@@ -85,20 +87,26 @@ export function ResponseActions({
   };
 
   const handleSendWelcomeMessage = async () => {
-    if (!telegramUsername) {
-      toast.error("У кандидата не указан Telegram username");
+    if (!telegramUsername && !phone) {
+      toast.error(
+        "У кандидата не указаны ни Telegram username, ни номер телефона",
+      );
       return;
     }
 
     setIsSendingWelcome(true);
     try {
-      const result = await triggerSendWelcome(responseId, telegramUsername);
+      const result = await triggerSendWelcome(
+        responseId,
+        telegramUsername,
+        phone,
+      );
       if (!result.success) {
         toast.error("Не удалось отправить приветствие");
         return;
       }
       toast.success(
-        `Приветствие отправлено ${candidateName ? candidateName : `@${telegramUsername}`}`,
+        `Приветствие отправлено ${candidateName ? candidateName : telegramUsername ? `@${telegramUsername}` : phone}`,
       );
     } catch (error) {
       console.error("Ошибка отправки приветствия:", error);
@@ -123,7 +131,7 @@ export function ResponseActions({
 
         <DropdownMenuItem
           onClick={handleSendWelcomeMessage}
-          disabled={isSendingWelcome || !telegramUsername}
+          disabled={isSendingWelcome}
         >
           <IconSend className="h-4 w-4" />
           {isSendingWelcome ? "Отправка..." : "Отправить приветствие"}

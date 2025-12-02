@@ -123,6 +123,8 @@ export function ResponseCards({ responses }: ResponseCardsProps) {
                 responseId={response.id}
                 resumeUrl={response.resumeUrl}
                 candidateName={response.candidateName}
+                telegramUsername={response.telegramUsername}
+                phone={response.phone}
               />
             </div>
           </CardContent>

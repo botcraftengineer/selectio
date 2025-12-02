@@ -217,14 +217,19 @@ export async function triggerRefreshSingleResume(responseId: string) {
   }
 }
 
-export async function triggerSendWelcome(responseId: string, username: string) {
+export async function triggerSendWelcome(
+  responseId: string,
+  username?: string | null,
+  phone?: string | null,
+) {
   try {
     const { inngest } = await import("@selectio/jobs/client");
     await inngest.send({
       name: "candidate/welcome",
       data: {
         responseId,
-        username,
+        username: username || undefined,
+        phone: phone || undefined,
       },
     });
     return { success: true as const };

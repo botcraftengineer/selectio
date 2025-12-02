@@ -32,7 +32,8 @@ export const vacancyResponsesRefreshDataSchema = z.object({
 // Schema for candidate welcome message event data
 export const candidateWelcomeDataSchema = z.object({
   responseId: z.string().min(1, "Response ID is required"),
-  username: z.string().min(1, "Username is required"),
+  username: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 // Schema for batch candidate welcome message event data

@@ -148,6 +148,7 @@ export function ResponseRow({
             resumeUrl={response.resumeUrl}
             candidateName={response.candidateName}
             telegramUsername={response.telegramUsername}
+            phone={response.phone}
           />
         </div>
       </TableCell>

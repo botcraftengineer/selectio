@@ -4,7 +4,7 @@ import {
   telegramMessage,
   vacancyResponse,
 } from "@selectio/db/schema";
-import { sendMessageByUsername } from "@selectio/tg-client";
+import { sendMessageByPhone, sendMessageByUsername } from "@selectio/tg-client";
 import { generateWelcomeMessage } from "../services/candidate-welcome-service";
 import { inngest } from "./client";
 
@@ -32,13 +32,14 @@ export const sendCandidateWelcomeBatchFunction = inngest.createFunction(
 
     console.log(`📋 Всего откликов для обработки: ${allResponseIds.length}`);
 
-    // Получаем данные откликов с username
+    // Получаем данные откликов с username или телефоном
     const responses = await step.run("fetch-responses", async () => {
       const results = await db.query.vacancyResponse.findMany({
         where: (fields, { inArray }) => inArray(fields.id, allResponseIds),
         columns: {
           id: true,
           telegramUsername: true,
+          phone: true,
           candidateName: true,
           vacancyId: true,
         },
@@ -48,35 +49,61 @@ export const sendCandidateWelcomeBatchFunction = inngest.createFunction(
       return results;
     });
 
-    // Фильтруем отклики с username
-    const responsesWithUsername = responses.filter((r) => r.telegramUsername);
-    const skippedCount = responses.length - responsesWithUsername.length;
+    // Фильтруем отклики с username или телефоном
+    const responsesWithContact = responses.filter(
+      (r) => r.telegramUsername || r.phone,
+    );
+    const skippedCount = responses.length - responsesWithContact.length;
 
     console.log(
-      `📤 Отклики с username: ${responsesWithUsername.length}, пропущено: ${skippedCount}`,
+      `📤 Отклики с контактами: ${responsesWithContact.length}, пропущено: ${skippedCount}`,
     );
 
     // Обрабатываем каждый отклик
     const results = await Promise.allSettled(
-      responsesWithUsername.map(async (response) => {
+      responsesWithContact.map(async (response) => {
         return await step.run(`send-welcome-${response.id}`, async () => {
           try {
             // Генерируем приветственное сообщение
             const welcomeMessage = await generateWelcomeMessage(response.id);
 
-            // Отправляем сообщение
-            const username = response.telegramUsername;
-            if (!username) {
-              throw new Error("Username is missing");
+            let sendResult:
+              | { success: boolean; message: string; chatId?: string }
+              | undefined;
+
+            // Пытаемся отправить по username, если он есть
+            if (response.telegramUsername) {
+              console.log(
+                `📨 Попытка отправки по username: @${response.telegramUsername}`,
+              );
+              sendResult = await sendMessageByUsername(
+                response.telegramUsername,
+                welcomeMessage,
+              );
+
+              if (!sendResult.success && response.phone) {
+                console.log(
+                  `⚠️ Не удалось отправить по username, пробуем по телефону`,
+                );
+              }
             }
 
-            const sendResult = await sendMessageByUsername(
-              username,
-              welcomeMessage,
-            );
+            // Если username не сработал или его нет, пробуем по телефону
+            if ((!sendResult || !sendResult.success) && response.phone) {
+              console.log(
+                `📞 Попытка отправки по номеру телефона: ${response.phone}`,
+              );
+              sendResult = await sendMessageByPhone(
+                response.phone,
+                welcomeMessage,
+                response.candidateName || undefined,
+              );
+            }
 
-            if (!sendResult.success) {
-              throw new Error(sendResult.message);
+            if (!sendResult || !sendResult.success) {
+              throw new Error(
+                sendResult?.message || "Не удалось отправить сообщение",
+              );
             }
 
             // Сохраняем беседу если получили chatId

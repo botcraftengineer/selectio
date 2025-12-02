@@ -47,3 +47,9 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: rollout status deployment/selectio-jobs
+      - name: Sync Inngest App
+        uses: kodermax/kubectl-aws-eks@main
+        with:
+          args: |
+            run curl-sync --image=curlimages/curl:latest --rm -i --restart=Never -- \
+            curl -X PUT https://jobs.spilwood.ru/api/inngest

@@ -4,7 +4,7 @@ import {
   telegramMessage,
   vacancyResponse,
 } from "@selectio/db/schema";
-import { sendMessageByUsername } from "@selectio/tg-client";
+import { sendMessageByPhone, sendMessageByUsername } from "@selectio/tg-client";
 import { generateWelcomeMessage } from "../services/candidate-welcome-service";
 import { inngest } from "./client";
 
@@ -19,7 +19,7 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
   },
   { event: "candidate/welcome" },
   async ({ event, step }) => {
-    const { responseId, username } = event.data;
+    const { responseId, username, phone } = event.data;
 
     // Получаем данные отклика
     const response = await step.run("fetch-response-data", async () => {
@@ -68,29 +68,71 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
       console.log("📤 Отправка сообщения пользователю", {
         responseId,
         username,
+        phone,
       });
 
       try {
-        const sendResult = await sendMessageByUsername(
-          username,
-          welcomeMessage,
-        );
+        let sendResult:
+          | { success: boolean; message: string; chatId?: string }
+          | undefined;
 
-        if (!sendResult.success) {
-          throw new Error(sendResult.message);
+        // Пытаемся отправить по username, если он есть
+        if (username) {
+          console.log(`📨 Попытка отправки по username: @${username}`);
+          sendResult = await sendMessageByUsername(username, welcomeMessage);
+
+          if (sendResult.success) {
+            console.log("✅ Сообщение отправлено по username", {
+              responseId,
+              username,
+              chatId: sendResult.chatId,
+            });
+            return sendResult;
+          }
+
+          console.log(
+            `⚠️ Не удалось отправить по username: ${sendResult.message}`,
+          );
         }
 
-        console.log("✅ Сообщение отправлено", {
-          responseId,
-          username,
-          chatId: sendResult.chatId,
-        });
+        // Если username не сработал или его нет, пробуем по телефону
+        if (phone) {
+          console.log(`📞 Попытка отправки по номеру телефона: ${phone}`);
+          sendResult = await sendMessageByPhone(
+            phone,
+            welcomeMessage,
+            response.candidateName || undefined,
+          );
 
-        return sendResult;
+          if (sendResult.success) {
+            console.log("✅ Сообщение отправлено по номеру телефона", {
+              responseId,
+              phone,
+              chatId: sendResult.chatId,
+            });
+            return sendResult;
+          }
+
+          console.log(
+            `⚠️ Не удалось отправить по телефону: ${sendResult.message}`,
+          );
+        }
+
+        // Если ничего не сработало
+        throw new Error(
+          username && phone
+            ? `Не удалось отправить сообщение ни по username (@${username}), ни по телефону (${phone})`
+            : username
+              ? `Не удалось отправить сообщение по username (@${username}), телефон не указан`
+              : phone
+                ? `Username не указан, не удалось отправить по телефону (${phone})`
+                : "Не указаны ни username, ни телефон",
+        );
       } catch (error) {
         console.error("❌ Ошибка отправки сообщения в Telegram", {
           responseId,
           username,
+          phone,
           error,
         });
         throw error;

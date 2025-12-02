@@ -1,1 +1,7 @@
-export { checkUsername, initClient, sendMessageByUsername, tg } from "./client";
+export {
+  checkUsername,
+  initClient,
+  sendMessageByPhone,
+  sendMessageByUsername,
+  tg,
+} from "./client";
