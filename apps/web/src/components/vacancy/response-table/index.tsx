@@ -1,6 +1,13 @@
 "use client";
 
-import { Pagination, Table, TableBody } from "@selectio/ui";
+import {
+  Pagination,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@selectio/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useTRPC } from "~/trpc/react";
@@ -35,8 +42,8 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
     handleSelectOne,
   } = useResponseTable();
 
-  const { data, isLoading } = useQuery(
-    trpc.vacancy.responses.list.queryOptions({
+  const { data, isLoading, isFetching } = useQuery({
+    ...trpc.vacancy.responses.list.queryOptions({
       vacancyId,
       page: currentPage,
       limit: ITEMS_PER_PAGE,
@@ -44,7 +51,8 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
       sortDirection,
       screeningFilter,
     }),
-  );
+    placeholderData: (previousData) => previousData,
+  });
 
   const {
     isProcessing,
@@ -82,9 +90,62 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
     }
   };
 
+  // Первоначальная загрузка - показываем простой индикатор
   if (isLoading) {
     return <div className="text-center py-8">Загрузка...</div>;
   }
+
+  // Рендерим скелетон для строк таблицы при фоновой загрузке
+  const renderTableContent = () => {
+    if (isFetching && !isLoading) {
+      // Показываем скелетон во время фоновой загрузки (сортировка/пагинация)
+      return Array.from({ length: 5 }, (_, i) => (
+        <TableRow key={`skeleton-${i}`}>
+          <TableCell>
+            <Skeleton className="h-5 w-5" />
+          </TableCell>
+          <TableCell>
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-16" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-8 w-24" />
+          </TableCell>
+        </TableRow>
+      ));
+    }
+
+    if (responses.length === 0) {
+      return <EmptyState hasResponses={total > 0} colSpan={8} />;
+    }
+
+    return responses.map((response: VacancyResponse) => (
+      <ResponseRow
+        key={response.id}
+        response={response}
+        accessToken={accessToken}
+        isSelected={selectedIds.has(response.id)}
+        onSelect={handleSelectOne}
+      />
+    ));
+  };
 
   return (
     <div className="space-y-4">
@@ -123,21 +184,7 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
             sortDirection={sortDirection}
             onSort={handleSort}
           />
-          <TableBody>
-            {responses.length === 0 ? (
-              <EmptyState hasResponses={total > 0} colSpan={8} />
-            ) : (
-              responses.map((response: VacancyResponse) => (
-                <ResponseRow
-                  key={response.id}
-                  response={response}
-                  accessToken={accessToken}
-                  isSelected={selectedIds.has(response.id)}
-                  onSelect={handleSelectOne}
-                />
-              ))
-            )}
-          </TableBody>
+          <TableBody>{renderTableContent()}</TableBody>
         </Table>
 
         {total > 0 && (
