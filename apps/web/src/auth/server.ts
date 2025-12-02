@@ -33,7 +33,7 @@ export const auth = initAuth({
   }) => {
     await sendEmail({
       to: [email],
-      subject: type === "sign-in" ? "Your Sign In Code" : "Verify Your Email",
+      subject: type === "sign-in" ? "Код для входа" : "Подтвердите email",
       react: OtpSignInEmail({ otp, isSignUp: type !== "sign-in" }),
     });
   },

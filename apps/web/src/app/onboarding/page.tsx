@@ -52,7 +52,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-4">
+    <div className="relative flex min-h-screen items-start justify-center p-4 pt-20">
       {/* Background gradient */}
       <div className="absolute inset-0 isolate overflow-hidden bg-white">
         <div className="absolute inset-y-0 left-1/2 w-[1200px] -translate-x-1/2 [mask-composite:intersect] [mask-image:linear-gradient(black,transparent_320px),linear-gradient(90deg,transparent,black_5%,black_95%,transparent)]">

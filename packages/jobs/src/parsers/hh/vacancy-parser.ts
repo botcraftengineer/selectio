@@ -1,5 +1,4 @@
 import type { Page } from "puppeteer";
-import { stripHtml } from "string-strip-html";
 import {
   hasVacancyDescription,
   saveBasicVacancy,
@@ -239,8 +238,7 @@ async function parseVacancyDetails(page: Page, url: string): Promise<string> {
       (el) => (el as HTMLElement).innerHTML,
     );
 
-    const { result } = stripHtml(htmlContent as string);
-    return result.trim();
+    return htmlContent.trim();
   } catch (_e) {
     console.log("⚠️ Не удалось получить описание вакансии.");
     return "";
