@@ -20,23 +20,25 @@ async function downloadResumePdf(page: Page): Promise<Buffer | null> {
       return null;
     }
 
-    // Кликаем по кнопке
+    // Кликаем по кнопке и сразу получаем URL из появившейся ссылки
     await downloadButton.click();
 
-    // Ждем появления ссылки на PDF
-    await page.waitForSelector('a[data-qa="resume-export-pdf"]', {
-      timeout: 5000,
-    });
-
-    const pdfLink = await page.$('a[data-qa="resume-export-pdf"]');
+    // Ждем появления ссылки на PDF с небольшим таймаутом
+    const pdfLink = await page
+      .waitForSelector('a[data-qa="resume-export-pdf"]', {
+        timeout: 3000,
+      })
+      .catch(() => null);
 
     if (!pdfLink) {
-      console.log("⚠️ Ссылка на PDF не найдена");
+      console.log("⚠️ Ссылка на PDF не появилась");
       return null;
     }
 
-    // Получаем URL PDF
-    const pdfUrl = await pdfLink.evaluate((el) => el.getAttribute("href"));
+    // Получаем URL PDF до любых действий со страницей
+    const pdfUrl = await pdfLink
+      .evaluate((el) => el.getAttribute("href"))
+      .catch(() => null);
 
     if (!pdfUrl) {
       console.log("⚠️ URL PDF не найден");
@@ -50,18 +52,27 @@ async function downloadResumePdf(page: Page): Promise<Buffer | null> {
 
     console.log(`📄 Скачивание PDF: ${fullPdfUrl}`);
 
-    // Скачиваем PDF
-    const response = await page.goto(fullPdfUrl, {
-      waitUntil: "networkidle0",
-      timeout: 30000,
+    // Скачиваем PDF через fetch вместо page.goto, чтобы не потерять текущую страницу
+    const cookies = await page.browserContext().cookies();
+    const cookieString = cookies
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+
+    const response = await fetch(fullPdfUrl, {
+      headers: {
+        Cookie: cookieString,
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
     });
 
-    if (!response) {
-      console.log("⚠️ Не удалось получить ответ от сервера");
+    if (!response.ok) {
+      console.log(`⚠️ Ошибка загрузки PDF: ${response.status}`);
       return null;
     }
 
-    const buffer = await response.buffer();
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
     console.log(`✅ PDF скачан, размер: ${buffer.length} байт`);
 
     return buffer;

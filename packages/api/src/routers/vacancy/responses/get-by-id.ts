@@ -12,6 +12,7 @@ export const getById = protectedProcedure
         vacancy: true,
         screening: true,
         conversation: true,
+        resumePdfFile: true,
       },
     });
   });

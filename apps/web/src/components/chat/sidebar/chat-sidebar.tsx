@@ -1,4 +1,5 @@
 import { CandidateInfo } from "./candidate-info";
+import { ResumePdfLink } from "./resume-pdf-link";
 import { ScreeningInfo } from "./screening-info";
 import { StatusInfo } from "./status-info";
 import { VacancyInfo } from "./vacancy-info";
@@ -10,6 +11,10 @@ interface ChatSidebarProps {
     about?: string | null;
     status?: string | null;
     createdAt?: Date | null;
+    resumePdfFile?: {
+      key: string;
+      fileName: string;
+    } | null;
     screening?: {
       score: number | null;
       detailedScore?: number | null;
@@ -35,6 +40,16 @@ export function ChatSidebar({
           chatId={chatId}
           about={responseData?.about}
         />
+
+        {responseData?.resumePdfFile && (
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Резюме</h2>
+            <ResumePdfLink
+              fileKey={responseData.resumePdfFile.key}
+              fileName={responseData.resumePdfFile.fileName}
+            />
+          </div>
+        )}
 
         {responseData?.screening && (
           <ScreeningInfo

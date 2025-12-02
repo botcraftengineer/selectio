@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+import { file } from "../file";
 import { telegramConversation } from "../telegram/conversation";
 import { workspace } from "../workspace/workspace";
 import { vacancyResponse } from "./response";
@@ -27,6 +28,10 @@ export const vacancyResponseRelations = relations(
     conversation: one(telegramConversation, {
       fields: [vacancyResponse.id],
       references: [telegramConversation.responseId],
+    }),
+    resumePdfFile: one(file, {
+      fields: [vacancyResponse.resumePdfFileId],
+      references: [file.id],
     }),
   }),
 );
