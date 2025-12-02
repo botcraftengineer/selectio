@@ -29,7 +29,7 @@
     "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
-    "@ai-sdk/deepseek": "1.0.30",
+    "@ai-sdk/deepseek": "1.0.31",
     "@ai-sdk/openai": "2.0.76",
     "@inngest/realtime": "0.4.5",
     "@selectio/config": "workspace:*",

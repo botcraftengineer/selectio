@@ -1,6 +1,7 @@
 import { eq } from "@selectio/db";
 import { db } from "@selectio/db/client";
 import { telegramConversation } from "@selectio/db/schema";
+import { stripHtml } from "string-strip-html";
 import { generateText } from "../lib/ai-client";
 
 interface InterviewContext {
@@ -181,7 +182,9 @@ export async function getInterviewContext(
     conversationId: conversation.id,
     candidateName: conversation.candidateName,
     vacancyTitle: conversation.response?.vacancy?.title || null,
-    vacancyDescription: conversation.response?.vacancy?.description || null,
+    vacancyDescription: conversation.response?.vacancy?.description
+      ? stripHtml(conversation.response.vacancy.description).result
+      : null,
     currentAnswer: currentTranscription,
     previousQA: questionAnswers,
     questionNumber: questionAnswers.length + 1,

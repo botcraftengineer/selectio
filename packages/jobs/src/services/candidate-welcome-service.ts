@@ -5,6 +5,7 @@ import {
   responseScreening,
   vacancyResponse,
 } from "@selectio/db/schema";
+import { stripHtml } from "string-strip-html";
 import { generateText } from "../lib/ai-client";
 
 /**
@@ -89,7 +90,7 @@ ${companyWebsite ? `Сайт: ${companyWebsite}` : ""}
 
 ИНФОРМАЦИЯ О ВАКАНСИИ:
 Позиция: ${response.vacancy?.title || "Не указана"}
-${response.vacancy?.description ? `Описание: ${response.vacancy.description.substring(0, 200)}...` : ""}
+${response.vacancy?.description ? `Описание: ${stripHtml(response.vacancy.description).result.substring(0, 200)}...` : ""}
 
 ИНФОРМАЦИЯ О КАНДИДАТЕ:
 ФИО: ${response.candidateName || "Кандидат"}
