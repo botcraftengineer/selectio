@@ -17,9 +17,20 @@ interface VacancyAnalyticsProps {
   avgScore: number;
 }
 
-interface VacancyRequirement {
-  category: string;
-  items: string[];
+interface VacancyRequirementsData {
+  summary?: string;
+  job_title?: string;
+  languages?: string[];
+  tech_stack?: string[];
+  location_type?: string;
+  experience_years?: {
+    min?: number;
+    max?: number;
+    description?: string;
+  };
+  nice_to_have_skills?: string[];
+  keywords_for_matching?: string[];
+  mandatory_requirements?: string[];
 }
 
 interface VacancyRequirementsProps {
@@ -173,73 +184,130 @@ export function VacancyRequirements({
     return null;
   }
 
-  // Type guard для проверки структуры
-  const isValidRequirements = (data: unknown): data is VacancyRequirement[] => {
-    return (
-      Array.isArray(data) &&
-      data.every(
-        (item) =>
-          typeof item === "object" &&
-          item !== null &&
-          "category" in item &&
-          "items" in item &&
-          typeof item.category === "string" &&
-          Array.isArray(item.items),
-      )
-    );
-  };
-
-  if (!isValidRequirements(requirements)) {
-    return (
-      <div className="rounded-lg border bg-linear-to-t from-primary/5 to-card dark:bg-card p-6 shadow-xs space-y-4">
-        <h2 className="text-xl font-semibold">Сгенерированные требования</h2>
-        <details className="mt-4">
-          <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Показать JSON
-          </summary>
-          <pre className="mt-2 p-4 bg-muted rounded-lg overflow-x-auto text-xs">
-            <code>{JSON.stringify(requirements, null, 2)}</code>
-          </pre>
-        </details>
-      </div>
-    );
-  }
+  const data = requirements as VacancyRequirementsData;
 
   return (
     <div className="rounded-lg border bg-linear-to-t from-primary/5 to-card dark:bg-card p-6 shadow-xs space-y-6">
       <h2 className="text-xl font-semibold">Сгенерированные требования</h2>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {requirements.map((requirement, index) => (
-          <div
-            key={`${requirement.category}-${index}`}
-            className="space-y-3 rounded-lg border bg-card/50 p-4"
-          >
+      {data.summary && (
+        <div className="rounded-lg border bg-card/50 p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            Краткое описание
+          </h3>
+          <p className="text-sm leading-relaxed">{data.summary}</p>
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {data.job_title && (
+          <div className="rounded-lg border bg-card/50 p-4">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">
+              Должность
+            </h3>
+            <p className="text-sm font-semibold">{data.job_title}</p>
+          </div>
+        )}
+
+        {data.location_type && (
+          <div className="rounded-lg border bg-card/50 p-4">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">
+              Формат работы
+            </h3>
+            <p className="text-sm font-semibold">{data.location_type}</p>
+          </div>
+        )}
+
+        {data.experience_years && (
+          <div className="rounded-lg border bg-card/50 p-4">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">
+              Опыт работы
+            </h3>
+            <p className="text-sm font-semibold">
+              {data.experience_years.description ||
+                `${data.experience_years.min}${data.experience_years.max ? `-${data.experience_years.max}` : "+"} лет`}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {data.mandatory_requirements &&
+        data.mandatory_requirements.length > 0 && (
+          <div className="rounded-lg border bg-card/50 p-4 space-y-3">
             <h3 className="text-lg font-semibold text-primary">
-              {requirement.category}
+              Обязательные требования
             </h3>
             <ul className="space-y-2 pl-5">
-              {requirement.items.map((item, itemIndex) => (
+              {data.mandatory_requirements.map((req, index) => (
                 <li
-                  key={`${requirement.category}-${index}-${itemIndex}`}
+                  key={index}
                   className="text-sm text-muted-foreground list-disc leading-relaxed"
                 >
-                  {item}
+                  {req}
                 </li>
               ))}
             </ul>
           </div>
-        ))}
-      </div>
+        )}
 
-      <details className="pt-4 border-t">
-        <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
-          Показать JSON
-        </summary>
-        <pre className="mt-2 p-4 bg-muted rounded-lg overflow-x-auto text-xs">
-          <code>{JSON.stringify(requirements, null, 2)}</code>
-        </pre>
-      </details>
+      {data.tech_stack && data.tech_stack.length > 0 && (
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-primary">
+            Технологический стек
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {data.tech_stack.map((tech, index) => (
+              <Badge key={index} variant="secondary">
+                {tech}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.nice_to_have_skills && data.nice_to_have_skills.length > 0 && (
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-primary">Будет плюсом</h3>
+          <ul className="space-y-2 pl-5">
+            {data.nice_to_have_skills.map((skill, index) => (
+              <li
+                key={index}
+                className="text-sm text-muted-foreground list-disc leading-relaxed"
+              >
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.languages && data.languages.length > 0 && (
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-primary">Языки</h3>
+          <div className="flex flex-wrap gap-2">
+            {data.languages.map((lang, index) => (
+              <Badge key={index} variant="outline">
+                {lang}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.keywords_for_matching && data.keywords_for_matching.length > 0 && (
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-primary">
+            Ключевые слова для поиска
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {data.keywords_for_matching.map((keyword, index) => (
+              <Badge key={index} variant="outline">
+                {keyword}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
