@@ -35,9 +35,6 @@ export {
 } from "./services/screening-prompt-service";
 export { transcribeAudio } from "./services/transcription-service";
 export { triggerVacancyRequirementsExtraction } from "./services/trigger-service";
-// Trigger tasks
-export { extractVacancyRequirementsTask } from "./trigger/extract-vacancy-requirements";
-export { screenResponseTask } from "./trigger/screen-response";
 // Types
 export type {
   ResumeScreeningData,

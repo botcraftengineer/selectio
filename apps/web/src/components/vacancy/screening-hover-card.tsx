@@ -62,7 +62,10 @@ export function ScreeningHoverCard({ screening }: ScreeningHoverCardProps) {
           <Info className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </HoverCardTrigger>
-      <HoverCardContent className="w-96" side="left">
+      <HoverCardContent
+        className="w-96 max-h-[600px] overflow-y-auto"
+        side="left"
+      >
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold mb-2 flex items-center gap-2">

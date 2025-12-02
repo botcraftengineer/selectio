@@ -1,5 +1,4 @@
 import { deepseek } from "@ai-sdk/deepseek";
-import { logger } from "@trigger.dev/sdk";
 import type { LanguageModel } from "ai";
 import { generateText as aiGenerateText } from "ai";
 import { Langfuse } from "langfuse";
@@ -68,7 +67,7 @@ export async function generateText(options: GenerateTextOptions) {
     try {
       await langfuse.flushAsync();
     } catch (flushError) {
-      logger.error("Failed to flush Langfuse trace", {
+      console.error("Failed to flush Langfuse trace", {
         generationName,
         traceId: trace.id,
         entityId,

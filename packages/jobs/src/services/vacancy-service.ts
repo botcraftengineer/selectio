@@ -102,7 +102,6 @@ export async function updateVacancyDescription(
     // Запускаем задание для извлечения требований вакансии
     if (description?.trim()) {
       console.log(`🎯 Запуск извлечения требований вакансии: ${vacancyId}`);
-      // Импортируем динамически, чтобы избежать циклических зависимостей
       const { triggerVacancyRequirementsExtraction } = await import(
         "./trigger-service"
       );

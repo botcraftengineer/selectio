@@ -20,14 +20,12 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "bun with-env bun run --watch src/inngest/server.ts",
-    "dev:trigger": "bun with-env trigger dev",
-    "dev:inngest": "npx inngest-cli@latest dev -u http://localhost:8000/api/inngest",
+    "inngest": "npx inngest-cli@latest dev -u http://localhost:8000/api/inngest",
     "hh:parse": "bun with-env bun run src/hh-response-parser.ts",
     "hh:enrich": "bun with-env bun run src/hh-enrich-responses.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "trigger:deploy": "cross-env CI=true SKIP_ENV_VALIDATION=true bun with-env trigger deploy",
     "with-env": "bun run --env-file ../../.env"
   },
   "dependencies": {
@@ -40,7 +38,6 @@
     "@selectio/telegram-bot": "workspace:*",
     "@selectio/tg-client": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "@trigger.dev/sdk": "4.1.2",
     "ai": "5.0.104",
     "crawlee": "3.15.3",
     "inngest": "^3.46.0",
@@ -53,12 +50,10 @@
   },
   "devDependencies": {
     "@selectio/tsconfig": "workspace:*",
-    "@trigger.dev/build": "4.1.2",
     "@types/bun": "1.3.3",
     "@types/node": "24.10.1",
     "cross-env": "^10.1.0",
     "inngest-cli": "^1.14.0",
-    "trigger.dev": "^4.1.2",
     "tsup": "8.5.1",
     "typescript": "5.9.3"
   }

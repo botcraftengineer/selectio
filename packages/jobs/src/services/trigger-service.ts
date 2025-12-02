@@ -1,5 +1,4 @@
-import { tasks } from "@trigger.dev/sdk";
-import type { extractVacancyRequirementsTask } from "../trigger/extract-vacancy-requirements";
+import { inngest } from "../inngest/client";
 
 /**
  * Запускает задание для извлечения требований вакансии через AI
@@ -9,21 +8,19 @@ export async function triggerVacancyRequirementsExtraction(
   description: string,
 ): Promise<void> {
   try {
-    // В v4 используем tasks.trigger с типом задания и payload
-    const handle = await tasks.trigger<typeof extractVacancyRequirementsTask>(
-      "extract-vacancy-requirements",
-      {
+    await inngest.send({
+      name: "vacancy/requirements.extract",
+      data: {
         vacancyId,
         description,
       },
-    );
+    });
 
-    console.log(`✅ Задание запущено: ${handle.id}`);
+    console.log(`✅ Задание запущено для вакансии: ${vacancyId}`);
   } catch (error) {
     console.error(
       `❌ Ошибка запуска задания генерации промпта для ${vacancyId}:`,
       error,
     );
-    // Не пробрасываем ошибку, чтобы не блокировать основной процесс
   }
 }
