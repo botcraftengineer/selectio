@@ -8,7 +8,6 @@ interface ChatSidebarProps {
   candidateName: string | null;
   chatId: string;
   responseData?: {
-    about?: string | null;
     status?: string | null;
     createdAt?: Date | null;
     resumePdfFile?: {
@@ -35,11 +34,7 @@ export function ChatSidebar({
   return (
     <div className="w-80 border-l overflow-y-auto">
       <div className="p-6 space-y-6">
-        <CandidateInfo
-          candidateName={candidateName}
-          chatId={chatId}
-          about={responseData?.about}
-        />
+        <CandidateInfo candidateName={candidateName} chatId={chatId} />
 
         {responseData?.resumePdfFile && (
           <div>
@@ -60,10 +55,7 @@ export function ChatSidebar({
         )}
 
         {responseData?.vacancy && (
-          <VacancyInfo
-            title={responseData.vacancy.title}
-            description={responseData.vacancy.description}
-          />
+          <VacancyInfo title={responseData.vacancy.title} />
         )}
 
         <StatusInfo
