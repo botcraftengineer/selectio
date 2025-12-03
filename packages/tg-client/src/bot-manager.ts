@@ -91,33 +91,83 @@ class BotManager {
         await storage.import(sessionData as Record<string, string>);
       }
 
-      // Создаем клиент
+      // Создаем клиент с настройками для получения обновлений
       const client = new TelegramClient({
         apiId: Number.parseInt(apiId, 10),
         apiHash,
         storage,
+        updates: {
+          catchUp: true, // Получать пропущенные обновления
+          messageGroupingInterval: 250, // Группировать альбомы (250ms)
+        },
       });
 
-      // Подключаемся
-      await client.connect();
+      console.log(`🔌 Подключение клиента для workspace ${workspaceId}...`);
 
       // Проверяем авторизацию
-      const me = await client.call({
-        _: "users.getUsers",
-        id: [{ _: "inputUserSelf" }],
-      });
-      const user = me[0];
+      let user: Awaited<ReturnType<typeof client.getMe>> | null = null;
+      try {
+        user = await client.getMe();
+      } catch (error) {
+        // Проверяем, является ли это ошибкой неавторизованности
+        if (error && typeof error === "object" && "text" in error) {
+          const errorText = String(error.text);
+          if (errorText.includes("AUTH_KEY_UNREGISTERED")) {
+            throw new Error(
+              `Сессия не авторизована для workspace ${workspaceId}. Требуется повторная авторизация.`,
+            );
+          }
+        }
+        // Другая ошибка - пробрасываем дальше
+        throw error;
+      }
 
-      if (!user || user._ !== "user") {
+      if (!user) {
         throw new Error(
           `Не удалось получить информацию о пользователе для workspace ${workspaceId}`,
         );
       }
 
-      // Создаем dispatcher и регистрируем обработчик
+      // Завершаем все другие сессии, чтобы получать обновления
+      console.log(
+        `🔄 Завершение других сессий для workspace ${workspaceId}...`,
+      );
+      try {
+        await client.call({
+          _: "auth.resetAuthorizations",
+        });
+        console.log(`✅ Другие сессии завершены для workspace ${workspaceId}`);
+      } catch (error) {
+        console.warn(
+          `⚠️ Не удалось завершить другие сессии для workspace ${workspaceId}:`,
+          error,
+        );
+        // Продолжаем работу, даже если не удалось завершить сессии
+      }
+
+      // Создаем dispatcher
       const dp = Dispatcher.for(client);
-      const handler = createBotHandler(client);
-      dp.onNewMessage(handler);
+
+      // Создаем обработчик один раз
+      const messageHandler = createBotHandler(client);
+
+      // Регистрируем обработчик через dispatcher
+      dp.onNewMessage(async (msg) => {
+        try {
+          await messageHandler(msg);
+        } catch (error) {
+          console.error(`❌ [${workspaceId}] Ошибка обработки:`, error);
+        }
+      });
+
+      // Добавляем обработчик ошибок
+      dp.onError((err, upd) => {
+        console.error(`❌ [${workspaceId}] Ошибка в dispatcher:`, err);
+        console.error(`Обновление:`, upd.name);
+        return false; // Не останавливать обработку
+      });
+
+      console.log(`✅ Dispatcher зарегистрирован для workspace ${workspaceId}`);
 
       // Сохраняем экземпляр бота
       const botInstance: BotInstance = {
@@ -130,9 +180,10 @@ class BotManager {
       };
 
       this.bots.set(workspaceId, botInstance);
-
+      // Подключаемся
+      await client.start();
       console.log(
-        `✅ Бот запущен для workspace ${workspaceId}: ${user.firstName} ${user.lastName || ""} (@${user.username || "no username"}) [${phone}]`,
+        `✅ Бот запущен для workspace ${workspaceId}: ${user.firstName || ""} ${user.lastName || ""} (@${user.username || "no username"}) [${phone}]`,
       );
     } catch (error) {
       console.error(
