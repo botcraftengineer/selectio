@@ -39,7 +39,6 @@ messages.post("/send-by-username", async (c) => {
   try {
     const body = await c.req.json();
     const result = sendMessageByUsernameSchema.safeParse(body);
-    console.log(result.error);
     if (!result.success) {
       return c.json(
         { error: "Invalid request data", details: result.error.issues },

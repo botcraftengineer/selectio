@@ -25,7 +25,6 @@ auth.post("/send-code", async (c) => {
 
     if ("phoneCodeHash" in authResult) {
       const sessionData = await storage.export();
-      console.log("Session data after sendCode:", sessionData);
 
       return c.json({
         success: true,
@@ -58,7 +57,6 @@ auth.post("/sign-in", async (c) => {
     const { apiId, apiHash, phone, phoneCode, phoneCodeHash, sessionData } =
       result.data;
 
-    console.log("Received sessionData:", sessionData);
     const parsedSessionData = sessionData
       ? (JSON.parse(sessionData) as Record<string, string>)
       : undefined;
