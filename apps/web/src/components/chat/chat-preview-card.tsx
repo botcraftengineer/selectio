@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { Card, Badge, Button, cn } from "@selectio/ui";
-import { MessageCircle, Clock } from "lucide-react";
+import { Badge, Button, Card, cn } from "@selectio/ui";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { Clock, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 interface ChatPreviewCardProps {
   candidateId: string;
@@ -16,6 +16,7 @@ interface ChatPreviewCardProps {
   unreadCount?: number;
   status?: "active" | "pending" | "completed";
   className?: string;
+  workspaceSlug: string;
 }
 
 const statusConfig = {
@@ -34,6 +35,7 @@ export function ChatPreviewCard({
   unreadCount = 0,
   status = "active",
   className,
+  workspaceSlug,
 }: ChatPreviewCardProps) {
   const statusInfo = statusConfig[status];
   const initials = candidateName
@@ -82,7 +84,7 @@ export function ChatPreviewCard({
               {format(lastMessageTime, "dd MMM, HH:mm", { locale: ru })}
             </div>
 
-            <Link href={`/chat/${candidateId}`}>
+            <Link href={`/${workspaceSlug}/chat/${candidateId}`}>
               <Button variant="outline" size="sm" className="h-7 text-xs">
                 <MessageCircle className="h-3 w-3 mr-1" />
                 Открыть ({messageCount})

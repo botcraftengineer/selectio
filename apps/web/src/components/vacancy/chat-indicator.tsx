@@ -10,11 +10,13 @@ import Link from "next/link";
 interface ChatIndicatorProps {
   messageCount: number;
   conversationId: string;
+  workspaceSlug: string;
 }
 
 export function ChatIndicator({
   messageCount,
   conversationId,
+  workspaceSlug,
 }: ChatIndicatorProps) {
   if (messageCount === 0) return null;
 
@@ -23,7 +25,7 @@ export function ChatIndicator({
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
-            href={`/chat/${conversationId}`}
+            href={`/${workspaceSlug}/chat/${conversationId}`}
             className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 transition-colors hover:bg-blue-100"
             onClick={(e) => e.stopPropagation()}
           >
