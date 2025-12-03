@@ -79,14 +79,6 @@ export async function sendHHChatMessage(params: {
 
     const idempotencyKey = randomUUID();
 
-    console.log(`📤 Отправка сообщения в HH чат`, {
-      chatId: response.chatId,
-      chatIdNumber: Number(response.chatId),
-      responseId,
-      textLength: text.length,
-      hasXsrfToken: !!xsrfToken,
-    });
-
     // Отправляем запрос в hh.ru API с полными браузерными заголовками
     const apiResponse = await axios.post(
       "https://chatik.hh.ru/chatik/api/send?hhtmSourceLabel=spoiler&hhtmSource=chat",
