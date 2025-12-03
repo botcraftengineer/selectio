@@ -57,8 +57,8 @@ export default function IntegrationsPage() {
 
       <div className="grid gap-4">
         {AVAILABLE_INTEGRATIONS.map((availableIntegration) => {
-          const existingIntegration = (integrations as any)?.find(
-            (i: { type: string }) => i.type === availableIntegration.type,
+          const existingIntegration = integrations?.find(
+            (i) => i.type === availableIntegration.type,
           );
 
           return (
