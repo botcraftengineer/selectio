@@ -83,7 +83,7 @@ services:
     build:
       context: .
       dockerfile: packages/tg-client/Dockerfile
-    container_name: telegram-bot
+    container_name: telegram-client
     env_file:
       - .env
     environment:

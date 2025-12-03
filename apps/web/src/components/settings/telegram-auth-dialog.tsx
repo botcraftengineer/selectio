@@ -116,6 +116,11 @@ export function TelegramAuthDialog({
       },
       onError: (err) => {
         if (err.message === "SESSION_PASSWORD_NEEDED") {
+          // Сохраняем sessionData из ошибки если есть
+          const errorData = err.data as { cause?: { sessionData?: string } };
+          if (errorData?.cause?.sessionData) {
+            setSessionData(errorData.cause.sessionData);
+          }
           setStep(3);
           toast.info("Требуется пароль 2FA");
         } else if (
@@ -360,25 +365,22 @@ export function TelegramAuthDialog({
                       />
                     </FormControl>
                     <FormDescription className="text-xs text-center">
-                      Код отправлен на {apiData?.phone}
+                      Код отправлен на {apiData?.phone}.{" "}
+                      <button
+                        type="button"
+                        onClick={handleResendCode}
+                        disabled={sendCodeMutation.isPending}
+                        className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {sendCodeMutation.isPending
+                          ? "Отправка..."
+                          : "Отправить повторно?"}
+                      </button>
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleResendCode}
-                disabled={sendCodeMutation.isPending}
-                className="w-full h-10"
-              >
-                {sendCodeMutation.isPending
-                  ? "Отправка..."
-                  : "Отправить код повторно"}
-              </Button>
 
               <DialogFooter className="gap-2">
                 <Button

@@ -105,6 +105,7 @@ export const signInRouter = protectedProcedure
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "SESSION_PASSWORD_NEEDED",
+          cause: { sessionData: input.sessionData },
         });
       }
 
@@ -126,18 +127,19 @@ export const checkPasswordRouter = protectedProcedure
       apiHash: z.string(),
       phone: z.string().trim(),
       password: z.string(),
-      sessionData: z.record(z.string(), z.string()),
+      sessionData: z.string(),
     }),
   )
   .mutation(async ({ input }) => {
     try {
       const phone = input.phone.trim().replace(/\s+/g, "");
+      const sessionDataObj = JSON.parse(input.sessionData);
       const result = await tgClientSDK.checkPassword({
         apiId: input.apiId,
         apiHash: input.apiHash,
         phone,
         password: input.password,
-        sessionData: input.sessionData,
+        sessionData: sessionDataObj,
       });
 
       // Сохраняем в БД
