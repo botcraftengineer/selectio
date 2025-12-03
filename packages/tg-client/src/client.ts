@@ -1,40 +1,98 @@
 import { TelegramClient } from "@mtcute/bun";
-import { env } from "@selectio/config";
+import { getIntegrationCredentials } from "@selectio/db";
 import { ExportableStorage } from "./storage";
 
-const API_ID = Number.parseInt(env.TELEGRAM_API_ID || "0", 10);
-const API_HASH = env.TELEGRAM_API_HASH || "";
-const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || "";
-if (!API_ID || !API_HASH || !BOT_TOKEN) {
-  throw new Error(
-    "TELEGRAM_API_ID, TELEGRAM_API_HASH и TELEGRAM_BOT_TOKEN должны быть установлены",
-  );
-}
+// Кэш клиентов по workspaceId
+const clientCache = new Map<string, TelegramClient>();
 
-// Создаем клиент для отправки сообщений (бот) - используется только для получения обновлений
-export const tg = new TelegramClient({
-  apiId: API_ID,
-  apiHash: API_HASH,
-  storage: new ExportableStorage(),
-});
+/**
+ * Получить или создать Telegram клиент для workspace
+ */
+export async function getClient(
+  workspaceId: string,
+): Promise<TelegramClient | null> {
+  // Проверяем кэш
+  const cached = clientCache.get(workspaceId);
+  if (cached) {
+    return cached;
+  }
 
-// Инициализация клиента
-let isInitialized = false;
+  // Получаем credentials из базы
+  const credentials = await getIntegrationCredentials("telegram", workspaceId);
+  if (!credentials) {
+    console.error(
+      `❌ Telegram интеграция не найдена для workspace ${workspaceId}`,
+    );
+    return null;
+  }
 
-export async function initClient() {
-  if (isInitialized) return;
+  const { apiId, apiHash, sessionData } = credentials;
+  if (!apiId || !apiHash) {
+    console.error("❌ Отсутствуют apiId или apiHash в credentials");
+    return null;
+  }
 
   try {
-    await tg.start({
-      botToken: BOT_TOKEN,
+    // Создаем storage и импортируем сессию если есть
+    const storage = new ExportableStorage();
+    if (sessionData) {
+      await storage.import(JSON.parse(sessionData));
+    }
+
+    // Создаем клиент
+    const client = new TelegramClient({
+      apiId: Number.parseInt(apiId, 10),
+      apiHash,
+      storage,
     });
 
-    isInitialized = true;
-    console.log("✅ MTCute клиент инициализирован");
+    // Сохраняем в кэш
+    clientCache.set(workspaceId, client);
+
+    console.log(`✅ Telegram клиент создан для workspace ${workspaceId}`);
+    return client;
   } catch (error) {
-    console.error("❌ Ошибка инициализации MTCute клиента:", error);
-    throw error;
+    console.error(
+      `❌ Ошибка создания клиента для workspace ${workspaceId}:`,
+      error,
+    );
+    return null;
   }
+}
+
+/**
+ * Удалить клиент из кэша (например, при logout)
+ */
+export async function removeClient(workspaceId: string): Promise<void> {
+  const client = clientCache.get(workspaceId);
+  if (client) {
+    // TODO: найти правильный метод для остановки клиента mtcute
+    // try {
+    //   await client.close();
+    // } catch (error) {
+    //   console.error(
+    //     `Ошибка остановки клиента для workspace ${workspaceId}:`,
+    //     error,
+    //   );
+    // }
+    clientCache.delete(workspaceId);
+    console.log(`🗑️ Клиент удален из кэша для workspace ${workspaceId}`);
+  }
+}
+
+/**
+ * Очистить весь кэш клиентов
+ */
+export async function clearClientCache(): Promise<void> {
+  // TODO: найти правильный метод для остановки клиента mtcute
+  // const promises: Promise<void>[] = [];
+
+  for (const [workspaceId] of clientCache.entries()) {
+    console.log(`🗑️ Удаление клиента для workspace ${workspaceId}`);
+    clientCache.delete(workspaceId);
+  }
+
+  console.log("🗑️ Кэш клиентов очищен");
 }
 
 export { ExportableStorage } from "./storage";

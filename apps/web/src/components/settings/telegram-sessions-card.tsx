@@ -6,7 +6,7 @@ import { Plus, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTRPC } from "~/trpc/react";
-import { TelegramAuthDialog } from "./telegram-auth-dialog";
+import { TelegramAuthDialog } from "./telegram-auth";
 
 export function TelegramSessionsCard({ workspaceId }: { workspaceId: string }) {
   const trpc = useTRPC();

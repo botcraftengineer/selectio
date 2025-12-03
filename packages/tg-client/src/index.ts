@@ -1,4 +1,4 @@
-export { initClient, tg } from "./client";
+export { clearClientCache, getClient, removeClient } from "./client";
 export { ExportableStorage } from "./storage";
 export {
   checkUsername,

@@ -100,13 +100,21 @@ export const signInRouter = protectedProcedure
       // Проверяем нужен ли пароль 2FA
       if (
         error instanceof Error &&
-        error.message.includes("SESSION_PASSWORD_NEEDED")
+        (error.message.includes("SESSION_PASSWORD_NEEDED") ||
+          error.message.includes("2FA is enabled"))
       ) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "SESSION_PASSWORD_NEEDED",
-          cause: { sessionData: input.sessionData },
-        });
+        // Получаем sessionData из ошибки если это TgClientError
+        const sessionData =
+          "data" in error && error.data
+            ? (error.data as { sessionData?: string }).sessionData
+            : input.sessionData;
+
+        // Возвращаем специальный ответ вместо ошибки
+        return {
+          success: false,
+          requiresPassword: true,
+          sessionData: sessionData || "",
+        };
       }
 
       throw new TRPCError({
@@ -133,16 +141,16 @@ export const checkPasswordRouter = protectedProcedure
   .mutation(async ({ input }) => {
     try {
       const phone = input.phone.trim().replace(/\s+/g, "");
-      const sessionDataObj = JSON.parse(input.sessionData);
       const result = await tgClientSDK.checkPassword({
         apiId: input.apiId,
         apiHash: input.apiHash,
         phone,
         password: input.password,
-        sessionData: sessionDataObj,
+        sessionData: input.sessionData,
       });
 
       // Сохраняем в БД
+      const sessionDataObj = JSON.parse(result.sessionData);
       const [session] = await db
         .insert(telegramSession)
         .values({
@@ -150,7 +158,7 @@ export const checkPasswordRouter = protectedProcedure
           apiId: input.apiId.toString(),
           apiHash: input.apiHash,
           phone,
-          sessionData: result.sessionData as Record<string, unknown>,
+          sessionData: sessionDataObj as Record<string, unknown>,
           userInfo: {
             id: result.user.id,
             firstName: result.user.firstName,

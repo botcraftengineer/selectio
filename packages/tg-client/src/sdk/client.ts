@@ -1,4 +1,17 @@
 /**
+ * Кастомная ошибка для передачи дополнительных данных
+ */
+export class TgClientError extends Error {
+  constructor(
+    message: string,
+    public data?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = "TgClientError";
+  }
+}
+
+/**
  * SDK клиент для обращения к Telegram Client API
  */
 export class TgClientSDK {
@@ -22,8 +35,13 @@ export class TgClientSDK {
     });
 
     if (!response.ok) {
-      const error = (await response.json()) as { error?: string };
-      throw new Error(error.error || "Request failed");
+      const error = (await response.json()) as {
+        error?: string;
+        sessionData?: string;
+      };
+      throw new TgClientError(error.error || "Request failed", {
+        sessionData: error.sessionData,
+      });
     }
 
     return (await response.json()) as T;
@@ -77,10 +95,10 @@ export class TgClientSDK {
     apiHash: string;
     phone: string;
     password: string;
-    sessionData: Record<string, string>;
+    sessionData: string;
   }): Promise<{
     success: boolean;
-    sessionData: Record<string, string>;
+    sessionData: string;
     user: {
       id: string;
       firstName: string;

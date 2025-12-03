@@ -42,6 +42,7 @@ auth.post("/send-code", async (c) => {
 });
 
 auth.post("/sign-in", async (c) => {
+  let storage: any;
   try {
     const body = await c.req.json();
     const result = signInSchema.safeParse(body);
@@ -66,14 +67,15 @@ auth.post("/sign-in", async (c) => {
     const sessionData = rawSessionData ? JSON.parse(rawSessionData) : undefined;
     console.log("Parsed sessionData:", sessionData);
 
-    const { client, storage } = await createUserClient(
-      apiId,
-      apiHash,
-      sessionData,
-    );
+    const clientData = await createUserClient(apiId, apiHash, sessionData);
+    storage = clientData.storage;
 
-    await client.connect();
-    const user = await client.signIn({ phone, phoneCode, phoneCodeHash });
+    await clientData.client.connect();
+    const user = await clientData.client.signIn({
+      phone,
+      phoneCode,
+      phoneCodeHash,
+    });
     const newSessionData = await storage.export();
 
     return c.json({
@@ -89,7 +91,17 @@ auth.post("/sign-in", async (c) => {
     });
   } catch (error) {
     if (isAuthError(error, "SESSION_PASSWORD_NEEDED")) {
-      return c.json({ error: "SESSION_PASSWORD_NEEDED" }, 400);
+      // Сохраняем sessionData для использования в checkPassword
+      if (storage) {
+        const newSessionData = await storage.export();
+        return c.json(
+          {
+            error: "SESSION_PASSWORD_NEEDED",
+            sessionData: JSON.stringify(newSessionData),
+          },
+          400,
+        );
+      }
     }
     if (isAuthError(error, "PHONE_CODE_EXPIRED")) {
       return c.json({ error: "PHONE_CODE_EXPIRED" }, 400);
@@ -106,7 +118,7 @@ auth.post("/check-password", async (c) => {
   try {
     const body = await c.req.json();
     const result = checkPasswordSchema.safeParse(body);
-
+    console.log(result.error);
     if (!result.success) {
       return c.json(
         { error: "Invalid request data", details: result.error.issues },
@@ -122,6 +134,7 @@ auth.post("/check-password", async (c) => {
       JSON.parse(sessionData),
     );
     const user = await client.checkPassword(password);
+    console.log(user);
     const newSessionData = await storage.export();
 
     return c.json({
