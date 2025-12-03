@@ -10,7 +10,7 @@ export const interviewAnalysisSchema = z.object({
   shouldContinue: z.boolean().describe("Стоит ли задавать следующий вопрос"),
   reason: z
     .string()
-    .optional()
+    .nullish()
     .describe("Причина завершения интервью, если shouldContinue=false"),
   nextQuestion: z
     .string()
