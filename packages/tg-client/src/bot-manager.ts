@@ -100,6 +100,7 @@ class BotManager {
           catchUp: true, // Получать пропущенные обновления
           messageGroupingInterval: 250, // Группировать альбомы (250ms)
         },
+        logLevel: 1,
       });
 
       console.log(`🔌 Подключение клиента для workspace ${workspaceId}...`);
