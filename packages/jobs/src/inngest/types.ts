@@ -80,6 +80,11 @@ export const vacancyUpdateSingleDataSchema = z.object({
   vacancyId: z.string().min(1, "Vacancy ID is required"),
 });
 
+// Schema for collecting chat IDs event data
+export const collectChatIdsDataSchema = z.object({
+  vacancyId: z.string().min(1, "Vacancy ID is required"),
+});
+
 // Schema for telegram message send event data
 export const telegramMessageSendDataSchema = z.object({
   messageId: z.string().min(1, "Message ID is required"),
@@ -160,6 +165,9 @@ export const inngestEventSchemas = {
   "vacancy/update.single": {
     data: vacancyUpdateSingleDataSchema,
   },
+  "vacancy/chat-ids.collect": {
+    data: collectChatIdsDataSchema,
+  },
   "telegram/message.send": {
     data: telegramMessageSendDataSchema,
   },
@@ -215,6 +223,7 @@ export type ParseMissingContactsPayload = z.infer<
 export type VacancyUpdateSinglePayload = z.infer<
   typeof vacancyUpdateSingleDataSchema
 >;
+export type CollectChatIdsPayload = z.infer<typeof collectChatIdsDataSchema>;
 export type TelegramMessageSendPayload = z.infer<
   typeof telegramMessageSendDataSchema
 >;

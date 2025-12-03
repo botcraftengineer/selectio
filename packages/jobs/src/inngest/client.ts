@@ -3,6 +3,7 @@ import { EventSchemas, Inngest } from "inngest";
 import {
   candidateWelcomeBatchDataSchema,
   candidateWelcomeDataSchema,
+  collectChatIdsDataSchema,
   interviewAnalysisDataSchema,
   interviewCompleteDataSchema,
   interviewSendQuestionDataSchema,
@@ -38,6 +39,7 @@ export const inngest = new Inngest({
     "vacancy/update.active": vacancyUpdateActiveDataSchema,
     "vacancy/update.single": vacancyUpdateSingleDataSchema,
     "vacancy/responses.refresh": vacancyResponsesRefreshDataSchema,
+    "vacancy/chat-ids.collect": collectChatIdsDataSchema,
     "candidate/welcome": candidateWelcomeDataSchema,
     "candidate/welcome.batch": candidateWelcomeBatchDataSchema,
     "telegram/message.send": telegramMessageSendDataSchema,
