@@ -22,11 +22,11 @@ export class TgClientSDK {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = (await response.json()) as { error?: string };
       throw new Error(error.error || "Request failed");
     }
 
-    return response.json();
+    return (await response.json()) as T;
   }
 
   /**
@@ -150,7 +150,7 @@ export class TgClientSDK {
    */
   async health(): Promise<{ status: string; service: string }> {
     const response = await fetch(`${this.baseUrl}/health`);
-    return response.json();
+    return (await response.json()) as { status: string; service: string };
   }
 }
 
