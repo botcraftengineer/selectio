@@ -57,6 +57,16 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
     }
   }, [countdown]);
 
+  const isValidInternalPath = (path: string): boolean => {
+    // Проверяем, что путь начинается с '/' и не содержит протокол или '//'
+    return (
+      path.startsWith("/") &&
+      !path.includes("//") &&
+      !path.toLowerCase().includes("http:") &&
+      !path.toLowerCase().includes("https:")
+    );
+  };
+
   const onSubmit = async (data: OTPFormData) => {
     setLoading(true);
     try {
@@ -66,10 +76,12 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       });
       toast.success("Успешно подтверждено!");
 
-      // Проверяем наличие redirect URL
+      // Проверяем наличие redirect URL и всегда удаляем его
       const redirectUrl = localStorage.getItem("auth_redirect");
-      if (redirectUrl) {
-        localStorage.removeItem("auth_redirect");
+      localStorage.removeItem("auth_redirect");
+
+      // Валидируем redirect URL перед использованием
+      if (redirectUrl && isValidInternalPath(redirectUrl)) {
         router.push(redirectUrl);
       } else {
         router.push("/");

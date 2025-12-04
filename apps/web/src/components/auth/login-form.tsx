@@ -40,6 +40,16 @@ export function LoginForm({
     },
   });
 
+  const isValidInternalPath = (path: string): boolean => {
+    // Проверяем, что путь начинается с '/' и не содержит протокол или '//'
+    return (
+      path.startsWith("/") &&
+      !path.includes("//") &&
+      !path.toLowerCase().includes("http:") &&
+      !path.toLowerCase().includes("https:")
+    );
+  };
+
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
@@ -49,7 +59,8 @@ export function LoginForm({
       });
       // Сохраняем email и redirect URL в localStorage
       localStorage.setItem("otp_email", data.email);
-      if (redirectUrl) {
+      // Валидируем redirect URL перед сохранением
+      if (redirectUrl && isValidInternalPath(redirectUrl)) {
         localStorage.setItem("auth_redirect", redirectUrl);
       }
       toast.success("Код отправлен! Проверьте вашу почту.");
