@@ -41,8 +41,8 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
   if (isPending) {
     return (
       <div className="flex flex-col h-full">
-        <div className="border-b px-4 py-3 space-y-3">
-          <Skeleton className="h-7 w-24" />
+        <div className="border-b px-3 md:px-4 py-3 space-y-3">
+          <Skeleton className="h-6 md:h-7 w-20 md:w-24" />
           <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex-1 space-y-0">
@@ -50,12 +50,12 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
             (key) => (
               <div
                 key={key}
-                className="flex items-start gap-3 px-4 py-3 border-b"
+                className="flex items-start gap-2 md:gap-3 px-3 md:px-4 py-3 border-b"
               >
-                <Skeleton className="h-12 w-12 rounded-full" />
+                <Skeleton className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-4 w-28 md:w-32" />
+                  <Skeleton className="h-3 w-20 md:w-24" />
                   <Skeleton className="h-3 w-full" />
                 </div>
               </div>
@@ -68,10 +68,14 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
 
   if (error) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed border-red-200">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2 text-red-600">Ошибка</h2>
-          <p className="text-muted-foreground">{error.message}</p>
+      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed border-red-200 mx-3 md:mx-4 my-4">
+        <div className="text-center px-4">
+          <h2 className="text-xl md:text-2xl font-semibold mb-2 text-red-600">
+            Ошибка
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {error.message}
+          </p>
         </div>
       </div>
     );
@@ -79,11 +83,11 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
 
   if (conversations.length === 0) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed">
-        <div className="text-center">
-          <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-semibold mb-2">Нет чатов</h2>
-          <p className="text-muted-foreground">
+      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed mx-3 md:mx-4 my-4">
+        <div className="text-center px-4">
+          <MessageCircle className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-xl md:text-2xl font-semibold mb-2">Нет чатов</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
             Пока нет активных диалогов с кандидатами
           </p>
         </div>
@@ -93,8 +97,8 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b px-4 py-3 space-y-3">
-        <h1 className="text-xl font-semibold">Чаты</h1>
+      <div className="border-b px-3 md:px-4 py-3 space-y-3">
+        <h1 className="text-lg md:text-xl font-semibold">Чаты</h1>
 
         <Select value={selectedVacancyId} onValueChange={setSelectedVacancyId}>
           <SelectTrigger className="w-full">
@@ -111,7 +115,7 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
         </Select>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         {conversations.map((conversation) => {
           const lastMessage = conversation.messages[0];
           const initials = conversation.candidateName
@@ -145,19 +149,19 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
               href={`/${workspaceSlug}/chat/${conversation.id}`}
             >
               <div
-                className={`flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer border-b ${
+                className={`flex items-start gap-2 md:gap-3 px-3 md:px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer border-b ${
                   isActive ? "bg-muted" : ""
                 }`}
               >
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback className="bg-teal-500 text-white font-semibold">
+                <Avatar className="h-10 w-10 md:h-12 md:w-12 shrink-0">
+                  <AvatarFallback className="bg-teal-500 text-white font-semibold text-sm">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2 mb-1">
-                    <h3 className="font-semibold truncate">
+                    <h3 className="font-semibold truncate text-sm md:text-base">
                       {conversation.candidateName ?? "Без имени"}
                     </h3>
                     {lastMessage && (
@@ -170,14 +174,14 @@ export function ChatList({ workspaceSlug }: { workspaceSlug: string }) {
                   {vacancyTitle && (
                     <Badge
                       variant="outline"
-                      className="mb-1 text-teal-600 border-teal-200"
+                      className="mb-1 text-xs text-teal-600 border-teal-200"
                     >
                       {vacancyTitle}
                     </Badge>
                   )}
 
                   {lastMessage && (
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">
                       {lastMessage.sender === "ADMIN" && "Вы: "}
                       {lastMessage.content}
                     </p>

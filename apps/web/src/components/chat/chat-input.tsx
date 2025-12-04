@@ -30,7 +30,7 @@ export function ChatInput({
 
   return (
     <div className="border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="p-4">
+      <div className="p-2 md:p-4">
         <div className="relative">
           <Textarea
             value={message}
@@ -38,7 +38,7 @@ export function ChatInput({
             onKeyDown={handleKeyPress}
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full min-h-[60px] max-h-40 resize-none rounded-3xl pl-12 pr-14 py-4 focus-visible:ring-1 border-2"
+            className="w-full min-h-[50px] md:min-h-[60px] max-h-40 resize-none rounded-3xl pl-10 md:pl-12 pr-12 md:pr-14 py-3 md:py-4 focus-visible:ring-1 border-2 text-sm md:text-base"
             rows={1}
           />
 
@@ -46,19 +46,19 @@ export function ChatInput({
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute left-2 top-3 h-9 w-9 text-muted-foreground hover:text-foreground"
+            className="absolute left-1 md:left-2 top-2 md:top-3 h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-foreground"
             disabled={disabled}
           >
-            <Paperclip className="h-5 w-5" />
+            <Paperclip className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
 
           <Button
             onClick={handleSend}
             disabled={!message.trim() || disabled}
             size="icon"
-            className="absolute right-2 top-3 h-9 w-9 rounded-full"
+            className="absolute right-1 md:right-2 top-2 md:top-3 h-8 w-8 md:h-9 md:w-9 rounded-full"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </Button>
         </div>
       </div>

@@ -57,9 +57,9 @@ export function ChatMessages({
 
   return (
     <ScrollArea className="h-full" ref={scrollRef}>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-2 md:px-4 py-4 md:py-6 space-y-4 md:space-y-6">
         {Object.entries(groupedMessages).map(([date, msgs]) => (
-          <div key={date} className="space-y-4">
+          <div key={date} className="space-y-3 md:space-y-4">
             <div className="flex items-center justify-center">
               <div className="bg-muted px-3 py-1 rounded-full">
                 <span className="text-xs font-medium text-muted-foreground">
@@ -67,7 +67,7 @@ export function ChatMessages({
                 </span>
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {msgs.map((msg) => (
                 <ChatMessage
                   key={msg.id}
