@@ -23,6 +23,7 @@ export default function IntegrationsPage() {
   const { data: workspaceData } = useQuery(workspaceQueryOptions);
 
   const workspaceId = workspaceData?.workspace?.id || "";
+  const userRole = workspaceData?.role;
 
   const integrationsQueryOptions = api.integration.list.queryOptions({
     workspaceId,
@@ -68,6 +69,7 @@ export default function IntegrationsPage() {
               integration={existingIntegration}
               onEdit={() => handleEdit(availableIntegration.type)}
               workspaceId={workspaceId}
+              userRole={userRole}
             />
           );
         })}

@@ -17,6 +17,7 @@ export default function SettingsCompanyPage() {
   );
 
   const workspaceId = workspaceData?.workspace.id;
+  const userRole = workspaceData?.role;
 
   // Получаем настройки компании
   const { data: company, isLoading } = useQuery({
@@ -45,6 +46,7 @@ export default function SettingsCompanyPage() {
           website: company?.website || "",
           description: company?.description || "",
         }}
+        userRole={userRole}
       />
     </div>
   );

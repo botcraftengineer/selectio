@@ -1,11 +1,29 @@
-import { decryptCredentials, getIntegrationsByWorkspace } from "@selectio/db";
+import {
+  decryptCredentials,
+  getIntegrationsByWorkspace,
+  workspaceRepository,
+} from "@selectio/db";
 import { workspaceIdSchema } from "@selectio/validators";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 
 export const listIntegrations = protectedProcedure
   .input(z.object({ workspaceId: workspaceIdSchema }))
-  .query(async ({ input }) => {
+  .query(async ({ input, ctx }) => {
+    // Проверка доступа к workspace
+    const access = await workspaceRepository.checkAccess(
+      input.workspaceId,
+      ctx.session.user.id,
+    );
+
+    if (!access) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Нет доступа к workspace",
+      });
+    }
+
     const integrations = await getIntegrationsByWorkspace(input.workspaceId);
 
     // Не возвращаем credentials на клиент, только email

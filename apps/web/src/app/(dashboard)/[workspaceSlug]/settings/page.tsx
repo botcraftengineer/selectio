@@ -33,7 +33,7 @@ export default function SettingsPage() {
     );
   }
 
-  const { workspace } = data;
+  const { workspace, role } = data;
 
   return (
     <div className="space-y-6">
@@ -45,6 +45,7 @@ export default function SettingsPage() {
             logo: workspace.logo,
           }}
           workspaceId={workspace.id}
+          userRole={role}
         />
       </div>
     </div>

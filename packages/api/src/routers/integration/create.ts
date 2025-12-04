@@ -1,5 +1,6 @@
-import { upsertIntegration } from "@selectio/db";
+import { upsertIntegration, workspaceRepository } from "@selectio/db";
 import { workspaceIdSchema } from "@selectio/validators";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 
@@ -13,7 +14,20 @@ export const createIntegration = protectedProcedure
       metadata: z.record(z.string(), z.any()).optional(),
     }),
   )
-  .mutation(async ({ input }) => {
+  .mutation(async ({ input, ctx }) => {
+    // Проверка доступа к workspace
+    const access = await workspaceRepository.checkAccess(
+      input.workspaceId,
+      ctx.session.user.id,
+    );
+
+    if (!access || (access.role !== "owner" && access.role !== "admin")) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Недостаточно прав для создания интеграций",
+      });
+    }
+
     const integration = await upsertIntegration({
       workspaceId: input.workspaceId,
       type: input.type,

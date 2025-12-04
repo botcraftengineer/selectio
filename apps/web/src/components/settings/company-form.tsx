@@ -24,12 +24,16 @@ import { useTRPC } from "~/trpc/react";
 export function CompanyForm({
   initialData,
   workspaceId,
+  userRole,
 }: {
   initialData?: Partial<CompanyFormValues>;
   workspaceId: string;
+  userRole?: string;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
+  const canEdit = userRole === "owner" || userRole === "admin";
 
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
@@ -57,6 +61,17 @@ export function CompanyForm({
       workspaceId,
       data,
     });
+  }
+
+  if (!canEdit) {
+    return (
+      <div className="rounded-lg border border-muted p-6">
+        <p className="text-muted-foreground">
+          У вас нет прав для изменения настроек компании. Обратитесь к
+          администратору.
+        </p>
+      </div>
+    );
   }
 
   return (

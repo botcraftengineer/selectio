@@ -176,9 +176,12 @@ export function WorkspaceMembersClient({
   const allMembersAndInvites = useMemo((): MemberOrInvite[] => {
     const membersList: MemberOrInvite[] =
       members?.map((m) => ({ type: "member" as const, data: m })) || [];
-    const invitesList: MemberOrInvite[] =
-      invites?.map((i) => ({ type: "invite" as const, data: i })) || [];
-    return [...membersList, ...invitesList];
+    const now = new Date();
+    const personalInvitesList: MemberOrInvite[] =
+      invites
+        ?.filter((i) => new Date(i.expiresAt) > now && i.invitedEmail !== null)
+        .map((i) => ({ type: "invite" as const, data: i })) || [];
+    return [...membersList, ...personalInvitesList];
   }, [members, invites]);
 
   // Фильтрация участников и приглашений
@@ -194,14 +197,27 @@ export function WorkspaceMembersClient({
       } else {
         const invite = item.data;
         const matchesSearch =
-          invite.invitedEmail
+          !searchQuery ||
+          (invite.invitedEmail
             ?.toLowerCase()
-            .includes(searchQuery.toLowerCase()) || false;
+            .includes(searchQuery.toLowerCase()) ??
+            false);
         const matchesRole = roleFilter === "all" || invite.role === roleFilter;
         return matchesSearch && matchesRole;
       }
     });
   }, [allMembersAndInvites, searchQuery, roleFilter]);
+
+  // Подсчет общего количества участников и приглашений
+  const totalStats = useMemo(() => {
+    const membersCount = allMembersAndInvites.filter(
+      (item) => item.type === "member",
+    ).length;
+    const invitesCount = allMembersAndInvites.filter(
+      (item) => item.type === "invite",
+    ).length;
+    return { membersCount, invitesCount };
+  }, [allMembersAndInvites]);
 
   if (isLoading) {
     return <MembersLoadingSkeleton />;
@@ -317,7 +333,8 @@ export function WorkspaceMembersClient({
         {/* Stats */}
         <div className="text-sm text-muted-foreground">
           Показано {filteredItems.length} из {allMembersAndInvites.length} (
-          {members?.length || 0} участников, {invites?.length || 0} приглашений)
+          {totalStats.membersCount} участников, {totalStats.invitesCount}{" "}
+          приглашений)
         </div>
       </div>
     </>

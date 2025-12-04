@@ -38,9 +38,11 @@ type WorkspaceFormValues = z.infer<typeof workspaceFormSchema>;
 export function WorkspaceForm({
   initialData,
   workspaceId,
+  userRole,
 }: {
   initialData?: Partial<WorkspaceFormValues>;
   workspaceId: string;
+  userRole?: string;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -49,6 +51,9 @@ export function WorkspaceForm({
   );
   const [initialSlug] = useState(initialData?.slug);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const canEdit = userRole === "owner" || userRole === "admin";
+  const canDelete = userRole === "owner";
 
   const form = useForm<WorkspaceFormValues>({
     resolver: zodResolver(workspaceFormSchema),
@@ -119,6 +124,17 @@ export function WorkspaceForm({
   const handleDeleteWorkspace = () => {
     deleteWorkspace.mutate({ id: workspaceId });
   };
+
+  if (!canEdit) {
+    return (
+      <div className="rounded-lg border border-muted p-6">
+        <p className="text-muted-foreground">
+          У вас нет прав для изменения настроек workspace. Обратитесь к
+          администратору.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -221,23 +237,24 @@ export function WorkspaceForm({
       <Separator />
 
       {/* Delete Workspace Section */}
-      <div className="rounded-lg border border-destructive/50 p-6">
-        <h3 className="text-lg font-semibold text-destructive mb-2">
-          Удалить Workspace
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Безвозвратно удалить ваш workspace, пользовательский домен и все
-          связанные ссылки + их статистику. Это действие нельзя отменить -
-          пожалуйста, действуйте осторожно.
-        </p>
-        <Button
-          variant="destructive"
-          onClick={() => setDeleteDialogOpen(true)}
-          disabled={deleteWorkspace.isPending}
-        >
-          Удалить Workspace
-        </Button>
-      </div>
+      {canDelete && (
+        <div className="rounded-lg border border-destructive/50 p-6">
+          <h3 className="text-lg font-semibold text-destructive mb-2">
+            Удалить Workspace
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Внимание: Это безвозвратно удалит ваш workspace, все интеграции
+            HH.ru, вакансии, отклики кандидатов и их статистику.
+          </p>
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={deleteWorkspace.isPending}
+          >
+            Удалить Workspace
+          </Button>
+        </div>
+      )}
 
       <DeleteWorkspaceDialog
         open={deleteDialogOpen}

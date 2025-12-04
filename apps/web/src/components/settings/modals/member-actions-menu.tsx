@@ -165,7 +165,7 @@ function MemberActionsDropdown({
         {canManage && !isCurrentUser && (
           <DropdownMenuItem
             onClick={handleRemove}
-            className="text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive focus:bg-destructive/10"
           >
             <IconTrash className="mr-2 h-4 w-4" />
             Удалить участника
@@ -228,7 +228,7 @@ function RemoveMemberDialog({
           <AlertDialogAction
             onClick={handleRemove}
             disabled={removeUser.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive !text-white hover:bg-destructive/90"
           >
             {removeUser.isPending ? "Удаление..." : "Удалить"}
           </AlertDialogAction>
@@ -291,7 +291,7 @@ function LeaveWorkspaceDialog({
           <AlertDialogAction
             onClick={handleLeave}
             disabled={leaveWorkspace.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive !text-white hover:bg-destructive/90"
           >
             {leaveWorkspace.isPending ? "Выход..." : "Покинуть"}
           </AlertDialogAction>
@@ -352,7 +352,7 @@ function CancelInviteDialog({
           <AlertDialogAction
             onClick={handleCancel}
             disabled={cancelInvite.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive !text-white hover:bg-destructive/90"
           >
             {cancelInvite.isPending ? "Отмена..." : "Отменить приглашение"}
           </AlertDialogAction>

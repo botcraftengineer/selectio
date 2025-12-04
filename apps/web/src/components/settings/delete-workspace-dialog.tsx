@@ -64,8 +64,8 @@ export function DeleteWorkspaceDialog({
             Удалить Workspace
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center text-muted-foreground">
-            Внимание: Это безвозвратно удалит ваш workspace, пользовательский
-            домен и все связанные ссылки + их статистику.
+            Внимание: Это безвозвратно удалит ваш workspace, все интеграции
+            HH.ru, вакансии, отклики кандидатов и их статистику.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

@@ -22,6 +22,7 @@ interface IntegrationCardProps {
   integration?: Integration;
   onEdit: () => void;
   workspaceId: string;
+  userRole?: string;
 }
 
 const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
@@ -33,9 +34,12 @@ export function IntegrationCard({
   integration,
   onEdit,
   workspaceId,
+  userRole,
 }: IntegrationCardProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
+  const canEdit = userRole === "owner" || userRole === "admin";
 
   const deleteMutation = useMutation(
     trpc.integration.delete.mutationOptions({
@@ -113,30 +117,34 @@ export function IntegrationCard({
           </div>
         </div>
         <div className="flex gap-2">
-          {isConnected ? (
-            <>
-              <Button variant="outline" size="sm" onClick={onEdit}>
-                <Edit className="h-4 w-4" />
+          {canEdit ? (
+            isConnected ? (
+              <>
+                <Button variant="outline" size="sm" onClick={onEdit}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    deleteMutation.mutate({
+                      type: availableIntegration.type,
+                      workspaceId,
+                    })
+                  }
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" onClick={onEdit}>
+                <Plus className="h-4 w-4 mr-2" />
+                Подключить
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  deleteMutation.mutate({
-                    type: availableIntegration.type,
-                    workspaceId,
-                  })
-                }
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
+            )
           ) : (
-            <Button size="sm" onClick={onEdit}>
-              <Plus className="h-4 w-4 mr-2" />
-              Подключить
-            </Button>
+            <Badge variant="secondary">Только для просмотра</Badge>
           )}
         </div>
       </div>
