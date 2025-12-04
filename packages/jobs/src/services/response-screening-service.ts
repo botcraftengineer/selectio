@@ -53,12 +53,30 @@ export async function screenResponse(responseId: string) {
 
   const result = parseScreeningResult(text);
 
-  await db.insert(responseScreening).values({
-    responseId,
-    score: result.score,
-    detailedScore: result.detailedScore,
-    analysis: result.analysis,
+  // Проверяем, существует ли уже запись скрининга для этого отклика
+  const existingScreening = await db.query.responseScreening.findFirst({
+    where: eq(responseScreening.responseId, responseId),
   });
+
+  if (existingScreening) {
+    // Обновляем существующую запись
+    await db
+      .update(responseScreening)
+      .set({
+        score: result.score,
+        detailedScore: result.detailedScore,
+        analysis: result.analysis,
+      })
+      .where(eq(responseScreening.responseId, responseId));
+  } else {
+    // Создаем новую запись
+    await db.insert(responseScreening).values({
+      responseId,
+      score: result.score,
+      detailedScore: result.detailedScore,
+      analysis: result.analysis,
+    });
+  }
 
   await db
     .update(vacancyResponse)
