@@ -154,6 +154,7 @@
         "@selectio/config": "workspace:*",
         "@selectio/db": "workspace:*",
         "@selectio/lib": "workspace:*",
+        "@selectio/prompts": "workspace:*",
         "@selectio/telegram-bot": "workspace:*",
         "@selectio/tg-client": "workspace:*",
         "@t3-oss/env-core": "0.13.8",
@@ -186,6 +187,19 @@
         "@aws-sdk/s3-request-presigner": "3.943.0",
         "@selectio/config": "workspace:*",
         "sharp": "^0.34.5",
+      },
+      "devDependencies": {
+        "@selectio/tsconfig": "workspace:*",
+        "@types/node": "24.10.1",
+        "tsup": "8.5.1",
+        "typescript": "5.9.3",
+      },
+    },
+    "packages/prompts": {
+      "name": "@selectio/prompts",
+      "version": "0.1.0",
+      "dependencies": {
+        "string-strip-html": "^13.4.8",
       },
       "devDependencies": {
         "@selectio/tsconfig": "workspace:*",
@@ -1224,6 +1238,8 @@
     "@selectio/jobs": ["@selectio/jobs@workspace:packages/jobs"],
 
     "@selectio/lib": ["@selectio/lib@workspace:packages/lib"],
+
+    "@selectio/prompts": ["@selectio/prompts@workspace:packages/prompts"],
 
     "@selectio/tailwind-config": ["@selectio/tailwind-config@workspace:tooling/tailwind"],
 

@@ -35,6 +35,7 @@
     "@selectio/config": "workspace:*",
     "@selectio/db": "workspace:*",
     "@selectio/lib": "workspace:*",
+    "@selectio/prompts": "workspace:*",
     "@selectio/telegram-bot": "workspace:*",
     "@selectio/tg-client": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
