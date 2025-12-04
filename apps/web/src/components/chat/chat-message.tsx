@@ -36,8 +36,10 @@ export function ChatMessage({
     .slice(0, 2);
 
   return (
-    <div className={`flex gap-3 ${isAdmin ? "flex-row-reverse" : "flex-row"}`}>
-      <Avatar className="h-8 w-8 shrink-0">
+    <div
+      className={`flex gap-2 md:gap-3 ${isAdmin ? "flex-row-reverse" : "flex-row"}`}
+    >
+      <Avatar className="h-7 w-7 md:h-8 md:w-8 shrink-0">
         <AvatarFallback
           className={
             isAdmin
@@ -48,17 +50,17 @@ export function ChatMessage({
           }
         >
           {isBot ? (
-            <Bot className="h-4 w-4" />
+            <Bot className="h-3.5 w-3.5 md:h-4 md:w-4" />
           ) : isAdmin ? (
-            initials
+            <span className="text-xs">{initials}</span>
           ) : (
-            <User className="h-4 w-4" />
+            <User className="h-3.5 w-3.5 md:h-4 md:w-4" />
           )}
         </AvatarFallback>
       </Avatar>
 
       <div
-        className={`flex flex-col gap-1 max-w-[70%] ${isAdmin ? "items-end" : "items-start"}`}
+        className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isAdmin ? "items-end" : "items-start"}`}
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">
@@ -70,7 +72,7 @@ export function ChatMessage({
         </div>
 
         <div
-          className={`rounded-2xl px-4 py-2 ${
+          className={`rounded-2xl px-3 py-2 md:px-4 md:py-2 ${
             isAdmin
               ? "bg-primary text-primary-foreground rounded-tr-sm"
               : isBot
@@ -101,7 +103,7 @@ export function ChatMessage({
               )}
             </div>
           ) : (
-            <p className="text-sm whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm whitespace-pre-wrap leading-relaxed wrap-break-word">
               {content}
             </p>
           )}

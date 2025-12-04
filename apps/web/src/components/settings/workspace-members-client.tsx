@@ -290,6 +290,8 @@ function MemberRow({
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const isCurrentUser = member.userId === currentUserId;
+
   const { MemberActionsMenu, setShowMemberActionsMenu } = useMemberActionsMenu({
     member: {
       id: member.userId,
@@ -299,10 +301,11 @@ function MemberRow({
       status: "active",
     },
     workspaceId,
+    canManage: canManageMembers,
+    isCurrentUser,
   });
 
   const initials = getInitials(member.user.name);
-  const isCurrentUser = member.userId === currentUserId;
 
   const updateRole = useMutation(
     trpc.workspace.updateUserRole.mutationOptions({

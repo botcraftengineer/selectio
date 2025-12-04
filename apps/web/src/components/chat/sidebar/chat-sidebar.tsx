@@ -32,8 +32,8 @@ export function ChatSidebar({
   responseData,
 }: ChatSidebarProps) {
   return (
-    <div className="w-80 border-l overflow-y-auto">
-      <div className="p-6 space-y-6">
+    <div className="w-full lg:w-80 border-l overflow-y-auto">
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
         <CandidateInfo candidateName={candidateName} chatId={chatId} />
 
         {responseData?.resumePdfFile && (

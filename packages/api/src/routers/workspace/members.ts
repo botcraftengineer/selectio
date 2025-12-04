@@ -253,4 +253,94 @@ export const workspaceMembers = {
 
       return updated;
     }),
+
+  // Повторно отправить приглашение
+  resendInvite: protectedProcedure
+    .input(addUserToWorkspaceSchema)
+    .mutation(async ({ input, ctx }) => {
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (!access || (access.role !== "owner" && access.role !== "admin")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Недостаточно прав для отправки приглашений",
+        });
+      }
+
+      // Получаем данные workspace и создаем invite link
+      const workspace = await workspaceRepository.findById(input.workspaceId);
+      const invite = await workspaceRepository.createInviteLink(
+        input.workspaceId,
+        ctx.session.user.id,
+        input.role,
+      );
+
+      if (!workspace || !invite) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Не удалось создать приглашение",
+        });
+      }
+
+      const { env } = await import("@selectio/config");
+      const inviteLink = `${env.APP_URL}/invite/${invite.token}`;
+
+      // Отправляем email с приглашением
+      const { WorkspaceInviteEmail } = await import("@selectio/emails");
+
+      await sendEmail({
+        to: [input.email],
+        subject: `Приглашение в ${workspace.name}`,
+        react: WorkspaceInviteEmail({
+          workspaceName: workspace.name,
+          workspaceLogo: workspace.logo || undefined,
+          inviterName: ctx.session.user.name || ctx.session.user.email,
+          inviteLink,
+          role: input.role,
+        }),
+      });
+
+      return { success: true };
+    }),
+
+  // Отменить приглашение
+  cancelInvite: protectedProcedure
+    .input(
+      z.object({
+        workspaceId: workspaceIdSchema,
+        email: z.string().email(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (!access || (access.role !== "owner" && access.role !== "admin")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Недостаточно прав для отмены приглашений",
+        });
+      }
+
+      // Находим пользователя по email
+      const user = await workspaceRepository.findUserByEmail(input.email);
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Пользователь не найден",
+        });
+      }
+
+      // Удаляем пользователя из workspace
+      await workspaceRepository.removeUser(input.workspaceId, user.id);
+
+      return { success: true };
+    }),
 };
