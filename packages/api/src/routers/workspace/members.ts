@@ -10,7 +10,7 @@ import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 
 export const workspaceMembers = {
-  // Добавить пользователя в workspace
+  // Пригласить пользователя в workspace (создать приглашение, не добавлять сразу)
   addUser: protectedProcedure
     .input(addUserToWorkspaceSchema)
     .mutation(async ({ input, ctx }) => {
@@ -23,48 +23,55 @@ export const workspaceMembers = {
       if (!access || (access.role !== "owner" && access.role !== "admin")) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Недостаточно прав для добавления пользователей",
+          message: "Недостаточно прав для приглашения пользователей",
         });
       }
 
       // Находим пользователя по email
       const user = await workspaceRepository.findUserByEmail(input.email);
-      if (!user) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Пользователь с таким email не найден",
-        });
-      }
-      const userId = user.id;
+      const userId = user?.id || null;
 
       // Проверка, не является ли пользователь уже участником
-      const existingMember = await workspaceRepository.checkAccess(
+      if (userId) {
+        const existingMember = await workspaceRepository.checkAccess(
+          input.workspaceId,
+          userId,
+        );
+
+        if (existingMember) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Пользователь уже является участником workspace",
+          });
+        }
+      }
+
+      // Проверка, нет ли уже активного приглашения для этого email
+      const existingInvite = await workspaceRepository.findInviteByEmail(
         input.workspaceId,
-        userId,
+        input.email,
       );
 
-      if (existingMember) {
+      if (existingInvite) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Пользователь уже является участником workspace",
+          message: "Приглашение для этого email уже существует",
         });
       }
 
-      const member = await workspaceRepository.addUser(
+      // Создаём персональное приглашение (НЕ добавляем в user_workspaces)
+      const invite = await workspaceRepository.createPersonalInvite(
         input.workspaceId,
+        ctx.session.user.id,
+        input.email,
         userId,
         input.role,
       );
 
-      // Получаем данные workspace и создаем invite link
+      // Получаем данные workspace для email
       const workspace = await workspaceRepository.findById(input.workspaceId);
-      const invite = await workspaceRepository.createInviteLink(
-        input.workspaceId,
-        ctx.session.user.id,
-        input.role,
-      );
 
-      if (workspace && invite) {
+      if (workspace) {
         const { env } = await import("@selectio/config");
         const inviteLink = `${env.APP_URL}/invite/${invite.token}`;
 
@@ -84,7 +91,7 @@ export const workspaceMembers = {
         });
       }
 
-      return member;
+      return invite;
     }),
 
   // Создать invite link
@@ -179,6 +186,17 @@ export const workspaceMembers = {
         });
       }
 
+      // Проверка персонального приглашения
+      if (
+        invite.invitedUserId &&
+        invite.invitedUserId !== ctx.session.user.id
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Это приглашение предназначено для другого пользователя",
+        });
+      }
+
       // Проверка, не является ли пользователь уже участником
       const existingMember = await workspaceRepository.checkAccess(
         invite.workspaceId,
@@ -199,6 +217,9 @@ export const workspaceMembers = {
         invite.role,
       );
 
+      // Удалить использованное приглашение
+      await workspaceRepository.deleteInviteByToken(input.token);
+
       return { success: true, workspace: invite.workspace };
     }),
 
@@ -211,17 +232,49 @@ export const workspaceMembers = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Проверка доступа
-      const access = await workspaceRepository.checkAccess(
+      // Разрешить пользователю удалить себя или требовать права админа
+      const isSelfRemoval = input.userId === ctx.session.user.id;
+
+      // Проверяем, что пользователь является участником workspace
+      const targetUserAccess = await workspaceRepository.checkAccess(
         input.workspaceId,
-        ctx.session.user.id,
+        input.userId,
       );
 
-      if (!access || (access.role !== "owner" && access.role !== "admin")) {
+      if (!targetUserAccess) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Недостаточно прав для удаления пользователей",
+          code: "NOT_FOUND",
+          message: "Пользователь не является участником workspace",
         });
+      }
+
+      if (!isSelfRemoval) {
+        // Проверка доступа для удаления других пользователей
+        const access = await workspaceRepository.checkAccess(
+          input.workspaceId,
+          ctx.session.user.id,
+        );
+
+        if (!access || (access.role !== "owner" && access.role !== "admin")) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Недостаточно прав для удаления пользователей",
+          });
+        }
+      }
+
+      // Проверяем, что это не последний owner
+      if (targetUserAccess.role === "owner") {
+        const members = await workspaceRepository.getMembers(input.workspaceId);
+        const ownerCount = members.filter((m) => m.role === "owner").length;
+
+        if (ownerCount <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Невозможно удалить последнего владельца workspace. Назначьте другого владельца перед удалением.",
+          });
+        }
       }
 
       await workspaceRepository.removeUser(input.workspaceId, input.userId);
@@ -271,23 +324,31 @@ export const workspaceMembers = {
         });
       }
 
-      // Получаем данные workspace и создаем invite link
-      const workspace = await workspaceRepository.findById(input.workspaceId);
-      const invite = await workspaceRepository.createInviteLink(
+      // Ищем существующее приглашение
+      const existingInvite = await workspaceRepository.findInviteByEmail(
         input.workspaceId,
-        ctx.session.user.id,
-        input.role,
+        input.email,
       );
 
-      if (!workspace || !invite) {
+      if (!existingInvite) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Приглашение не найдено",
+        });
+      }
+
+      // Получаем данные workspace
+      const workspace = await workspaceRepository.findById(input.workspaceId);
+
+      if (!workspace) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Не удалось создать приглашение",
+          message: "Workspace не найден",
         });
       }
 
       const { env } = await import("@selectio/config");
-      const inviteLink = `${env.APP_URL}/invite/${invite.token}`;
+      const inviteLink = `${env.APP_URL}/invite/${existingInvite.token}`;
 
       // Отправляем email с приглашением
       const { WorkspaceInviteEmail } = await import("@selectio/emails");
@@ -307,7 +368,7 @@ export const workspaceMembers = {
       return { success: true };
     }),
 
-  // Отменить приглашение
+  // Отменить приглашение (удалить из workspace_invites)
   cancelInvite: protectedProcedure
     .input(
       z.object({
@@ -329,17 +390,24 @@ export const workspaceMembers = {
         });
       }
 
-      // Находим пользователя по email
-      const user = await workspaceRepository.findUserByEmail(input.email);
-      if (!user) {
+      // Ищем приглашение по email
+      const invite = await workspaceRepository.findInviteByEmail(
+        input.workspaceId,
+        input.email,
+      );
+
+      if (!invite) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Пользователь не найден",
+          message: "Приглашение не найдено",
         });
       }
 
-      // Удаляем пользователя из workspace
-      await workspaceRepository.removeUser(input.workspaceId, user.id);
+      // Удаляем приглашение
+      await workspaceRepository.cancelInviteByEmail(
+        input.workspaceId,
+        input.email,
+      );
 
       return { success: true };
     }),

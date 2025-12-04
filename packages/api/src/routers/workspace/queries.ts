@@ -91,4 +91,25 @@ export const workspaceQueries = {
       const members = await workspaceRepository.getMembers(input.workspaceId);
       return members;
     }),
+
+  // Получить приглашения workspace
+  invites: protectedProcedure
+    .input(z.object({ workspaceId: workspaceIdSchema }))
+    .query(async ({ input, ctx }) => {
+      // Проверка доступа
+      const access = await workspaceRepository.checkAccess(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      if (!access || (access.role !== "owner" && access.role !== "admin")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Недостаточно прав для просмотра приглашений",
+        });
+      }
+
+      const invites = await workspaceRepository.getInvites(input.workspaceId);
+      return invites;
+    }),
 };

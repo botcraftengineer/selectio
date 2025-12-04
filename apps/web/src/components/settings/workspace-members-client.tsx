@@ -48,6 +48,20 @@ interface WorkspaceMember {
   };
 }
 
+interface WorkspaceInvite {
+  id: string;
+  workspaceId: string;
+  invitedEmail: string | null;
+  invitedUserId: string | null;
+  role: MemberRole;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+type MemberOrInvite =
+  | { type: "member"; data: WorkspaceMember }
+  | { type: "invite"; data: WorkspaceInvite };
+
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -136,7 +150,7 @@ export function WorkspaceMembersClient({
     useInviteLinkModal(workspaceId);
 
   // Получение участников
-  const { data: members, isLoading } = useQuery(
+  const { data: members, isLoading: membersLoading } = useQuery(
     trpc.workspace.members.queryOptions({ workspaceId }),
   );
 
@@ -150,19 +164,44 @@ export function WorkspaceMembersClient({
   const isAdmin = currentUserRole === "admin";
   const canManageMembers = isOwner || isAdmin;
 
-  // Фильтрация участников
-  const filteredMembers = useMemo(() => {
-    if (!members) return [];
+  // Получение приглашений (только для админов)
+  const { data: invites, isLoading: invitesLoading } = useQuery({
+    ...(trpc.workspace as any).invites?.queryOptions({ workspaceId }),
+    enabled: canManageMembers && !!(trpc.workspace as any).invites,
+  }) as { data: WorkspaceInvite[] | undefined; isLoading: boolean };
 
-    return members.filter((member: WorkspaceMember) => {
-      const matchesSearch =
-        member.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.user.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesRole = roleFilter === "all" || member.role === roleFilter;
+  const isLoading = membersLoading || (canManageMembers && invitesLoading);
 
-      return matchesSearch && matchesRole;
+  // Объединение участников и приглашений
+  const allMembersAndInvites = useMemo((): MemberOrInvite[] => {
+    const membersList: MemberOrInvite[] =
+      members?.map((m) => ({ type: "member" as const, data: m })) || [];
+    const invitesList: MemberOrInvite[] =
+      invites?.map((i) => ({ type: "invite" as const, data: i })) || [];
+    return [...membersList, ...invitesList];
+  }, [members, invites]);
+
+  // Фильтрация участников и приглашений
+  const filteredItems = useMemo(() => {
+    return allMembersAndInvites.filter((item) => {
+      if (item.type === "member") {
+        const member = item.data;
+        const matchesSearch =
+          member.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = roleFilter === "all" || member.role === roleFilter;
+        return matchesSearch && matchesRole;
+      } else {
+        const invite = item.data;
+        const matchesSearch =
+          invite.invitedEmail
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) || false;
+        const matchesRole = roleFilter === "all" || invite.role === roleFilter;
+        return matchesSearch && matchesRole;
+      }
     });
-  }, [members, searchQuery, roleFilter]);
+  }, [allMembersAndInvites, searchQuery, roleFilter]);
 
   if (isLoading) {
     return <MembersLoadingSkeleton />;
@@ -241,7 +280,7 @@ export function WorkspaceMembersClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMembers.length === 0 ? (
+              {filteredItems.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={3}
@@ -251,16 +290,25 @@ export function WorkspaceMembersClient({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredMembers.map((member: WorkspaceMember) => (
-                  <MemberRow
-                    key={member.userId}
-                    member={member}
-                    workspaceId={workspaceId}
-                    currentUserId={currentUserId}
-                    canManageMembers={canManageMembers}
-                    isOwner={isOwner}
-                  />
-                ))
+                filteredItems.map((item) =>
+                  item.type === "member" ? (
+                    <MemberRow
+                      key={item.data.userId}
+                      member={item.data}
+                      workspaceId={workspaceId}
+                      currentUserId={currentUserId}
+                      canManageMembers={canManageMembers}
+                      isOwner={isOwner}
+                    />
+                  ) : (
+                    <InviteRow
+                      key={item.data.id}
+                      invite={item.data}
+                      workspaceId={workspaceId}
+                      canManageMembers={canManageMembers}
+                    />
+                  ),
+                )
               )}
             </TableBody>
           </Table>
@@ -268,10 +316,80 @@ export function WorkspaceMembersClient({
 
         {/* Stats */}
         <div className="text-sm text-muted-foreground">
-          Показано {filteredMembers.length} из {members?.length || 0} участников
+          Показано {filteredItems.length} из {allMembersAndInvites.length} (
+          {members?.length || 0} участников, {invites?.length || 0} приглашений)
         </div>
       </div>
     </>
+  );
+}
+
+function InviteRow({
+  invite,
+  workspaceId,
+  canManageMembers,
+}: {
+  invite: WorkspaceInvite;
+  workspaceId: string;
+  canManageMembers: boolean;
+}) {
+  const { MemberActionsMenu } = useMemberActionsMenu({
+    member: {
+      id: invite.invitedUserId || "",
+      name: invite.invitedEmail || "Приглашённый пользователь",
+      email: invite.invitedEmail || "",
+      role: invite.role,
+      status: "invited",
+    },
+    workspaceId,
+    canManage: canManageMembers,
+    isCurrentUser: false,
+  });
+
+  return (
+    <TableRow className="bg-muted/30">
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>
+              <IconUserPlus className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium flex items-center gap-2">
+              {invite.invitedEmail}
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                Приглашён
+              </span>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Истекает: {new Date(invite.expiresAt).toLocaleDateString("ru-RU")}
+            </div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Select value={invite.role} disabled>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="owner">Владелец</SelectItem>
+            <SelectItem value="admin">Администратор</SelectItem>
+            <SelectItem value="member">Участник</SelectItem>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        {canManageMembers && (
+          <MemberActionsMenu>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <IconDots className="h-4 w-4" />
+            </Button>
+          </MemberActionsMenu>
+        )}
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -292,7 +410,7 @@ function MemberRow({
   const queryClient = useQueryClient();
   const isCurrentUser = member.userId === currentUserId;
 
-  const { MemberActionsMenu, setShowMemberActionsMenu } = useMemberActionsMenu({
+  const { MemberActionsMenu } = useMemberActionsMenu({
     member: {
       id: member.userId,
       name: member.user.name,
@@ -330,55 +448,46 @@ function MemberRow({
   const canChangeRole = isOwner && !isCurrentUser;
 
   return (
-    <>
-      <MemberActionsMenu />
-      <TableRow>
-        <TableCell>
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage
-                src={member.user.image || ""}
-                alt={member.user.name}
-              />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium">{member.user.name}</div>
-              <div className="text-sm text-muted-foreground">
-                {member.user.email}
-              </div>
+    <TableRow>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={member.user.image || ""} alt={member.user.name} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{member.user.name}</div>
+            <div className="text-sm text-muted-foreground">
+              {member.user.email}
             </div>
           </div>
-        </TableCell>
-        <TableCell>
-          <Select
-            value={member.role}
-            onValueChange={handleRoleChange}
-            disabled={!canChangeRole || updateRole.isPending}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="owner">Владелец</SelectItem>
-              <SelectItem value="admin">Администратор</SelectItem>
-              <SelectItem value="member">Участник</SelectItem>
-            </SelectContent>
-          </Select>
-        </TableCell>
-        <TableCell>
-          {(canManageMembers || isCurrentUser) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMemberActionsMenu(true)}
-              className="h-8 w-8 p-0"
-            >
+        </div>
+      </TableCell>
+      <TableCell>
+        <Select
+          value={member.role}
+          onValueChange={handleRoleChange}
+          disabled={!canChangeRole || updateRole.isPending}
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="owner">Владелец</SelectItem>
+            <SelectItem value="admin">Администратор</SelectItem>
+            <SelectItem value="member">Участник</SelectItem>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        {(canManageMembers || isCurrentUser) && (
+          <MemberActionsMenu>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
               <IconDots className="h-4 w-4" />
             </Button>
-          )}
-        </TableCell>
-      </TableRow>
-    </>
+          </MemberActionsMenu>
+        )}
+      </TableCell>
+    </TableRow>
   );
 }

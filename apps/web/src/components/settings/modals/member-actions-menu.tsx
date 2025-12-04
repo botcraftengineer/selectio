@@ -29,7 +29,7 @@ interface Member {
   status: "active" | "invited";
 }
 
-type DialogType = "remove" | "cancel-invite" | null;
+type DialogType = "remove" | "leave" | "cancel-invite" | null;
 
 export function useMemberActionsMenu({
   member,
@@ -42,27 +42,31 @@ export function useMemberActionsMenu({
   canManage: boolean;
   isCurrentUser: boolean;
 }) {
-  const [showMenu, setShowMenu] = useState(false);
   const [dialogType, setDialogType] = useState<DialogType>(null);
 
   return {
-    setShowMemberActionsMenu: setShowMenu,
-    MemberActionsMenu: () => (
+    MemberActionsMenu: ({ children }: { children: ReactNode }) => (
       <>
         <MemberActionsDropdown
-          open={showMenu}
-          onOpenChange={setShowMenu}
           member={member}
           workspaceId={workspaceId}
           canManage={canManage}
           isCurrentUser={isCurrentUser}
           onAction={setDialogType}
-        />
+        >
+          {children}
+        </MemberActionsDropdown>
         <RemoveMemberDialog
           open={dialogType === "remove"}
           onOpenChange={(open) => setDialogType(open ? "remove" : null)}
           member={member}
           workspaceId={workspaceId}
+        />
+        <LeaveWorkspaceDialog
+          open={dialogType === "leave"}
+          onOpenChange={(open) => setDialogType(open ? "leave" : null)}
+          workspaceId={workspaceId}
+          userId={member.id}
         />
         <CancelInviteDialog
           open={dialogType === "cancel-invite"}
@@ -76,8 +80,6 @@ export function useMemberActionsMenu({
 }
 
 function MemberActionsDropdown({
-  open,
-  onOpenChange,
   member,
   workspaceId,
   canManage,
@@ -85,22 +87,21 @@ function MemberActionsDropdown({
   onAction,
   children,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   member: Member;
   workspaceId: string;
   canManage: boolean;
   isCurrentUser: boolean;
   onAction: (action: DialogType) => void;
-  children?: ReactNode;
+  children: ReactNode;
 }) {
   const trpc = useTRPC();
+  const [open, setOpen] = useState(false);
 
   const resendInvite = useMutation(
     trpc.workspace.resendInvite.mutationOptions({
       onSuccess: () => {
         toast.success("Приглашение отправлено повторно");
-        onOpenChange(false);
+        setOpen(false);
       },
       onError: (err) => {
         toast.error(err.message || "Не удалось отправить приглашение");
@@ -117,19 +118,24 @@ function MemberActionsDropdown({
   };
 
   const handleRemove = () => {
-    onOpenChange(false);
+    setOpen(false);
     onAction("remove");
   };
 
+  const handleLeave = () => {
+    setOpen(false);
+    onAction("leave");
+  };
+
   const handleCancelInvite = () => {
-    onOpenChange(false);
+    setOpen(false);
     onAction("cancel-invite");
   };
 
   const isInvited = member.status === "invited";
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {isInvited && canManage && (
@@ -150,7 +156,7 @@ function MemberActionsDropdown({
         )}
 
         {isCurrentUser && !isInvited && (
-          <DropdownMenuItem onClick={handleRemove}>
+          <DropdownMenuItem onClick={handleLeave}>
             <IconUserMinus className="mr-2 h-4 w-4" />
             Покинуть workspace
           </DropdownMenuItem>
@@ -225,6 +231,69 @@ function RemoveMemberDialog({
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {removeUser.isPending ? "Удаление..." : "Удалить"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+function LeaveWorkspaceDialog({
+  open,
+  onOpenChange,
+  workspaceId,
+  userId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  workspaceId: string;
+  userId: string;
+}) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const leaveWorkspace = useMutation(
+    trpc.workspace.removeUser.mutationOptions({
+      onSuccess: () => {
+        toast.success("Вы покинули workspace");
+        onOpenChange(false);
+        queryClient.invalidateQueries(trpc.workspace.members.pathFilter());
+        // Redirect to workspaces list or home
+        window.location.href = "/";
+      },
+      onError: (err) => {
+        toast.error(err.message || "Не удалось покинуть workspace");
+      },
+    }),
+  );
+
+  const handleLeave = () => {
+    leaveWorkspace.mutate({
+      workspaceId,
+      userId,
+    });
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Покинуть workspace?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Вы уверены, что хотите покинуть этот workspace? Вы потеряете доступ
+            ко всем проектам и данным. Это действие нельзя отменить.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={leaveWorkspace.isPending}>
+            Отмена
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleLeave}
+            disabled={leaveWorkspace.isPending}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {leaveWorkspace.isPending ? "Выход..." : "Покинуть"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -11,6 +11,14 @@ export const workspaceInvite = pgTable("workspace_invites", {
   // Токен для ссылки приглашения
   token: text("token").notNull().unique(),
 
+  // Приглашённый пользователь (для персональных приглашений)
+  // null для публичных ссылок-приглашений
+  invitedUserId: text("invited_user_id"),
+
+  // Email приглашённого (для отправки email и отображения в UI)
+  // null для публичных ссылок-приглашений
+  invitedEmail: text("invited_email"),
+
   // Роль, которую получит пользователь при присоединении
   role: text("role", { enum: ["owner", "admin", "member"] })
     .default("member")

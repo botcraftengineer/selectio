@@ -136,6 +136,59 @@ export class WorkspaceRepository {
     });
   }
 
+  // Получить все активные приглашения workspace
+  async getInvites(workspaceId: string) {
+    const { gt } = await import("drizzle-orm");
+
+    return db.query.workspaceInvite.findMany({
+      where: (invite, { and, eq }) =>
+        and(
+          eq(invite.workspaceId, workspaceId),
+          gt(invite.expiresAt, new Date()),
+        ),
+    });
+  }
+
+  // Найти приглашение по email
+  async findInviteByEmail(workspaceId: string, email: string) {
+    const { workspaceInvite } = await import("../schema");
+    const { and, eq: eqOp, gt } = await import("drizzle-orm");
+
+    return db.query.workspaceInvite.findFirst({
+      where: and(
+        eqOp(workspaceInvite.workspaceId, workspaceId),
+        eqOp(workspaceInvite.invitedEmail, email),
+        gt(workspaceInvite.expiresAt, new Date()),
+      ),
+    });
+  }
+
+  // Отменить приглашение по email
+  async cancelInviteByEmail(workspaceId: string, email: string) {
+    const { workspaceInvite } = await import("../schema");
+    const { and, eq: eqOp } = await import("drizzle-orm");
+
+    const result = await db
+      .delete(workspaceInvite)
+      .where(
+        and(
+          eqOp(workspaceInvite.workspaceId, workspaceId),
+          eqOp(workspaceInvite.invitedEmail, email),
+        ),
+      )
+      .returning();
+
+    return result.length > 0 ? result[0] : null;
+  }
+
+  // Удалить приглашение после принятия
+  async deleteInviteByToken(token: string) {
+    const { workspaceInvite } = await import("../schema");
+    const { eq: eqOp } = await import("drizzle-orm");
+
+    await db.delete(workspaceInvite).where(eqOp(workspaceInvite.token, token));
+  }
+
   // Найти пользователя по email
   async findUserByEmail(email: string) {
     const { z } = await import("zod");
@@ -150,7 +203,7 @@ export class WorkspaceRepository {
     });
   }
 
-  // Создать invite link
+  // Создать публичный invite link (для любого пользователя)
   async createInviteLink(
     workspaceId: string,
     createdBy: string,
@@ -172,8 +225,50 @@ export class WorkspaceRepository {
         role,
         expiresAt,
         createdBy,
+        invitedUserId: null,
+        invitedEmail: null,
       })
       .returning();
+
+    if (!invite) {
+      throw new Error("Failed to create invite link");
+    }
+
+    return invite;
+  }
+
+  // Создать персональное приглашение для конкретного пользователя
+  async createPersonalInvite(
+    workspaceId: string,
+    createdBy: string,
+    invitedEmail: string,
+    invitedUserId: string | null,
+    role: "owner" | "admin" | "member" = "member",
+    expiresInDays: number = 7,
+  ) {
+    const { workspaceInvite } = await import("../schema");
+    const { nanoid } = await import("nanoid");
+
+    const token = nanoid(32);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    const [invite] = await db
+      .insert(workspaceInvite)
+      .values({
+        workspaceId,
+        token,
+        role,
+        expiresAt,
+        createdBy,
+        invitedUserId,
+        invitedEmail,
+      })
+      .returning();
+
+    if (!invite) {
+      throw new Error("Failed to create personal invite");
+    }
 
     return invite;
   }

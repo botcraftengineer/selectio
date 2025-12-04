@@ -103,7 +103,7 @@ export function ChatMessage({
               )}
             </div>
           ) : (
-            <p className="text-sm whitespace-pre-wrap leading-relaxed wrap-break-word">
+            <p className="text-sm whitespace-pre-wrap leading-relaxed break-words">
               {content}
             </p>
           )}
