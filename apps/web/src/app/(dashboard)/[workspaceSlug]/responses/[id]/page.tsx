@@ -74,10 +74,10 @@ export default function ResponseDetailPage({
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="px-4 lg:px-6">
               <div className="mb-4 flex items-center justify-between">
-                <Link href={`/${workspaceSlug}/responses`}>
+                <Link href={`/${workspaceSlug}`}>
                   <Button variant="ghost" size="sm">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Назад к откликам
+                    Назад
                   </Button>
                 </Link>
                 {response.conversation && (
