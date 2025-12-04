@@ -12,8 +12,9 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
 
+  // Редирект на /auth/signin обрабатывается в middleware
   if (!session?.user) {
-    redirect("/auth/signin");
+    return null;
   }
 
   const caller = await api();

@@ -230,7 +230,7 @@ export function WorkspaceMembersClient({
 
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">Участники</h2>
             <p className="text-sm text-muted-foreground">
@@ -241,10 +241,11 @@ export function WorkspaceMembersClient({
             <div className="flex gap-2">
               <Button
                 onClick={() => setShowInviteMemberModal(true)}
-                className="gap-2"
+                className="gap-2 flex-1 sm:flex-none"
               >
                 <IconUserPlus className="h-4 w-4" />
-                Пригласить участника
+                <span className="hidden sm:inline">Пригласить участника</span>
+                <span className="sm:hidden">Пригласить</span>
               </Button>
               <Button
                 variant="outline"
@@ -258,12 +259,12 @@ export function WorkspaceMembersClient({
         </div>
 
         {/* Filters */}
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Select
             value={roleFilter}
             onValueChange={(v) => setRoleFilter(v as MemberRole | "all")}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Роль" />
             </SelectTrigger>
             <SelectContent>
@@ -274,7 +275,7 @@ export function WorkspaceMembersClient({
             </SelectContent>
           </Select>
 
-          <div className="relative flex-1 max-w-sm ml-auto">
+          <div className="relative flex-1 sm:max-w-sm sm:ml-auto">
             <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Поиск по имени или email"
@@ -286,12 +287,12 @@ export function WorkspaceMembersClient({
         </div>
 
         {/* Members Table */}
-        <div className="rounded-lg border">
+        <div className="rounded-lg border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Имя</TableHead>
-                <TableHead>Роль</TableHead>
+                <TableHead className="min-w-[200px]">Имя</TableHead>
+                <TableHead className="min-w-[120px]">Роль</TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
@@ -366,20 +367,22 @@ function InviteRow({
   return (
     <TableRow className="bg-muted/30">
       <TableCell>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Avatar className="h-8 w-8 shrink-0">
             <AvatarFallback>
               <IconUserPlus className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
-          <div>
-            <div className="font-medium flex items-center gap-2">
-              {invite.invitedEmail ?? "Публичное приглашение"}
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+          <div className="min-w-0">
+            <div className="font-medium flex items-center gap-2 flex-wrap">
+              <span className="truncate">
+                {invite.invitedEmail ?? "Публичное приглашение"}
+              </span>
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded whitespace-nowrap">
                 Приглашён
               </span>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground truncate">
               Истекает: {new Date(invite.expiresAt).toLocaleDateString("ru-RU")}
             </div>
           </div>
@@ -387,7 +390,7 @@ function InviteRow({
       </TableCell>
       <TableCell>
         <Select value={invite.role} disabled>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-full sm:w-[120px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -467,14 +470,14 @@ function MemberRow({
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Avatar className="h-8 w-8 shrink-0">
             <AvatarImage src={member.user.image || ""} alt={member.user.name} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
-          <div>
-            <div className="font-medium">{member.user.name}</div>
-            <div className="text-sm text-muted-foreground">
+          <div className="min-w-0">
+            <div className="font-medium truncate">{member.user.name}</div>
+            <div className="text-sm text-muted-foreground truncate">
               {member.user.email}
             </div>
           </div>
@@ -486,7 +489,7 @@ function MemberRow({
           onValueChange={handleRoleChange}
           disabled={!canChangeRole || updateRole.isPending}
         >
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-full sm:w-[120px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
