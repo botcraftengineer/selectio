@@ -282,7 +282,7 @@ export const completeInterviewFunction = inngest.createFunction(
     });
 
     if (responseId) {
-      await step.run("create-scoring", async () => {
+      const scoringResult = await step.run("create-scoring", async () => {
         console.log("📊 Создание скоринга интервью", {
           responseId,
         });
@@ -339,6 +339,37 @@ export const completeInterviewFunction = inngest.createFunction(
           });
 
         console.log("✅ Скоринг интервью сохранен в БД");
+
+        return scoring;
+      });
+
+      await step.run("finalize-response-status", async () => {
+        console.log("🔄 Финализация статуса response", {
+          responseId,
+          score: scoringResult.score,
+          detailedScore: scoringResult.detailedScore,
+        });
+
+        const { vacancyResponse } = await import("@selectio/db");
+
+        // Определяем hrSelectionStatus на основе оценки
+        // Если detailedScore >= 70, то RECOMMENDED, иначе NOT_RECOMMENDED
+        const hrSelectionStatus =
+          scoringResult.detailedScore >= 70 ? "RECOMMENDED" : "NOT_RECOMMENDED";
+
+        await db
+          .update(vacancyResponse)
+          .set({
+            status: "COMPLETED",
+            hrSelectionStatus,
+          })
+          .where(eq(vacancyResponse.id, responseId));
+
+        console.log("✅ Статус обновлен", {
+          status: "COMPLETED",
+          hrSelectionStatus,
+          detailedScore: scoringResult.detailedScore,
+        });
       });
     }
 
@@ -363,8 +394,16 @@ export const completeInterviewFunction = inngest.createFunction(
     });
 
     await step.run("send-final-message", async () => {
+      const finalMessages = [
+        "Отлично, спасибо за развернутые ответы! 🙏 Мне нужно время, чтобы все проанализировать. Свяжусь с тобой в ближайшее время с результатами.",
+        "Супер, благодарю за беседу! Я изучу все детали и вернусь с обратной связью. Держу в курсе! 😊",
+        "Спасибо большое за уделенное время! Сейчас обработаю информацию и скоро выйду на связь с решением.",
+        "Отлично пообщались, спасибо! 👍 Мне нужно проанализировать наш разговор, после чего я с тобой свяжусь.",
+        "Благодарю за ответы! Все записал, теперь изучу детали. Скоро вернусь с фидбеком.",
+      ] as const;
+
       const finalMessage =
-        "Спасибо за ответы! 🙏 Я изучу их и свяжусь с тобой в ближайшее время.";
+        finalMessages[Math.floor(Math.random() * finalMessages.length)] as string;
 
       const [newMessage] = await db
         .insert(telegramMessage)

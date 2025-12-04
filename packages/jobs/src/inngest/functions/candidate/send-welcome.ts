@@ -263,6 +263,19 @@ export const sendCandidateWelcomeFunction = inngest.createFunction(
           console.log(`✅ Приветственное сообщение сохранено в историю`);
         }
       });
+
+      await step.run("update-response-status", async () => {
+        console.log("🔄 Обновление статуса response на INTERVIEW_HH", {
+          responseId,
+        });
+
+        await db
+          .update(vacancyResponse)
+          .set({ status: "INTERVIEW_HH" })
+          .where(eq(vacancyResponse.id, responseId));
+
+        console.log("✅ Статус обновлен на INTERVIEW_HH");
+      });
     }
 
     return {
