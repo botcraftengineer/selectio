@@ -14,6 +14,20 @@ interface VoicePlayerProps {
   isTranscribing?: boolean;
 }
 
+/**
+ * Extract base URL path without query parameters
+ * This is needed because presigned S3 URLs change every request
+ * but the actual file path stays the same
+ */
+function getBaseUrlPath(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return `${urlObj.origin}${urlObj.pathname}`;
+  } catch {
+    return url;
+  }
+}
+
 export function VoicePlayer({
   src,
   isOutgoing = false,
@@ -24,23 +38,27 @@ export function VoicePlayer({
   isTranscribing = false,
 }: VoicePlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const lastSrcRef = useRef<string>("");
+  const lastBasePathRef = useRef<string>("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
 
-  // Мемоизируем URL чтобы избежать повторных запросов
-  const audioSrc = useMemo(() => src, [src]);
+  // Extract base path to compare (without presigned tokens)
+  const basePath = useMemo(() => getBaseUrlPath(src), [src]);
+
+  // Store the current src for actual use
+  const currentSrc = useRef<string>(src);
+  currentSrc.current = src;
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Устанавливаем src только если он изменился
-    if (lastSrcRef.current !== audioSrc) {
-      audio.src = audioSrc;
+    // Only reload if the actual file path changed (ignore signature changes)
+    if (lastBasePathRef.current !== basePath) {
+      audio.src = currentSrc.current;
       audio.load();
-      lastSrcRef.current = audioSrc;
+      lastBasePathRef.current = basePath;
     }
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
@@ -62,7 +80,7 @@ export function VoicePlayer({
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, [audioSrc]);
+  }, [basePath]);
 
   const togglePlay = async () => {
     const audio = audioRef.current;

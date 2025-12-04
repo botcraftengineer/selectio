@@ -197,6 +197,22 @@ export const workspaceMembers = {
         });
       }
 
+      // Проверка email для персонального приглашения
+      if (
+        invite.invitedEmail &&
+        (!invite.invitedUserId || invite.invitedUserId !== ctx.session.user.id)
+      ) {
+        const sessionEmail = ctx.session.user.email?.toLowerCase();
+        const invitedEmail = invite.invitedEmail.toLowerCase();
+
+        if (!sessionEmail || sessionEmail !== invitedEmail) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Это приглашение предназначено для другого пользователя",
+          });
+        }
+      }
+
       // Проверка, не является ли пользователь уже участником
       const existingMember = await workspaceRepository.checkAccess(
         invite.workspaceId,

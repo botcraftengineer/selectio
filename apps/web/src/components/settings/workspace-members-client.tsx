@@ -166,9 +166,9 @@ export function WorkspaceMembersClient({
 
   // Получение приглашений (только для админов)
   const { data: invites, isLoading: invitesLoading } = useQuery({
-    ...(trpc.workspace as any).invites?.queryOptions({ workspaceId }),
-    enabled: canManageMembers && !!(trpc.workspace as any).invites,
-  }) as { data: WorkspaceInvite[] | undefined; isLoading: boolean };
+    ...trpc.workspace.invites.queryOptions({ workspaceId }),
+    enabled: canManageMembers,
+  });
 
   const isLoading = membersLoading || (canManageMembers && invitesLoading);
 
@@ -335,9 +335,9 @@ function InviteRow({
 }) {
   const { MemberActionsMenu } = useMemberActionsMenu({
     member: {
-      id: invite.invitedUserId || "",
-      name: invite.invitedEmail || "Приглашённый пользователь",
-      email: invite.invitedEmail || "",
+      id: invite.id,
+      name: invite.invitedEmail ?? "Приглашённый пользователь",
+      email: invite.invitedEmail ?? "",
       role: invite.role,
       status: "invited",
     },
@@ -357,7 +357,7 @@ function InviteRow({
           </Avatar>
           <div>
             <div className="font-medium flex items-center gap-2">
-              {invite.invitedEmail}
+              {invite.invitedEmail ?? "Публичное приглашение"}
               <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
                 Приглашён
               </span>

@@ -103,9 +103,10 @@ export function ScreeningHoverCard({ screening }: ScreeningHoverCardProps) {
                 )}
                 Анализ
               </h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {screening.analysis}
-              </p>
+              <div
+                className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: screening.analysis }}
+              />
             </div>
           )}
         </div>
