@@ -30,7 +30,6 @@ export const list = protectedProcedure
             "EVALUATED",
             "DIALOG_APPROVED",
             "INTERVIEW_HH",
-            "INTERVIEW_WHATSAPP",
             "COMPLETED",
             "SKIPPED",
           ]),

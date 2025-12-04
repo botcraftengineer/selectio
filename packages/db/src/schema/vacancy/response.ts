@@ -19,7 +19,6 @@ export const responseStatusEnum = pgEnum("response_status", [
   "EVALUATED",
   "DIALOG_APPROVED",
   "INTERVIEW_HH",
-  "INTERVIEW_WHATSAPP",
   "COMPLETED",
   "SKIPPED",
 ]);
@@ -74,7 +73,6 @@ export const CreateVacancyResponseSchema = createInsertSchema(vacancyResponse, {
       "EVALUATED",
       "DIALOG_APPROVED",
       "INTERVIEW_HH",
-      "INTERVIEW_WHATSAPP",
       "COMPLETED",
       "SKIPPED",
     ])

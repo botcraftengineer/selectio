@@ -3,7 +3,6 @@ export const RESPONSE_STATUS = {
   EVALUATED: "EVALUATED",
   DIALOG_APPROVED: "DIALOG_APPROVED",
   INTERVIEW_HH: "INTERVIEW_HH",
-  INTERVIEW_WHATSAPP: "INTERVIEW_WHATSAPP",
   COMPLETED: "COMPLETED",
   SKIPPED: "SKIPPED",
 } as const;
@@ -16,7 +15,6 @@ export const RESPONSE_STATUS_LABELS: Record<ResponseStatus, string> = {
   [RESPONSE_STATUS.EVALUATED]: "Оценено",
   [RESPONSE_STATUS.DIALOG_APPROVED]: "Диалог утвержден",
   [RESPONSE_STATUS.INTERVIEW_HH]: "Собеседование HH.ru",
-  [RESPONSE_STATUS.INTERVIEW_WHATSAPP]: "Собеседование Ватсап",
   [RESPONSE_STATUS.COMPLETED]: "Завершено",
   [RESPONSE_STATUS.SKIPPED]: "Пропущено",
 };
@@ -27,8 +25,6 @@ export const RESPONSE_STATUS_DESCRIPTIONS: Record<ResponseStatus, string> = {
     "AI проанализировал резюме, выставлена оценка, предложен диалог",
   [RESPONSE_STATUS.DIALOG_APPROVED]: "Вопросы проверены и одобрены HR",
   [RESPONSE_STATUS.INTERVIEW_HH]: "Активный диалог с кандидатом через HH.ru",
-  [RESPONSE_STATUS.INTERVIEW_WHATSAPP]:
-    "Активный диалог с кандидатом через WhatsApp",
   [RESPONSE_STATUS.COMPLETED]:
     "Кандидат ответил на все вопросы, есть вывод по нему",
   [RESPONSE_STATUS.SKIPPED]: "Кандидат не ответил в срок (24 часа)",
