@@ -22,12 +22,17 @@ import { useResponseTable } from "./use-response-table";
 
 interface ResponseTableProps {
   vacancyId: string;
+  workspaceSlug: string;
   accessToken?: string;
 }
 
 const ITEMS_PER_PAGE = 25;
 
-export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
+export function ResponseTable({
+  vacancyId,
+  workspaceSlug,
+  accessToken,
+}: ResponseTableProps) {
   const trpc = useTRPC();
   const {
     currentPage,
@@ -147,6 +152,7 @@ export function ResponseTable({ vacancyId, accessToken }: ResponseTableProps) {
       <ResponseRow
         key={response.id}
         response={response}
+        workspaceSlug={workspaceSlug}
         accessToken={accessToken}
         isSelected={selectedIds.has(response.id)}
         onSelect={handleSelectOne}

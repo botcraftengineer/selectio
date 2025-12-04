@@ -24,6 +24,7 @@ import { ScreeningHoverCard } from "./screening-hover-card";
 
 interface ResponseRowProps {
   response: VacancyResponse;
+  workspaceSlug: string;
   accessToken: string | undefined;
   isSelected?: boolean;
   onSelect?: (id: string) => void;
@@ -31,6 +32,7 @@ interface ResponseRowProps {
 
 export function ResponseRow({
   response,
+  workspaceSlug,
   accessToken,
   isSelected = false,
   onSelect,
@@ -78,6 +80,7 @@ export function ResponseRow({
                 <ChatIndicator
                   messageCount={response.conversation.messages.length}
                   conversationId={response.conversation.id}
+                  workspaceSlug={workspaceSlug}
                 />
               )}
             </div>

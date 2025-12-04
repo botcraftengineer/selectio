@@ -4,7 +4,6 @@ import { responseScreening, vacancyResponse } from "@selectio/db/schema";
 import { buildResponseScreeningPrompt } from "@selectio/prompts";
 import { generateText } from "../lib/ai-client";
 import { responseScreeningResultSchema } from "../schemas/response-screening.schema";
-import type { VacancyRequirements } from "../types/screening";
 import { extractJsonFromText } from "../utils/json-extractor";
 import { getVacancyRequirements } from "./screening-prompt-service";
 /**

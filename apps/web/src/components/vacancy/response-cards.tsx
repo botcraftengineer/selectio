@@ -27,9 +27,13 @@ import { ContactInfo } from "./contact-info";
 
 interface ResponseCardsProps {
   responses: VacancyResponse[];
+  workspaceSlug: string;
 }
 
-export function ResponseCards({ responses }: ResponseCardsProps) {
+export function ResponseCards({
+  responses,
+  workspaceSlug,
+}: ResponseCardsProps) {
   return (
     <div className="grid gap-4 md:hidden">
       {responses.map((response) => (
@@ -66,6 +70,7 @@ export function ResponseCards({ responses }: ResponseCardsProps) {
                       <ChatIndicator
                         messageCount={response.conversation.messages.length}
                         conversationId={response.conversation.id}
+                        workspaceSlug={workspaceSlug}
                       />
                     )}
                   </CardTitle>

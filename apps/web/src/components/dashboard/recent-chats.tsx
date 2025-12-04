@@ -1,10 +1,14 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { ChatPreviewCard } from "~/components/chat";
 import { useTRPC } from "~/trpc/react";
-import { useQuery } from "@tanstack/react-query";
 
-export function RecentChats() {
+interface RecentChatsProps {
+  workspaceSlug: string;
+}
+
+export function RecentChats({ workspaceSlug }: RecentChatsProps) {
   const trpc = useTRPC();
 
   // Получаем последние сообщения с помощью queryOptions
@@ -63,6 +67,7 @@ export function RecentChats() {
             messageCount={0}
             unreadCount={0}
             status={conversation.status === "ACTIVE" ? "active" : "completed"}
+            workspaceSlug={workspaceSlug}
           />
         ))}
       </div>

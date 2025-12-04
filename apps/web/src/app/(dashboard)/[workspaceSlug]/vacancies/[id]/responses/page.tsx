@@ -175,7 +175,10 @@ export default function VacancyResponsesPage({
                       <CardDescription>Управление откликами</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ResponseTable vacancyId={id} />
+                      <ResponseTable
+                        vacancyId={id}
+                        workspaceSlug={workspaceSlug}
+                      />
                     </CardContent>
                   </Card>
                 </TabsContent>
