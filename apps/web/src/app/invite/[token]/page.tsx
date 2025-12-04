@@ -49,6 +49,17 @@ export default async function InvitePage({
       );
     }
 
+    // Проверяем, не является ли пользователь уже участником
+    const userWorkspaces = await caller.workspace.list();
+    const isAlreadyMember = userWorkspaces.some(
+      (uw) => uw.workspace.id === invite.workspaceId,
+    );
+
+    if (isAlreadyMember) {
+      // Если уже участник, редиректим в workspace
+      redirect(`/${invite.workspace.slug}`);
+    }
+
     return <InviteAcceptClient invite={invite} token={token} />;
   } catch {
     return (

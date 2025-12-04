@@ -30,7 +30,9 @@ export function InviteAcceptClient({ invite, token }: InviteAcceptClientProps) {
     trpc.workspace.acceptInvite.mutationOptions({
       onSuccess: () => {
         toast.success(`Вы присоединились к ${invite.workspace.name}`);
+        // Редиректим в workspace и обновляем страницу для загрузки новых данных
         router.push(`/${invite.workspace.slug}`);
+        router.refresh();
       },
       onError: (err) => {
         toast.error(err.message || "Не удалось принять приглашение");

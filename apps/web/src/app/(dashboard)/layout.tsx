@@ -16,11 +16,11 @@ export default async function DashboardLayout({
     redirect("/auth/signin");
   }
 
-  // Получаем workspaces пользователя
   const caller = await api();
   const userWorkspaces = await caller.workspace.list();
 
   // Если нет workspaces, редирект на создание
+  // (логика с приглашениями обрабатывается на странице /invite/[token])
   if (userWorkspaces.length === 0) {
     redirect("/onboarding");
   }

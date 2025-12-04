@@ -65,7 +65,15 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
         otp: data.otp,
       });
       toast.success("Успешно подтверждено!");
-      router.push("/"); // Redirect to dashboard
+
+      // Проверяем наличие redirect URL
+      const redirectUrl = localStorage.getItem("auth_redirect");
+      if (redirectUrl) {
+        localStorage.removeItem("auth_redirect");
+        router.push(redirectUrl);
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Неверный код. Попробуйте снова.");

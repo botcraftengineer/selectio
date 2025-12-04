@@ -18,7 +18,7 @@ import {
   Input,
 } from "@selectio/ui";
 import { type LoginFormData, loginFormSchema } from "@selectio/validators";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,6 +30,8 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -45,8 +47,11 @@ export function LoginForm({
         email: data.email,
         type: "sign-in",
       });
-      // Store email in localStorage or URL to pre-fill OTP form
+      // Сохраняем email и redirect URL в localStorage
       localStorage.setItem("otp_email", data.email);
+      if (redirectUrl) {
+        localStorage.setItem("auth_redirect", redirectUrl);
+      }
       toast.success("Код отправлен! Проверьте вашу почту.");
       router.push("/auth/otp");
     } catch (error) {
