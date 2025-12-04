@@ -23,6 +23,19 @@ export const list = protectedProcedure
       screeningFilter: z
         .enum(["all", "evaluated", "not-evaluated", "high-score", "low-score"])
         .default("all"),
+      statusFilter: z
+        .array(
+          z.enum([
+            "NEW",
+            "EVALUATED",
+            "DIALOG_APPROVED",
+            "INTERVIEW_HH",
+            "INTERVIEW_WHATSAPP",
+            "COMPLETED",
+            "SKIPPED",
+          ]),
+        )
+        .optional(),
       search: z.string().optional(),
     }),
   )
@@ -34,6 +47,7 @@ export const list = protectedProcedure
       sortField,
       sortDirection,
       screeningFilter,
+      statusFilter,
       search,
     } = input;
     const offset = (page - 1) * limit;
@@ -119,6 +133,11 @@ export const list = protectedProcedure
       whereConditions.push(
         ilike(vacancyResponse.candidateName, `%${search.trim()}%`),
       );
+    }
+
+    // Добавляем фильтр по статусу
+    if (statusFilter && statusFilter.length > 0) {
+      whereConditions.push(inArray(vacancyResponse.status, statusFilter));
     }
 
     const whereCondition = and(...whereConditions);
