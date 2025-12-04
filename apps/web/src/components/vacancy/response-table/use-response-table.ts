@@ -1,3 +1,4 @@
+import type { ResponseStatus } from "@selectio/db/schema";
 import { useState } from "react";
 import type { ScreeningFilter } from "~/components/response";
 import { useDebounce } from "~/hooks/use-debounce";
@@ -10,6 +11,7 @@ export function useResponseTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [screeningFilter, setScreeningFilter] =
     useState<ScreeningFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<ResponseStatus[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 500);
 
@@ -48,6 +50,8 @@ export function useResponseTable() {
     setSelectedIds,
     screeningFilter,
     setScreeningFilter,
+    statusFilter,
+    setStatusFilter,
     searchInput,
     debouncedSearch,
     handleSearchChange,

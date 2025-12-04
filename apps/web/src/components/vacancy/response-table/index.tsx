@@ -44,6 +44,8 @@ export function ResponseTable({
     setSelectedIds,
     screeningFilter,
     setScreeningFilter,
+    statusFilter,
+    setStatusFilter,
     searchInput,
     debouncedSearch,
     handleSearchChange,
@@ -58,6 +60,7 @@ export function ResponseTable({
       sortField,
       sortDirection,
       screeningFilter,
+      statusFilter,
       search: debouncedSearch,
     }),
     placeholderData: (previousData) => previousData,
@@ -81,7 +84,14 @@ export function ResponseTable({
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset selection when filters change
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [currentPage, sortField, sortDirection, screeningFilter, debouncedSearch]);
+  }, [
+    currentPage,
+    sortField,
+    sortDirection,
+    screeningFilter,
+    statusFilter,
+    debouncedSearch,
+  ]);
 
   const responses = data?.responses ?? [];
   const total = data?.total ?? 0;
@@ -167,6 +177,8 @@ export function ResponseTable({
         totalResponses={total}
         screeningFilter={screeningFilter}
         onFilterChange={setScreeningFilter}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
         search={searchInput}
         onSearchChange={handleSearchChange}
         isRefreshing={isRefreshing}

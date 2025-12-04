@@ -1,4 +1,4 @@
-import { cn, ThemeProvider, ThemeToggle, Toaster } from "@selectio/ui";
+import { cn, ThemeProvider, Toaster } from "@selectio/ui";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -53,9 +53,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       >
         <ThemeProvider>
           <TRPCReactProvider>{props.children}</TRPCReactProvider>
-          <div className="absolute right-4 bottom-4">
-            <ThemeToggle />
-          </div>
           <Toaster />
         </ThemeProvider>
         <Analytics />

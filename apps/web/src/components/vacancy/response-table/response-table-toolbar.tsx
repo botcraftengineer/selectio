@@ -1,4 +1,5 @@
 import { useInngestSubscription } from "@inngest/realtime/hooks";
+import type { ResponseStatus } from "@selectio/db/schema";
 import {
   Button,
   Dialog,
@@ -16,7 +17,11 @@ import {
   fetchScreenNewResponsesToken,
 } from "~/actions/realtime";
 
-import { ResponseFilters, type ScreeningFilter } from "~/components/response";
+import {
+  ResponseFilters,
+  ResponseStatusFilter,
+  type ScreeningFilter,
+} from "~/components/response";
 
 // Компонент для подписки на refresh - монтируется только когда нужен
 function RefreshSubscription({
@@ -103,6 +108,8 @@ interface ResponseTableToolbarProps {
   totalResponses: number;
   screeningFilter: ScreeningFilter;
   onFilterChange: (filter: ScreeningFilter) => void;
+  statusFilter: ResponseStatus[];
+  onStatusFilterChange: (statuses: ResponseStatus[]) => void;
   search: string;
   onSearchChange: (value: string) => void;
   isRefreshing: boolean;
@@ -120,6 +127,8 @@ export function ResponseTableToolbar({
   totalResponses,
   screeningFilter,
   onFilterChange,
+  statusFilter,
+  onStatusFilterChange,
   search,
   onSearchChange,
   isRefreshing,
@@ -410,6 +419,10 @@ export function ResponseTableToolbar({
           <ResponseFilters
             selectedFilter={screeningFilter}
             onFilterChange={onFilterChange}
+          />
+          <ResponseStatusFilter
+            selectedStatuses={statusFilter}
+            onStatusChange={onStatusFilterChange}
           />
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
