@@ -2,10 +2,11 @@ import { Avatar, AvatarFallback } from "@selectio/ui";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Bot, User } from "lucide-react";
+import { memo, useRef } from "react";
 import type { ChatMessageProps } from "../../types/chat";
 import { VoicePlayer } from "./voice-player";
 
-export function ChatMessage({
+export const ChatMessage = memo(function ChatMessage({
   id,
   sender,
   contentType,
@@ -21,6 +22,12 @@ export function ChatMessage({
   const isAdmin = sender === "ADMIN";
   const isBot = sender === "BOT";
   const isVoice = contentType === "VOICE";
+
+  // Store the initial fileUrl to prevent audio interruption when presigned URL changes
+  const stableFileUrlRef = useRef<string | null>(null);
+  if (fileUrl && !stableFileUrlRef.current) {
+    stableFileUrlRef.current = fileUrl;
+  }
 
   const senderLabel = isAdmin
     ? "Вы"
@@ -80,10 +87,10 @@ export function ChatMessage({
                 : "bg-muted rounded-tl-sm"
           }`}
         >
-          {isVoice && fileUrl ? (
+          {isVoice && stableFileUrlRef.current ? (
             <div className="space-y-2">
               <VoicePlayer
-                src={fileUrl}
+                src={stableFileUrlRef.current}
                 isOutgoing={isAdmin}
                 messageId={id}
                 fileId={fileId ?? undefined}
@@ -111,4 +118,18 @@ export function ChatMessage({
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison - ignore fileUrl changes as we cache the first one
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.sender === nextProps.sender &&
+    prevProps.contentType === nextProps.contentType &&
+    prevProps.content === nextProps.content &&
+    prevProps.createdAt.getTime() === nextProps.createdAt.getTime() &&
+    prevProps.candidateName === nextProps.candidateName &&
+    prevProps.fileId === nextProps.fileId &&
+    prevProps.voiceTranscription === nextProps.voiceTranscription &&
+    prevProps.isTranscribing === nextProps.isTranscribing
+    // Intentionally NOT comparing fileUrl and onTranscribe
+  );
+});

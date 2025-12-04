@@ -2,7 +2,7 @@
 
 import { cn } from "@selectio/ui";
 import { FileText, Pause, Play } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VoicePlayerProps {
   src: string;
@@ -12,20 +12,6 @@ interface VoicePlayerProps {
   hasTranscription?: boolean;
   onTranscribe?: () => void;
   isTranscribing?: boolean;
-}
-
-/**
- * Extract base URL path without query parameters
- * This is needed because presigned S3 URLs change every request
- * but the actual file path stays the same
- */
-function getBaseUrlPath(url: string): string {
-  try {
-    const urlObj = new URL(url);
-    return `${urlObj.origin}${urlObj.pathname}`;
-  } catch {
-    return url;
-  }
 }
 
 export function VoicePlayer({
@@ -38,40 +24,39 @@ export function VoicePlayer({
   isTranscribing = false,
 }: VoicePlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const lastBasePathRef = useRef<string>("");
+  // Store the initial src and NEVER update it - presigned URLs change but we use the first one
+  const initialSrcRef = useRef<string>(src);
+  const isInitializedRef = useRef<boolean>(false);
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
 
-  // Extract base path to compare (without presigned tokens)
-  const basePath = useMemo(() => getBaseUrlPath(src), [src]);
-
-  // Store the current src for actual use
-  const currentSrc = useRef<string>(src);
-  currentSrc.current = src;
-
+  // Initialize audio only once on mount
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
-
-    // Only reload if the actual file path changed (ignore signature changes)
-    if (lastBasePathRef.current !== basePath) {
-      audio.src = currentSrc.current;
-      audio.load();
-      lastBasePathRef.current = basePath;
-    }
+    if (!audio || isInitializedRef.current) return;
+    
+    // Set src only once
+    audio.src = initialSrcRef.current;
+    isInitializedRef.current = true;
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => setTotalDuration(audio.duration);
     const handleEnded = () => setIsPlaying(false);
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      console.error("Audio error:", e);
+      setIsPlaying(false);
+    };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -79,8 +64,9 @@ export function VoicePlayer({
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("error", handleError);
     };
-  }, [basePath]);
+  }, []); // Empty deps - run only once
 
   const togglePlay = async () => {
     const audio = audioRef.current;
