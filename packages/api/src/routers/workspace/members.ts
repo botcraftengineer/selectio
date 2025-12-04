@@ -1,4 +1,5 @@
 import { workspaceRepository } from "@selectio/db";
+import { sendEmail } from "@selectio/emails";
 import {
   addUserToWorkspaceSchema,
   updateUserRoleSchema,
@@ -54,6 +55,34 @@ export const workspaceMembers = {
         userId,
         input.role,
       );
+
+      // Получаем данные workspace и создаем invite link
+      const workspace = await workspaceRepository.findById(input.workspaceId);
+      const invite = await workspaceRepository.createInviteLink(
+        input.workspaceId,
+        ctx.session.user.id,
+        input.role,
+      );
+
+      if (workspace && invite) {
+        const { env } = await import("@selectio/config");
+        const inviteLink = `${env.APP_URL}/invite/${invite.token}`;
+
+        // Отправляем email с приглашением
+        const { WorkspaceInviteEmail } = await import("@selectio/emails");
+
+        await sendEmail({
+          to: [input.email],
+          subject: `Приглашение в ${workspace.name}`,
+          react: WorkspaceInviteEmail({
+            workspaceName: workspace.name,
+            workspaceLogo: workspace.logo || undefined,
+            inviterName: ctx.session.user.name || ctx.session.user.email,
+            inviteLink,
+            role: input.role,
+          }),
+        });
+      }
 
       return member;
     }),

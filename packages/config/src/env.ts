@@ -55,7 +55,8 @@ export const env = createEnv({
     INNGEST_EVENT_API_BASE_URL: z.url().optional().default("https://inn.gs"),
 
     // App URL
-    APP_URL: z.url().optional(),
+    APP_URL: z.url().optional().default("https://selectio-web.vercel.app"),
+    APP_NAME: z.string().optional().default("Selectio"),
   },
   client: {},
   clientPrefix: "NEXT_PUBLIC_",
@@ -92,6 +93,7 @@ export const env = createEnv({
     INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
     INNGEST_EVENT_API_BASE_URL: process.env.INNGEST_EVENT_API_BASE_URL,
     APP_URL: process.env.APP_URL,
+    APP_NAME: process.env.APP_NAME,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
