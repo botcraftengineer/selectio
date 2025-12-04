@@ -85,23 +85,6 @@ export function DashboardStats() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div
-            className={cn(
-              "line-clamp-1 flex gap-2 font-medium",
-              stats.newResponses > 0
-                ? "text-green-700 dark:text-green-400"
-                : "text-red-700 dark:text-red-400",
-            )}
-          >
-            {stats.newResponses > 0
-              ? "Есть новые отклики"
-              : "Нет новых откликов"}
-            {stats.newResponses > 0 ? (
-              <IconTrendingUp className="size-4" />
-            ) : (
-              <IconTrendingDown className="size-4" />
-            )}
-          </div>
           <div className="text-muted-foreground">
             по {stats.totalVacancies} вакансиям
           </div>
@@ -133,21 +116,6 @@ export function DashboardStats() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div
-            className={cn(
-              "line-clamp-1 flex gap-2 font-medium",
-              isGoodProcessed
-                ? "text-green-700 dark:text-green-400"
-                : "text-red-700 dark:text-red-400",
-            )}
-          >
-            {isGoodProcessed ? "Хороший прогресс" : "Требует обработки"}
-            {isGoodProcessed ? (
-              <IconTrendingUp className="size-4" />
-            ) : (
-              <IconTrendingDown className="size-4" />
-            )}
-          </div>
           <div className="text-muted-foreground">откликов прошли скрининг</div>
         </CardFooter>
       </Card>
@@ -177,21 +145,6 @@ export function DashboardStats() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div
-            className={cn(
-              "line-clamp-1 flex gap-2 font-medium",
-              isGoodHighScore
-                ? "text-green-700 dark:text-green-400"
-                : "text-red-700 dark:text-red-400",
-            )}
-          >
-            {isGoodHighScore ? "Отличные результаты" : "Нужно больше"}
-            {isGoodHighScore ? (
-              <IconTrendingUp className="size-4" />
-            ) : (
-              <IconTrendingDown className="size-4" />
-            )}
-          </div>
           <div className="text-muted-foreground">
             кандидатов со скорингом ≥ 3
           </div>
@@ -223,21 +176,6 @@ export function DashboardStats() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div
-            className={cn(
-              "line-clamp-1 flex gap-2 font-medium",
-              isGoodAvgScore
-                ? "text-green-700 dark:text-green-400"
-                : "text-red-700 dark:text-red-400",
-            )}
-          >
-            {isGoodAvgScore ? "Качество выше среднего" : "Требует улучшения"}
-            {isGoodAvgScore ? (
-              <IconTrendingUp className="size-4" />
-            ) : (
-              <IconTrendingDown className="size-4" />
-            )}
-          </div>
           <div className="text-muted-foreground">общая оценка кандидатов</div>
         </CardFooter>
       </Card>

@@ -81,7 +81,7 @@ function InviteMemberModalContent({
 
     addUser.mutate({
       workspaceId,
-      userId: result.data, // API автоматически найдет пользователя по email
+      email: result.data,
       role,
     });
   };

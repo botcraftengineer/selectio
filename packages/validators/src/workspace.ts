@@ -47,7 +47,7 @@ export const updateWorkspaceSchema = z.object({
 
 export const addUserToWorkspaceSchema = z.object({
   workspaceId: workspaceIdSchema,
-  userId: z.string(),
+  email: z.string().email("Некорректный email"),
   role: z.enum(["owner", "admin", "member"]).default("member"),
 });
 

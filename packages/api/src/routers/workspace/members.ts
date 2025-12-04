@@ -26,18 +26,15 @@ export const workspaceMembers = {
         });
       }
 
-      // Если передан email, ищем пользователя
-      let userId = input.userId;
-      if (input.userId.includes("@")) {
-        const user = await workspaceRepository.findUserByEmail(input.userId);
-        if (!user) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Пользователь с таким email не найден",
-          });
-        }
-        userId = user.id;
+      // Находим пользователя по email
+      const user = await workspaceRepository.findUserByEmail(input.email);
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Пользователь с таким email не найден",
+        });
       }
+      const userId = user.id;
 
       // Проверка, не является ли пользователь уже участником
       const existingMember = await workspaceRepository.checkAccess(
