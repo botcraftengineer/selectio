@@ -1,3 +1,4 @@
+import { env } from "@selectio/config";
 import { db, eq } from "@selectio/db";
 import {
   telegramSession,
@@ -6,7 +7,6 @@ import {
   workspace,
 } from "@selectio/db/schema";
 import { sendEmail, TelegramAuthErrorEmail } from "@selectio/emails";
-import { env } from "@selectio/config";
 import { inngest } from "../../client";
 
 /**
@@ -49,7 +49,7 @@ export const notifyTelegramAuthErrorFunction = inngest.createFunction(
 
       // Filter to admins and owners only
       const admins = members.filter(
-        (m) => m.role === "owner" || m.role === "admin"
+        (m) => m.role === "owner" || m.role === "admin",
       );
 
       return {
@@ -68,46 +68,49 @@ export const notifyTelegramAuthErrorFunction = inngest.createFunction(
         .where(eq(telegramSession.id, sessionId));
     });
 
-    // Send email to all admins
-    const emailResults = await step.run("send-emails", async () => {
-      const results: { email: string; success: boolean; error?: string }[] = [];
+    // Send email to each admin in separate idempotent steps
+    const emailResults = await Promise.allSettled(
+      workspaceData.admins
+        .filter((admin) => admin.email)
+        .map((admin) =>
+          step
+            .run(`send-email-${admin.userId}`, async () => {
+              const reauthorizeLink = `${env.APP_URL}/workspaces/${workspaceData.workspace.slug}/settings/telegram`;
 
-      for (const admin of workspaceData.admins) {
-        if (!admin.email) continue;
+              await sendEmail({
+                to: [admin.email],
+                subject: `⚠️ Telegram авторизация слетела: ${workspaceData.workspace.name}`,
+                react: TelegramAuthErrorEmail({
+                  workspaceName: workspaceData.workspace.name,
+                  phone,
+                  errorType,
+                  errorMessage,
+                  reauthorizeLink,
+                }),
+              });
 
-        try {
-          const reauthorizeLink = `${env.APP_URL}/workspaces/${workspaceData.workspace.slug}/settings/telegram`;
-
-          await sendEmail({
-            to: [admin.email],
-            subject: `⚠️ Telegram авторизация слетела: ${workspaceData.workspace.name}`,
-            react: TelegramAuthErrorEmail({
-              workspaceName: workspaceData.workspace.name,
-              phone,
-              errorType,
-              errorMessage,
-              reauthorizeLink,
+              console.log(`✅ Email sent to ${admin.email}`);
+              return { email: admin.email, success: true };
+            })
+            .catch((error) => {
+              const errorMsg =
+                error instanceof Error ? error.message : "Unknown error";
+              console.error(
+                `❌ Failed to send email to ${admin.email}:`,
+                error,
+              );
+              return { email: admin.email, success: false, error: errorMsg };
             }),
-          });
-
-          results.push({ email: admin.email, success: true });
-          console.log(`✅ Email sent to ${admin.email}`);
-        } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : "Unknown error";
-          results.push({ email: admin.email, success: false, error: errorMsg });
-          console.error(`❌ Failed to send email to ${admin.email}:`, error);
-        }
-      }
-
-      return results;
-    });
+        ),
+    ).then((results) =>
+      results.map((r) => (r.status === "fulfilled" ? r.value : r.reason)),
+    );
 
     const successCount = emailResults.filter((r) => r.success).length;
     const failCount = emailResults.filter((r) => !r.success).length;
 
     console.log(
-      `📧 Telegram auth error notification sent: ${successCount} success, ${failCount} failed`
+      `📧 Telegram auth error notification sent: ${successCount} success, ${failCount} failed`,
     );
 
     return {
@@ -118,5 +121,5 @@ export const notifyTelegramAuthErrorFunction = inngest.createFunction(
       emailsFailed: failCount,
       recipients: emailResults,
     };
-  }
+  },
 );

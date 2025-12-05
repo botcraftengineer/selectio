@@ -387,25 +387,25 @@ function normalizeAudioExtension(mimeType: string): string {
   // Удаляем суффиксы после "+" (например, "opus+ogg" -> "opus")
   normalized = normalized.split("+")[0] || normalized;
 
+  // Маппинг известных форматов (проверяем до обработки разделителей)
+  const knownMappings: Record<string, string> = {
+    wave: "wav",
+    "vnd.wave": "wav",
+    "x-wav": "wav",
+    "x-m4a": "m4a",
+    "x-aiff": "aiff",
+    "x-flac": "flac",
+    mpeg: "mp3",
+    mp4: "m4a",
+  };
+
+  const mapped = knownMappings[subtype.toLowerCase()];
+  if (mapped) {
+    return mapped;
+  }
+
   // Обрабатываем специальные случаи с разделителями
   if (normalized.includes(".") || normalized.includes("-")) {
-    // Маппинг известных форматов
-    const knownMappings: Record<string, string> = {
-      wave: "wav",
-      "vnd.wave": "wav",
-      "x-wav": "wav",
-      "x-m4a": "m4a",
-      "x-aiff": "aiff",
-      "x-flac": "flac",
-      mpeg: "mp3",
-      mp4: "m4a",
-    };
-
-    const mapped = knownMappings[subtype.toLowerCase()];
-    if (mapped) {
-      return mapped;
-    }
-
     // Берем последний токен после разделителя
     const tokens = normalized.split(/[.-]/);
     normalized = tokens[tokens.length - 1] || normalized;
