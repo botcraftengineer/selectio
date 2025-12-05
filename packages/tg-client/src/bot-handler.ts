@@ -52,6 +52,21 @@ async function humanDelay(minMs = 800, maxMs = 2000): Promise<void> {
 }
 
 /**
+ * Отметить сообщения как прочитанные
+ */
+async function markRead(client: TelegramClient, chatId: number): Promise<void> {
+  try {
+    await client.call({
+      _: "messages.readHistory",
+      peer: await client.resolvePeer(chatId),
+      maxId: 0,
+    });
+  } catch (error) {
+    console.error("Ошибка при отметке сообщений как прочитанных:", error);
+  }
+}
+
+/**
  * Выбрать случайный элемент из массива
  */
 function randomChoice<T>(array: T[]): T {
@@ -95,6 +110,9 @@ async function handleStartCommand(
     })
     .returning();
 
+  // Отмечаем сообщение как прочитанное
+  await markRead(client, message.chat.id);
+
   // Показываем индикатор печати
   await client.call({
     _: "messages.setTyping",
@@ -135,6 +153,7 @@ async function handleTextMessage(
 
   if (!conversation) {
     // Естественный ответ вместо команды
+    await markRead(client, message.chat.id);
     await humanDelay(600, 1200);
     await client.sendText(
       message.chat.id,
@@ -142,6 +161,9 @@ async function handleTextMessage(
     );
     return;
   }
+
+  // Отмечаем сообщение как прочитанное
+  await markRead(client, message.chat.id);
 
   await db.insert(telegramMessage).values({
     conversationId: conversation.id,
@@ -251,12 +273,16 @@ async function handleVoiceMessage(
     .limit(1);
 
   if (!conversation) {
+    await markRead(client, message.chat.id);
     await client.sendText(
       message.chat.id,
       "Пожалуйста, начните с команды /start",
     );
     return;
   }
+
+  // Отмечаем сообщение как прочитанное
+  await markRead(client, message.chat.id);
 
   try {
     // Показываем, что "слушаем" голосовое

@@ -1,3 +1,4 @@
+import { Progress } from "@selectio/ui";
 import { Star } from "lucide-react";
 
 interface TelegramInterviewScoringProps {
@@ -57,12 +58,11 @@ export function TelegramInterviewScoring({
               </span>
               <span className="text-sm text-muted-foreground">из 100</span>
             </div>
-            <div className="flex-1 bg-muted rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${getProgressColor(detailedScore)}`}
-                style={{ width: `${detailedScore}%` }}
-              />
-            </div>
+            <Progress
+              value={detailedScore}
+              indicatorClassName={getProgressColor(detailedScore)}
+              className="h-2"
+            />
           </div>
         )}
 
