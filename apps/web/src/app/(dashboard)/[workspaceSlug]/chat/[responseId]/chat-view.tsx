@@ -44,6 +44,14 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     enabled: !!candidateResponseId,
   });
 
+  // Debug: проверка данных telegramInterviewScoring
+  if (responseData?.telegramInterviewScoring) {
+    console.log(
+      "Telegram Interview Scoring:",
+      responseData.telegramInterviewScoring,
+    );
+  }
+
   const {
     data: messages = [],
     isPending,
