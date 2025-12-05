@@ -2,16 +2,11 @@
 
 import { Badge, Button, Card } from "@selectio/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  CheckCircle2,
-  MessageCircle,
-  Plus,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Plus, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTRPC } from "~/trpc/react";
+import { IntegrationIcon } from "../ui/integration-icon";
 import { TelegramAuthDialog } from "./telegram-auth";
 
 export function TelegramSessionsCard({ workspaceId }: { workspaceId: string }) {
@@ -55,7 +50,10 @@ export function TelegramSessionsCard({ workspaceId }: { workspaceId: string }) {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                 <div className="rounded-lg bg-muted p-2 sm:p-3 shrink-0">
-                  <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <IntegrationIcon
+                    type="telegram"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                  />
                 </div>
                 <div className="space-y-1 flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
@@ -106,7 +104,10 @@ export function TelegramSessionsCard({ workspaceId }: { workspaceId: string }) {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
               <div className="rounded-lg bg-muted p-2 sm:p-3 shrink-0">
-                <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                <IntegrationIcon
+                  type="telegram"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                />
               </div>
               <div className="space-y-1 flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">

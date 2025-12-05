@@ -2,9 +2,10 @@
 
 import { Badge, Button, Card } from "@selectio/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Edit, Globe, Plus, Trash2, XCircle } from "lucide-react";
+import { CheckCircle2, Edit, Plus, Trash2, XCircle } from "lucide-react";
 import type { AVAILABLE_INTEGRATIONS } from "~/lib/integrations";
 import { useTRPC } from "~/trpc/react";
+import { IntegrationIcon } from "../ui/integration-icon";
 
 interface Integration {
   id: string;
@@ -25,10 +26,6 @@ interface IntegrationCardProps {
   workspaceId: string;
   userRole?: string;
 }
-
-const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
-  hh: <Globe className="h-5 w-5" />,
-};
 
 export function IntegrationCard({
   availableIntegration,
@@ -63,9 +60,10 @@ export function IntegrationCard({
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
           <div className="rounded-lg bg-muted p-2 sm:p-3 shrink-0">
-            {INTEGRATION_ICONS[availableIntegration.type] || (
-              <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
-            )}
+            <IntegrationIcon
+              type={availableIntegration.type as "hh" | "telegram"}
+              className="h-4 w-4 sm:h-5 sm:w-5"
+            />
           </div>
           <div className="space-y-1 flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
