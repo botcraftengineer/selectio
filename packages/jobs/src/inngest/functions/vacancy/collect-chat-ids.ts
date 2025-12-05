@@ -70,7 +70,7 @@ export const collectChatIdsFunction = inngest.createFunction(
           and(
             eq(fields.workspaceId, vacancyData.workspaceId),
             eq(fields.type, "hh"),
-            eq(fields.isActive, "true"),
+            eq(fields.isActive, true),
           ),
       });
 

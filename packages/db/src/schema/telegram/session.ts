@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { workspace } from "../workspace/workspace";
 
 export const telegramSession = pgTable("telegram_sessions", {
@@ -37,7 +44,7 @@ export const telegramSession = pgTable("telegram_sessions", {
   }>(),
 
   // Активна ли сессия
-  isActive: text("is_active").default("true").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
 
   // Ошибка авторизации (если сессия стала невалидной)
   authError: text("auth_error"),

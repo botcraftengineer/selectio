@@ -7,20 +7,18 @@ import type { AVAILABLE_INTEGRATIONS } from "~/lib/integrations";
 import { useTRPC } from "~/trpc/react";
 import { IntegrationIcon } from "../ui/integration-icon";
 
-interface Integration {
-  id: string;
-  type: string;
-  name: string;
-  isActive: string;
-  lastUsedAt: Date | null;
-  hasCookies: boolean;
-  hasCredentials: boolean;
-  email?: string | null;
-}
-
 interface IntegrationCardProps {
   availableIntegration: (typeof AVAILABLE_INTEGRATIONS)[number];
-  integration?: Integration;
+  integration?: {
+    id: string;
+    type: string;
+    name: string;
+    isActive: boolean;
+    lastUsedAt: Date | null;
+    hasCookies: boolean;
+    hasCredentials: boolean;
+    email?: string | null;
+  };
   onCreate: () => void;
   onEdit: () => void;
   workspaceId: string;
@@ -52,7 +50,7 @@ export function IntegrationCard({
     }),
   );
 
-  const isActive = integration?.isActive === "true";
+  const isActive = integration?.isActive === true;
   const isConnected = !!integration;
 
   return (

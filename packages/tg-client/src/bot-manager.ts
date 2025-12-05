@@ -130,7 +130,7 @@ async function markSessionAsInvalid(
   await db
     .update(telegramSession)
     .set({
-      isActive: "false",
+      isActive: false,
       authError: errorType,
       authErrorAt: new Date(),
     })
@@ -161,7 +161,7 @@ class BotManager {
     const sessions = await db
       .select()
       .from(telegramSession)
-      .where(eq(telegramSession.isActive, "true"));
+      .where(eq(telegramSession.isActive, true));
 
     if (sessions.length === 0) {
       console.log("⚠️ Нет активных Telegram сессий");

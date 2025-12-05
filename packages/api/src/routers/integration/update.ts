@@ -15,7 +15,7 @@ export const updateIntegration = protectedProcedure
       name: z.string().optional(),
       credentials: z.record(z.string(), z.string()).optional(),
       metadata: z.record(z.string(), z.any()).optional(),
-      isActive: z.string().optional(),
+      isActive: z.boolean().optional(),
     }),
   )
   .mutation(async ({ input, ctx }) => {

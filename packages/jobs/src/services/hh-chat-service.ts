@@ -40,7 +40,7 @@ export async function sendHHChatMessage(params: {
         and(
           eq(fields.workspaceId, workspaceId),
           eq(fields.type, "hh"),
-          eq(fields.isActive, "true"),
+          eq(fields.isActive, true),
         ),
     });
 
