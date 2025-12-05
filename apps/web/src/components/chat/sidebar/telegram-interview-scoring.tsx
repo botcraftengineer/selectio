@@ -7,6 +7,18 @@ interface TelegramInterviewScoringProps {
   analysis?: string | null;
 }
 
+const getScoreColor = (score: number) => {
+  if (score >= 80) return "text-green-600";
+  if (score >= 60) return "text-yellow-600";
+  return "text-red-600";
+};
+
+const getProgressColor = (score: number) => {
+  if (score >= 80) return "bg-green-600";
+  if (score >= 60) return "bg-yellow-600";
+  return "bg-red-600";
+};
+
 export function TelegramInterviewScoring({
   score,
   detailedScore,
@@ -15,18 +27,6 @@ export function TelegramInterviewScoring({
   if (!score && !detailedScore) {
     return null;
   }
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
-  };
-
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return "bg-green-600";
-    if (score >= 60) return "bg-yellow-600";
-    return "bg-red-600";
-  };
 
   return (
     <div>
