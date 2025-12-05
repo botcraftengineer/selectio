@@ -5,6 +5,9 @@
 // Candidate functions
 export * from "./candidate";
 
+// Integration functions
+export * from "./integration";
+
 // Response functions
 export * from "./response";
 // Telegram functions
@@ -16,6 +19,8 @@ import {
   sendCandidateWelcomeBatchFunction,
   sendCandidateWelcomeFunction,
 } from "./candidate";
+
+import { verifyHHIntegrationFunction } from "./integration";
 
 import {
   parseMissingContactsFunction,
@@ -61,6 +66,8 @@ export const inngestFunctions = [
   // Candidate
   sendCandidateWelcomeBatchFunction,
   sendCandidateWelcomeFunction,
+  // Integration
+  verifyHHIntegrationFunction,
   // Telegram
   analyzeInterviewFunction,
   completeInterviewFunction,

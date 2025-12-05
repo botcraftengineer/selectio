@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { IntegrationCard } from "~/components/settings/integration-card";
 import { IntegrationDialog } from "~/components/settings/integration-dialog";
+import { IntegrationVerifyDialog } from "~/components/settings/integration-verify-dialog";
 import { TelegramSessionsCard } from "~/components/settings/telegram-sessions-card";
 import { AVAILABLE_INTEGRATIONS } from "~/lib/integrations";
 import { useTRPC } from "~/trpc/react";
@@ -17,6 +18,7 @@ export default function IntegrationsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [verifyDialogType, setVerifyDialogType] = useState<string | null>(null);
 
   const workspaceQueryOptions = api.workspace.bySlug.queryOptions({
     slug: workspaceSlug,
@@ -50,6 +52,10 @@ export default function IntegrationsPage() {
     setDialogOpen(false);
     setSelectedType(null);
     setIsEditing(false);
+  };
+
+  const handleVerify = (type: string) => {
+    setVerifyDialogType(type);
   };
 
   if (isLoading) {
@@ -90,7 +96,21 @@ export default function IntegrationsPage() {
         onClose={handleClose}
         selectedType={selectedType}
         isEditing={isEditing}
+        onVerify={handleVerify}
       />
+
+      {verifyDialogType && (
+        <IntegrationVerifyDialog
+          open={!!verifyDialogType}
+          onClose={() => setVerifyDialogType(null)}
+          workspaceId={workspaceId}
+          integrationType={verifyDialogType}
+          integrationName={
+            AVAILABLE_INTEGRATIONS.find((i) => i.type === verifyDialogType)
+              ?.name || ""
+          }
+        />
+      )}
     </div>
   );
 }

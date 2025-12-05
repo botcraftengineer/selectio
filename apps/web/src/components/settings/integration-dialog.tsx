@@ -38,6 +38,7 @@ interface IntegrationDialogProps {
   onClose: () => void;
   selectedType: string | null;
   isEditing: boolean;
+  onVerify?: (type: string) => void;
 }
 
 const integrationFormSchema = z.object({
@@ -60,6 +61,7 @@ export function IntegrationDialog({
   onClose,
   selectedType,
   isEditing,
+  onVerify,
 }: IntegrationDialogProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -114,7 +116,7 @@ export function IntegrationDialog({
 
   const createMutation = useMutation(
     trpc.integration.create.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (_, variables) => {
         toast.success("Интеграция успешно создана");
         if (workspaceData?.workspace?.id) {
           queryClient.invalidateQueries({
@@ -124,6 +126,13 @@ export function IntegrationDialog({
           });
         }
         handleClose();
+
+        // Запускаем проверку после создания
+        if (onVerify) {
+          setTimeout(() => {
+            onVerify(variables.type);
+          }, 500);
+        }
       },
       onError: (err) => {
         const message = err.message || "Не удалось создать интеграцию";

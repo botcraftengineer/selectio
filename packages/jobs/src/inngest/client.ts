@@ -20,6 +20,7 @@ import {
   vacancyResponsesRefreshDataSchema,
   vacancyUpdateActiveDataSchema,
   vacancyUpdateSingleDataSchema,
+  verifyHHIntegrationDataSchema,
   voiceTranscriptionDataSchema,
 } from "./types";
 
@@ -49,6 +50,6 @@ export const inngest = new Inngest({
     "telegram/interview.send-question": interviewSendQuestionDataSchema,
     "telegram/interview.complete": interviewCompleteDataSchema,
     "telegram/auth.error": telegramAuthErrorDataSchema,
+    "integration/hh.verify": verifyHHIntegrationDataSchema,
   }),
 });
-

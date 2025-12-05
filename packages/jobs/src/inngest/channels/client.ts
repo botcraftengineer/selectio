@@ -139,3 +139,20 @@ export const parseMissingContactsChannel = channel(
       }),
     ),
   );
+
+/**
+ * Канал для отслеживания проверки интеграций
+ */
+export const verifyIntegrationChannel = channel(
+  (workspaceId: string) => `workspace:${workspaceId}`,
+).addTopic(
+  topic("integration-verify").schema(
+    z.object({
+      integrationId: z.string(),
+      integrationType: z.string(),
+      success: z.boolean(),
+      isValid: z.boolean(),
+      error: z.string().optional(),
+    }),
+  ),
+);

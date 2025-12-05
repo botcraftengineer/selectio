@@ -39,10 +39,10 @@
     "@selectio/telegram-bot": "workspace:*",
     "@selectio/tg-client": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "ai": "5.0.106",
+    "ai": "5.0.107",
     "axios": "^1.13.2",
     "crawlee": "3.15.3",
-    "inngest": "^3.46.0",
+    "inngest": "3.47.0",
     "langfuse": "^3.38.6",
     "puppeteer": "24.32.0",
     "puppeteer-extra": "3.3.6",
@@ -55,7 +55,7 @@
     "@types/bun": "1.3.3",
     "@types/node": "24.10.1",
     "cross-env": "10.1.0",
-    "inngest-cli": "^1.14.0",
+    "inngest-cli": "1.14.3",
     "tsup": "8.5.1",
     "typescript": "5.9.3"
   }

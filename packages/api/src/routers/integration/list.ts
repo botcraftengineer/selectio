@@ -49,6 +49,7 @@ export const listIntegrations = protectedProcedure
         lastUsedAt: int.lastUsedAt,
         createdAt: int.createdAt,
         updatedAt: int.updatedAt,
+        metadata: int.metadata,
         hasCookies: !!int.cookies,
         hasCredentials: !!int.credentials,
         email,

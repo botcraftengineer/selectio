@@ -8,4 +8,5 @@ export {
   refreshVacancyResponsesChannel,
   screenAllResponsesChannel,
   screenNewResponsesChannel,
+  verifyIntegrationChannel,
 } from "./client";
