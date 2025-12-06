@@ -411,42 +411,51 @@ export function ResponseTableToolbar({
         />
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-4 md:px-0">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <div className="text-sm text-muted-foreground">
             Всего откликов: {totalResponses}
           </div>
-          <ResponseFilters
-            selectedFilter={screeningFilter}
-            onFilterChange={onFilterChange}
-          />
-          <ResponseStatusFilter
-            selectedStatuses={statusFilter}
-            onStatusChange={onStatusFilterChange}
-          />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <ResponseFilters
+              selectedFilter={screeningFilter}
+              onFilterChange={onFilterChange}
+            />
+            <ResponseStatusFilter
+              selectedStatuses={statusFilter}
+              onStatusChange={onStatusFilterChange}
+            />
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Поиск по ФИО..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9 w-64"
+              className="pl-9 w-full md:w-64 min-h-[44px] md:min-h-0 text-base md:text-sm"
+              style={{ fontSize: "16px" }}
             />
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
           <Dialog open={refreshDialogOpen} onOpenChange={setRefreshDialogOpen}>
             <Button
               disabled={isRefreshing}
               variant="outline"
               onClick={() => setRefreshDialogOpen(true)}
+              className="min-h-[44px] md:min-h-0 whitespace-nowrap flex-shrink-0"
             >
               {isRefreshing ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
-              {isRefreshing ? "Обновление..." : "Получить новые отклики"}
+              <span className="hidden sm:inline">
+                {isRefreshing ? "Обновление..." : "Получить новые отклики"}
+              </span>
+              <span className="sm:hidden">
+                {isRefreshing ? "Обновление..." : "Получить"}
+              </span>
             </Button>
             <DialogContent>
               <DialogHeader>
@@ -528,6 +537,7 @@ export function ResponseTableToolbar({
               disabled={isProcessingNew}
               variant="outline"
               onClick={() => setScreenNewDialogOpen(true)}
+              className="min-h-[44px] md:min-h-0 whitespace-nowrap flex-shrink-0"
             >
               {isProcessingNew ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -669,15 +679,21 @@ export function ResponseTableToolbar({
               disabled={isProcessingAll}
               variant="default"
               onClick={() => setScreenAllDialogOpen(true)}
+              className="min-h-[44px] md:min-h-0 whitespace-nowrap flex-shrink-0"
             >
               {isProcessingAll ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
-              {isProcessingAll
-                ? "Оценка..."
-                : `Оценить всех (${totalResponses})`}
+              <span className="hidden sm:inline">
+                {isProcessingAll
+                  ? "Оценка..."
+                  : `Оценить всех (${totalResponses})`}
+              </span>
+              <span className="sm:hidden">
+                {isProcessingAll ? "Оценка..." : "Оценить всех"}
+              </span>
             </Button>
             <DialogContent>
               <DialogHeader>
