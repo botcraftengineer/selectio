@@ -3,6 +3,20 @@ import type { ResumeExperience } from "../types";
 import { HH_CONFIG } from "./config";
 
 /**
+ * Проверяет, является ли буфер PDF файлом по magic bytes
+ */
+function isPdfBuffer(buffer: Buffer): boolean {
+  if (buffer.length < 4) return false;
+  // PDF файлы начинаются с "%PDF"
+  return (
+    buffer[0] === 0x25 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x44 &&
+    buffer[3] === 0x46
+  );
+}
+
+/**
  * Очищает HTML от стилей и классов, оставляя только теги
  */
 function cleanHtml(html: string): string {
@@ -92,6 +106,13 @@ async function downloadResumePdf(
       });
 
       const buffer = Buffer.from(response.data);
+
+      // Проверяем, что это действительно PDF
+      if (!isPdfBuffer(buffer)) {
+        console.log("⚠️ Скачанный файл не является PDF");
+        return null;
+      }
+
       console.log(`✅ PDF скачан, размер: ${buffer.length} байт`);
       return buffer;
     } catch (error) {
