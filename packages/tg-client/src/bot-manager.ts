@@ -86,7 +86,9 @@ async function sendAuthErrorEvent(
     const baseUrl = env.INNGEST_EVENT_API_BASE_URL;
 
     if (!eventKey) {
-      console.warn("⚠️ INNGEST_EVENT_KEY not set, cannot send auth error event");
+      console.warn(
+        "⚠️ INNGEST_EVENT_KEY не установлен, невозможно отправить событие об ошибке авторизации",
+      );
       return;
     }
 
@@ -109,13 +111,15 @@ async function sendAuthErrorEvent(
 
     if (!response.ok) {
       console.error(
-        `❌ Failed to send auth error event: ${response.status} ${response.statusText}`,
+        `❌ Не удалось отправить событие об ошибке авторизации: ${response.status} ${response.statusText}`,
       );
     } else {
-      console.log(`📧 Auth error event sent for workspace ${workspaceId}`);
+      console.log(
+        `📧 Событие об ошибке авторизации отправлено для workspace ${workspaceId}`,
+      );
     }
   } catch (error) {
-    console.error("❌ Error sending auth error event:", error);
+    console.error("❌ Ошибка отправки события об ошибке авторизации:", error);
   }
 }
 
@@ -136,7 +140,9 @@ async function markSessionAsInvalid(
     })
     .where(eq(telegramSession.id, sessionId));
 
-  console.log(`📛 Session ${sessionId} marked as invalid: ${errorType}`);
+  console.log(
+    `📛 Сессия ${sessionId} помечена как недействительная: ${errorType}`,
+  );
 }
 
 /**

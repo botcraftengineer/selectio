@@ -5,15 +5,15 @@ import { db } from "../client";
 
 async function setupUuidV7() {
   try {
-    console.log("Setting up UUID v7 function...");
+    console.log("Настройка функции UUID v7...");
 
     const sqlContent = readFileSync(join(__dirname, "uuid-v7.sql"), "utf-8");
 
     await db.execute(sql.raw(sqlContent));
 
-    console.log("✅ UUID v7 function created successfully");
+    console.log("✅ Функция UUID v7 успешно создана");
   } catch (error) {
-    console.error("❌ Error setting up UUID v7:", error);
+    console.error("❌ Ошибка настройки UUID v7:", error);
     throw error;
   }
 }

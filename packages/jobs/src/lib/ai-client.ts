@@ -67,7 +67,7 @@ export async function generateText(options: GenerateTextOptions) {
     try {
       await langfuse.flushAsync();
     } catch (flushError) {
-      console.error("Failed to flush Langfuse trace", {
+      console.error("Не удалось сохранить трейс Langfuse", {
         generationName,
         traceId: trace.id,
         entityId,

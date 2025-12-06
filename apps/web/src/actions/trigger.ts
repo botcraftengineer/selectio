@@ -31,8 +31,8 @@ export async function triggerScreenResponse(responseId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger screen-response:", error);
-    return { success: false as const, error: "Failed to trigger screening" };
+    console.error("Не удалось запустить оценку отклика:", error);
+    return { success: false as const, error: "Не удалось запустить оценку" };
   }
 }
 
@@ -47,8 +47,8 @@ export async function triggerScreenAllResponses(vacancyId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger screen-all-responses:", error);
-    return { success: false as const, error: "Failed to trigger screening" };
+    console.error("Не удалось запустить оценку всех откликов:", error);
+    return { success: false as const, error: "Не удалось запустить оценку" };
   }
 }
 
@@ -57,7 +57,7 @@ export async function triggerScreenResponsesBatch(responseIds: string[]) {
     if (responseIds.length === 0) {
       return {
         success: false as const,
-        error: "No responses provided",
+        error: "Отклики не предоставлены",
       };
     }
 
@@ -73,10 +73,10 @@ export async function triggerScreenResponsesBatch(responseIds: string[]) {
       success: true as const,
     };
   } catch (error) {
-    console.error("Failed to trigger screen-responses-batch:", error);
+    console.error("Не удалось запустить пакетную оценку откликов:", error);
     return {
       success: false as const,
-      error: "Failed to trigger batch screening",
+      error: "Не удалось запустить пакетную оценку",
     };
   }
 }
@@ -92,8 +92,8 @@ export async function triggerScreenNewResponses(vacancyId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger screen-new-responses:", error);
-    return { success: false as const, error: "Failed to trigger screening" };
+    console.error("Не удалось запустить оценку новых откликов:", error);
+    return { success: false as const, error: "Не удалось запустить оценку" };
   }
 }
 
@@ -106,8 +106,11 @@ export async function triggerUpdateVacancies(workspaceId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger update-vacancies:", error);
-    return { success: false as const, error: "Failed to trigger update" };
+    console.error("Не удалось запустить обновление вакансий:", error);
+    return {
+      success: false as const,
+      error: "Не удалось запустить обновление",
+    };
   }
 }
 
@@ -122,11 +125,13 @@ export async function triggerRefreshVacancyResponses(vacancyId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger refresh-vacancy-responses:", error);
+    console.error("Не удалось запустить обновление откликов вакансии:", error);
     return {
       success: false as const,
       error:
-        error instanceof Error ? error.message : "Failed to trigger refresh",
+        error instanceof Error
+          ? error.message
+          : "Не удалось запустить обновление",
     };
   }
 }
@@ -136,7 +141,7 @@ export async function triggerSendWelcomeBatch(responseIds: string[]) {
     if (responseIds.length === 0) {
       return {
         success: false as const,
-        error: "No responses provided",
+        error: "Отклики не предоставлены",
       };
     }
 
@@ -153,10 +158,10 @@ export async function triggerSendWelcomeBatch(responseIds: string[]) {
       count: responseIds.length,
     };
   } catch (error) {
-    console.error("Failed to trigger send-welcome-batch:", error);
+    console.error("Не удалось запустить пакетную отправку приветствий:", error);
     return {
       success: false as const,
-      error: "Failed to trigger batch welcome",
+      error: "Не удалось запустить пакетную отправку",
     };
   }
 }
@@ -172,11 +177,11 @@ export async function triggerParseNewResumes(vacancyId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger parse-new-resumes:", error);
+    console.error("Не удалось запустить парсинг новых резюме:", error);
     return {
       success: false as const,
       error:
-        error instanceof Error ? error.message : "Failed to trigger parsing",
+        error instanceof Error ? error.message : "Не удалось запустить парсинг",
     };
   }
 }
@@ -192,11 +197,11 @@ export async function triggerParseMissingContacts(vacancyId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger parse-missing-contacts:", error);
+    console.error("Не удалось запустить парсинг недостающих контактов:", error);
     return {
       success: false as const,
       error:
-        error instanceof Error ? error.message : "Failed to trigger parsing",
+        error instanceof Error ? error.message : "Не удалось запустить парсинг",
     };
   }
 }
@@ -212,8 +217,11 @@ export async function triggerRefreshSingleResume(responseId: string) {
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger refresh-single-resume:", error);
-    return { success: false as const, error: "Failed to trigger refresh" };
+    console.error("Не удалось запустить обновление резюме:", error);
+    return {
+      success: false as const,
+      error: "Не удалось запустить обновление",
+    };
   }
 }
 
@@ -234,7 +242,7 @@ export async function triggerSendWelcome(
     });
     return { success: true as const };
   } catch (error) {
-    console.error("Failed to trigger send-welcome:", error);
+    console.error("Не удалось запустить отправку приветствия:", error);
     return { success: false as const, error: "Failed to trigger welcome" };
   }
 }

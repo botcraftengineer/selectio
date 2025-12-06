@@ -24,7 +24,7 @@ export async function optimizeImageToBase64(
       // Извлекаем base64 из data URL
       const base64Data = input.split(",")[1];
       if (!base64Data) {
-        throw new Error("Invalid data URL");
+        throw new Error("Некорректный data URL");
       }
       buffer = Buffer.from(base64Data, "base64");
     } else {

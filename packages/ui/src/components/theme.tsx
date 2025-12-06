@@ -146,7 +146,7 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
 export function useTheme() {
   const context = React.use(ThemeContext);
   if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error("useTheme должен использоваться внутри ThemeProvider");
   }
   return context;
 }

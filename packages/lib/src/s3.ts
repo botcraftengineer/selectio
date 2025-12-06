@@ -78,7 +78,7 @@ export async function uploadBufferToS3(
     return { key, bucket: BUCKET_NAME, etag: res.ETag };
   } catch (err) {
     const e = err as Error;
-    console.error("S3 upload failed", {
+    console.error("Ошибка загрузки в S3", {
       bucket: BUCKET_NAME,
       key,
       error: e?.message ?? String(err),

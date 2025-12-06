@@ -3,13 +3,13 @@ import { z } from "zod";
 export const accountFormSchema = z.object({
   name: z
     .string()
-    .min(2, { message: "Name must be at least 2 characters." })
-    .max(30, { message: "Name must not be longer than 30 characters." }),
+    .min(2, { message: "Имя должно содержать минимум 2 символа." })
+    .max(30, { message: "Имя не должно превышать 30 символов." }),
   image: z
     .string()
     .refine(
       (val) => !val || val.startsWith("data:image/"),
-      "Image must be a valid data URL",
+      "Изображение должно быть в формате data URL",
     )
     .nullable()
     .optional(),
