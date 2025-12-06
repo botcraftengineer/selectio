@@ -49,4 +49,5 @@ jobs:
           args: rollout status deployment/selectio-jobs
       - name: Sync Inngest App
         run: |
+          sleep 10
           curl -X PUT https://jobs.spilwood.ru/api/inngest
