@@ -25,7 +25,7 @@ export const HH_CONFIG = {
     parseContacts: true,
   },
   puppeteer: {
-    headless: true,
+    headless: false,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

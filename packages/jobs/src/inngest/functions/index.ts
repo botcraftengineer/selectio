@@ -20,7 +20,7 @@ import {
   sendCandidateWelcomeFunction,
 } from "./candidate";
 
-import { verifyHHIntegrationFunction } from "./integration";
+import { verifyHHCredentialsFunction } from "./integration";
 
 import {
   parseMissingContactsFunction,
@@ -67,7 +67,7 @@ export const inngestFunctions = [
   sendCandidateWelcomeBatchFunction,
   sendCandidateWelcomeFunction,
   // Integration
-  verifyHHIntegrationFunction,
+  verifyHHCredentialsFunction,
   // Telegram
   analyzeInterviewFunction,
   completeInterviewFunction,

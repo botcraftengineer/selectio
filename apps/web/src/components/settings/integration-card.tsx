@@ -14,20 +14,12 @@ import {
   Card,
 } from "@selectio/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  CheckCircle2,
-  Edit,
-  Plus,
-  RefreshCw,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Edit, Plus, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { AVAILABLE_INTEGRATIONS } from "~/lib/integrations";
 import { useTRPC } from "~/trpc/react";
 import { IntegrationIcon } from "../ui/integration-icon";
-import { IntegrationVerifyDialog } from "./integration-verify-dialog";
 
 interface IntegrationCardProps {
   availableIntegration: (typeof AVAILABLE_INTEGRATIONS)[number];
@@ -58,7 +50,6 @@ export function IntegrationCard({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
 
   const canEdit = userRole === "owner" || userRole === "admin";
 
@@ -156,14 +147,6 @@ export function IntegrationCard({
           {canEdit ? (
             isConnected ? (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setVerifyDialogOpen(true)}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  <span className="ml-2 hidden sm:inline">Проверить</span>
-                </Button>
                 <Button variant="outline" size="sm" onClick={onEdit}>
                   <Edit className="h-4 w-4" />
                   <span className="ml-2 hidden sm:inline">Изменить</span>
@@ -215,15 +198,6 @@ export function IntegrationCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <IntegrationVerifyDialog
-        open={verifyDialogOpen}
-        onClose={() => setVerifyDialogOpen(false)}
-        workspaceId={workspaceId}
-        integrationId={integration?.id || ""}
-        integrationType={availableIntegration.type}
-        integrationName={availableIntegration.name}
-      />
     </Card>
   );
 }

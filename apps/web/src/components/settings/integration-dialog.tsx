@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useInngestSubscription } from "@inngest/realtime/hooks";
 import {
   Button,
   Dialog,
@@ -30,6 +31,10 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  fetchVerifyHHCredentialsToken,
+  triggerVerifyHHCredentials,
+} from "~/actions/integration";
 import { AVAILABLE_INTEGRATIONS } from "~/lib/integrations";
 import { useTRPC } from "~/trpc/react";
 
@@ -166,13 +171,45 @@ export function IntegrationDialog({
     }),
   );
 
-  const verifyMutation = useMutation(
-    trpc.integration.verifyCredentials.mutationOptions({
-      onError: (err) => {
-        toast.error(err.message || "Ошибка проверки данных");
-      },
-    }),
-  );
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<{
+    success?: boolean;
+    isValid?: boolean;
+    error?: string;
+  } | null>(null);
+
+  const { data: verifyData } = useInngestSubscription({
+    refreshToken: () =>
+      fetchVerifyHHCredentialsToken(workspaceData?.workspace?.id || ""),
+    enabled: isVerifying && !!workspaceData?.workspace?.id,
+  });
+
+  useEffect(() => {
+    if (verifyData) {
+      const result = verifyData as {
+        status?: string;
+        success?: boolean;
+        isValid?: boolean;
+        error?: string;
+      };
+
+      if (result.status === "success") {
+        setVerificationResult({
+          success: true,
+          isValid: true,
+        });
+        setIsVerifying(false);
+      } else if (result.status === "error") {
+        setVerificationResult({
+          success: false,
+          isValid: false,
+          error: result.error || "Ошибка проверки данных",
+        });
+        setIsVerifying(false);
+        toast.error(result.error || "Ошибка проверки данных");
+      }
+    }
+  }, [verifyData]);
 
   const handleClose = () => {
     form.reset();
@@ -198,13 +235,48 @@ export function IntegrationDialog({
 
     if (data.type === "hh") {
       try {
-        await verifyMutation.mutateAsync({
-          type: "hh",
-          email: data.email,
-          password: data.password,
+        setIsVerifying(true);
+        setVerificationResult(null);
+
+        toast.info(
+          "Проверка данных может занять до 2 минут. Пожалуйста, подождите…",
+          { duration: 5000 },
+        );
+
+        await triggerVerifyHHCredentials(
+          data.email,
+          data.password,
+          workspaceData.workspace.id,
+        );
+
+        // Wait for verification result
+        await new Promise<void>((resolve, reject) => {
+          const checkInterval = setInterval(() => {
+            if (verificationResult) {
+              clearInterval(checkInterval);
+              if (verificationResult.success && verificationResult.isValid) {
+                resolve();
+              } else {
+                reject(
+                  new Error(
+                    verificationResult.error || "Ошибка проверки данных",
+                  ),
+                );
+              }
+            }
+          }, 100);
+
+          // Timeout after 2 minutes
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            if (!verificationResult) {
+              setIsVerifying(false);
+              reject(new Error("Превышено время ожидания проверки"));
+            }
+          }, 120000);
         });
-      } catch (error) {
-        // Ошибка уже обработана в onError
+      } catch {
+        setIsVerifying(false);
         return;
       }
     }
@@ -239,11 +311,12 @@ export function IntegrationDialog({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 pt-2"
           >
-            <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
+            <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground space-y-2">
               <p>
                 Для подключения HeadHunter используйте учетные данные вашего
                 аккаунта работодателя
               </p>
+              <p className="text-xs">Проверка данных может занять до 2 минут</p>
             </div>
 
             <FormField
@@ -377,18 +450,18 @@ export function IntegrationDialog({
                 disabled={
                   createMutation.isPending ||
                   updateMutation.isPending ||
-                  verifyMutation.isPending
+                  isVerifying
                 }
                 className="h-11"
               >
-                {verifyMutation.isPending
-                  ? "Проверка..."
+                {isVerifying
+                  ? "Проверка данных…"
                   : isEditing
                     ? updateMutation.isPending
-                      ? "Обновление..."
+                      ? "Обновление…"
                       : "Обновить"
                     : createMutation.isPending
-                      ? "Подключение..."
+                      ? "Подключение…"
                       : "Подключить"}
               </Button>
             </DialogFooter>

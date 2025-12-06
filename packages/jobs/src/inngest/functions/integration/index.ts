@@ -1,5 +1,1 @@
-/**
- * Integration-related Inngest functions
- */
-
-export { verifyHHIntegrationFunction } from "./verify-hh";
+export * from "./verify-hh-credentials";
