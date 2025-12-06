@@ -30,7 +30,7 @@ export function ScreenResponseButton({
       const triggerResult = await triggerScreenResponse(responseId);
 
       if (!triggerResult.success) {
-        console.error("Failed to trigger screening:", triggerResult.error);
+        console.error("Не удалось запустить оценку:", triggerResult.error);
         return;
       }
 

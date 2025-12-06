@@ -33,7 +33,7 @@ export function useResponseActions(
       const result = await triggerScreenResponsesBatch(Array.from(selectedIds));
 
       if (!result.success) {
-        console.error("Failed to trigger batch screening:", result.error);
+        console.error("Не удалось запустить пакетную оценку:", result.error);
         return;
       }
 
@@ -58,7 +58,7 @@ export function useResponseActions(
       const result = await triggerScreenAllResponses(vacancyId);
 
       if (!result.success) {
-        console.error("Failed to trigger screen all:", result.error);
+        console.error("Не удалось запустить оценку всех:", result.error);
         return;
       }
 
@@ -81,7 +81,7 @@ export function useResponseActions(
       const result = await triggerScreenNewResponses(vacancyId);
 
       if (!result.success) {
-        console.error("Failed to trigger screen new:", result.error);
+        console.error("Не удалось запустить оценку новых:", result.error);
         toast.error("Не удалось запустить оценку откликов");
         return;
       }
@@ -90,7 +90,7 @@ export function useResponseActions(
 
       // Не сбрасываем isProcessingNew сразу - это будет сделано после закрытия диалога
     } catch (error) {
-      console.error("Error triggering screen new:", error);
+      console.error("Ошибка запуска оценки новых:", error);
       toast.error("Произошла ошибка");
       setIsProcessingNew(false);
     }
@@ -111,7 +111,7 @@ export function useResponseActions(
       const result = await triggerRefreshVacancyResponses(vacancyId);
 
       if (!result.success) {
-        console.error("Failed to trigger refresh:", result.error);
+        console.error("Не удалось запустить обновление:", result.error);
         setIsRefreshing(false);
         toast.error("Не удалось запустить обновление откликов");
         return result;
@@ -142,7 +142,10 @@ export function useResponseActions(
       const result = await triggerSendWelcomeBatch(Array.from(selectedIds));
 
       if (!result.success) {
-        console.error("Failed to trigger welcome batch:", result.error);
+        console.error(
+          "Не удалось запустить пакетную отправку приветствий:",
+          result.error,
+        );
         return;
       }
 

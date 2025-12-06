@@ -15,7 +15,7 @@ import {
   interviewScoringSchema,
 } from "../../schemas/interview";
 import { extractJsonFromText } from "../../utils/json-extractor";
-import { AI, INTERVIEW, createLogger } from "../base";
+import { AI, createLogger, INTERVIEW } from "../base";
 
 const logger = createLogger("Interview");
 
@@ -74,7 +74,7 @@ function parseAIResponse<T>(
     const extracted = extractJsonFromText(text);
 
     if (!extracted) {
-      throw new Error("JSON not found in response");
+      throw new Error("JSON не найден в ответе");
     }
 
     return schema.parse(extracted);

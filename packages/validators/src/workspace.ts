@@ -19,7 +19,7 @@ export const createWorkspaceSchema = z.object({
     .string()
     .refine(
       (val) => !val || val.startsWith("data:image/"),
-      "Logo must be a valid data URL",
+      "Логотип должен быть в формате data URL",
     )
     .optional()
     .or(z.literal("")),
@@ -39,7 +39,7 @@ export const updateWorkspaceSchema = z.object({
     .string()
     .refine(
       (val) => !val || val.startsWith("data:image/"),
-      "Logo must be a valid data URL",
+      "Логотип должен быть в формате data URL",
     )
     .optional()
     .or(z.literal("")),

@@ -55,11 +55,16 @@ botManager
 
     // Обработка необработанных ошибок
     process.on("unhandledRejection", (reason, promise) => {
-      console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+      console.error(
+        "❌ Необработанное отклонение промиса:",
+        promise,
+        "причина:",
+        reason,
+      );
     });
 
     process.on("uncaughtException", (error) => {
-      console.error("❌ Uncaught Exception:", error);
+      console.error("❌ Необработанное исключение:", error);
       shutdown("UNCAUGHT_EXCEPTION");
     });
   })

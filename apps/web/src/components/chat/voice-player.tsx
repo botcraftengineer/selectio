@@ -27,7 +27,7 @@ export function VoicePlayer({
   // Store the initial src and NEVER update it - presigned URLs change but we use the first one
   const initialSrcRef = useRef<string>(src);
   const isInitializedRef = useRef<boolean>(false);
-  
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -36,7 +36,7 @@ export function VoicePlayer({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || isInitializedRef.current) return;
-    
+
     // Set src only once
     audio.src = initialSrcRef.current;
     isInitializedRef.current = true;
@@ -47,7 +47,7 @@ export function VoicePlayer({
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleError = (e: Event) => {
-      console.error("Audio error:", e);
+      console.error("Ошибка аудио:", e);
       setIsPlaying(false);
     };
 

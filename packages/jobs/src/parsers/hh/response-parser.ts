@@ -166,7 +166,7 @@ async function collectAndSaveResponses(
               }
             }
           } catch (error) {
-            console.warn("Failed to parse respondedAt date:", error);
+            console.warn("Не удалось распарсить дату respondedAt:", error);
           }
 
           return {

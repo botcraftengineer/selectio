@@ -6,11 +6,11 @@ import { generateText } from "../../lib/ai-client";
 import { responseScreeningResultSchema } from "../../schemas/response-screening.schema";
 import { extractJsonFromText } from "../../utils/json-extractor";
 import {
-  type Result,
   AI,
-  RESPONSE_STATUS,
   createLogger,
   err,
+  RESPONSE_STATUS,
+  type Result,
   tryCatch,
 } from "../base";
 import { getVacancyRequirements } from "../vacancy";
@@ -30,7 +30,7 @@ function parseScreeningResult(text: string): ScreeningResult {
   const extracted = extractJsonFromText(text);
 
   if (!extracted) {
-    throw new Error("JSON not found in AI response");
+    throw new Error("JSON не найден в ответе ИИ");
   }
 
   return responseScreeningResultSchema.parse(extracted);
